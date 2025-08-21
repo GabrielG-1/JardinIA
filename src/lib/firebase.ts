@@ -15,12 +15,13 @@ const firebaseConfig = {
 let app;
 if (!getApps().length) {
   try {
-    if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "PEGAR_AQUÍ_LA_API_KEY_DE_LA_CONSOLA") {
+    if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("PEGAR_AQUÍ")) {
       throw new Error("Missing or placeholder Firebase API Key. Please check your .env file.");
     }
     app = initializeApp(firebaseConfig);
   } catch (error) {
     console.error("Error initializing Firebase. Check your firebaseConfig object and .env file.", error);
+    // You might want to handle this error more gracefully in a production app
   }
 } else {
   app = getApp();
