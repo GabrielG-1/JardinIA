@@ -5,7 +5,7 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-primary/10 py-8 px-4 sm:px-6 lg:px-8">
+    <footer className="py-8 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: 'hsl(var(--card))' }}>
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
         <p className="text-sm text-foreground/80 mb-4 md:mb-0">
           &copy; {currentYear} Jardín y Huerta Labranza (JHL). Todos los derechos reservados.

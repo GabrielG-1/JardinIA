@@ -65,7 +65,7 @@ export function AiAdvisorSection() {
   };
 
   const AnalysisResult = () => (
-    <Card className="mt-8 bg-card/80">
+    <Card className="mt-8">
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><Bot /> Diagnóstico de la IA</CardTitle>
       </CardHeader>
@@ -125,7 +125,7 @@ export function AiAdvisorSection() {
   )
 
   return (
-    <section id="asesor-ia" className="py-20 px-4">
+    <section id="asesor-ia" className="py-20 px-4 bg-background">
       <div className="container mx-auto max-w-4xl text-center">
         <h2 className="text-4xl font-bold mb-4 font-headline">Asesor de Cultivos IA</h2>
         <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -133,7 +133,7 @@ export function AiAdvisorSection() {
         </p>
 
         <div className="grid md:grid-cols-2 gap-8 text-left">
-          <Card className="bg-card/80">
+          <Card>
             <CardHeader>
               <CardTitle>1. Sube una foto</CardTitle>
               <CardDescription>Una imagen clara nos ayuda a diagnosticar mejor.</CardDescription>
@@ -154,7 +154,7 @@ export function AiAdvisorSection() {
             </CardContent>
           </Card>
           
-          <Card className="bg-card/80">
+          <Card>
             <CardHeader>
               <CardTitle>2. Describe el estado</CardTitle>
               <CardDescription>¿Qué síntomas has notado? (Opcional)</CardDescription>

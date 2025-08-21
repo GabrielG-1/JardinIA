@@ -12,7 +12,7 @@ export function ContactSection() {
   };
 
   return (
-    <section id="contacto" className="py-20 px-4 bg-primary/5">
+    <section id="contacto" className="py-20 px-4 bg-background">
       <div className="container mx-auto max-w-2xl">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold font-headline">Contacto</h2>

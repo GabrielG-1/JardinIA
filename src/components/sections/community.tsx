@@ -34,7 +34,7 @@ export function CommunitySection() {
   };
 
   return (
-    <section id="comunidad" className="py-20 px-4">
+    <section id="comunidad" className="py-20 px-4" style={{ backgroundColor: 'hsl(var(--card))' }}>
       <div className="container mx-auto">
         <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-2 font-headline">Consejos de la Comunidad</h2>
@@ -46,7 +46,7 @@ export function CommunitySection() {
         <div className="grid lg:grid-cols-3 gap-12 text-left">
           <div className="lg:col-span-2 space-y-4">
               {loading && Array.from({ length: 2 }).map((_, i) => (
-                <Card key={i} className="p-6">
+                <Card key={i} className="p-6 bg-background">
                     <div className="flex items-center gap-4">
                         <Skeleton className="h-10 w-1 bg-primary" />
                         <div className="w-full">
@@ -57,7 +57,7 @@ export function CommunitySection() {
                 </Card>
               ))}
               {!loading && tips.map((tip) => (
-                <Card key={tip.id} className="bg-card/80 p-6 shadow-md">
+                <Card key={tip.id} className="p-6 shadow-md bg-background">
                     <div className="flex items-center gap-4">
                         <div className="w-1.5 h-12 bg-primary rounded-full" />
                         <div className="flex-grow">
@@ -70,7 +70,7 @@ export function CommunitySection() {
           </div>
 
           <div className="lg:col-span-1">
-            <Card className="sticky top-24 shadow-lg">
+            <Card className="sticky top-24 shadow-lg bg-background">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline"><Users />Comparte tu Consejo</CardTitle>
                 <CardDescription>¿Tienes un tip de jardinería? ¡Compártelo con la comunidad!</CardDescription>

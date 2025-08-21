@@ -62,7 +62,7 @@ const catalogData: Category[] = [
 
 function ProductCard({ product }: { product: Product }) {
   return (
-    <Card className="flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-105">
+    <Card className="flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-105 bg-background">
       <CardHeader className="p-0">
         <Image
           src={product.image}
@@ -86,22 +86,22 @@ function ProductCard({ product }: { product: Product }) {
 
 export function CatalogSection() {
   return (
-    <section id="catalogo" className="py-20 bg-primary/5">
+    <section id="catalogo" className="py-20" style={{ backgroundColor: 'hsl(var(--card))' }}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold font-headline">Nuestro Catálogo</h2>
           <p className="text-muted-foreground mt-2">Explora nuestra selección de productos de alta calidad.</p>
         </div>
-        <Accordion type="multiple" className="w-full max-w-6xl mx-auto" defaultValue={["item-0"]}>
+        <Accordion type="multiple" className="w-full max-w-6xl mx-auto" defaultValue={catalogData.map((_, i) => `item-${i}`)}>
           {catalogData.map((category, index) => (
-            <AccordionItem key={category.name} value={`item-${index}`}>
-              <AccordionTrigger className="text-2xl font-headline hover:no-underline">
+            <AccordionItem key={category.name} value={`item-${index}`} className="border-border bg-background rounded-lg mb-4 shadow-sm">
+              <AccordionTrigger className="text-2xl font-headline hover:no-underline px-6 py-4">
                 <div className="flex items-center gap-3">
                   <category.icon className="h-8 w-8 text-primary" />
                   {category.name}
                 </div>
               </AccordionTrigger>
-              <AccordionContent>
+              <AccordionContent className="px-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
                   {category.products.map((product) => (
                     <ProductCard key={product.name} product={product} />
