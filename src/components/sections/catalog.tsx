@@ -1,8 +1,15 @@
+
+"use client";
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { FlaskConical, Sprout, Package, Wheat, type LucideIcon } from "lucide-react";
+import { FlaskConical, Sprout, Package, Wheat, type LucideIcon, Upload } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { uploadProductImage } from "@/services/storage-service";
+import { useToast } from "@/hooks/use-toast";
+
 
 type Product = {
   name: string;
@@ -17,7 +24,7 @@ type Category = {
   products: Product[];
 };
 
-const catalogData: Category[] = [
+const initialCatalogData: Category[] = [
   {
     name: "Agroquímicos",
     icon: FlaskConical,
@@ -60,10 +67,42 @@ const catalogData: Category[] = [
   },
 ];
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, onImageChange }: { product: Product, onImageChange: (newImageUrl: string) => void }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setIsUploading(true);
+      try {
+        const downloadURL = await uploadProductImage(file, product.name);
+        onImageChange(downloadURL);
+        toast({
+          title: "Imagen actualizada",
+          description: `La imagen de ${product.name} se ha cambiado correctamente.`,
+        });
+      } catch (error) {
+        toast({
+          title: "Error al subir la imagen",
+          description: "No se pudo subir la imagen. Inténtalo de nuevo.",
+          variant: "destructive",
+        });
+        console.error("Error uploading image: ", error);
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
-    <Card className="flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-105 bg-background">
-      <CardHeader className="p-0">
+    <Card className="flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-105 bg-background group/product">
+      <CardHeader className="p-0 relative">
         <Image
           src={product.image}
           alt={product.name}
@@ -72,6 +111,19 @@ function ProductCard({ product }: { product: Product }) {
           className="rounded-t-lg object-cover w-full aspect-square"
           data-ai-hint={product.aiHint}
         />
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/product:opacity-100 transition-opacity flex items-center justify-center">
+            <Button onClick={handleButtonClick} disabled={isUploading}>
+                <Upload className="mr-2 h-4 w-4" />
+                {isUploading ? "Subiendo..." : "Cambiar Imagen"}
+            </Button>
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/png, image/jpeg, image/webp"
+                onChange={handleImageUpload}
+            />
+        </div>
       </CardHeader>
       <CardContent className="flex-grow p-4">
         <CardTitle className="text-lg font-semibold">{product.name}</CardTitle>
@@ -85,6 +137,27 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 export function CatalogSection() {
+  const [catalogData, setCatalogData] = useState(initialCatalogData);
+
+  const handleImageChange = (categoryName: string, productName: string, newImageUrl: string) => {
+    setCatalogData(prevData =>
+      prevData.map(category => {
+        if (category.name === categoryName) {
+          return {
+            ...category,
+            products: category.products.map(product => {
+              if (product.name === productName) {
+                return { ...product, image: newImageUrl };
+              }
+              return product;
+            }),
+          };
+        }
+        return category;
+      })
+    );
+  };
+  
   return (
     <section id="catalogo" className="py-20" style={{ backgroundColor: 'hsl(var(--card))' }}>
       <div className="container mx-auto px-4">
@@ -104,7 +177,11 @@ export function CatalogSection() {
               <AccordionContent className="px-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
                   {category.products.map((product) => (
-                    <ProductCard key={product.name} product={product} />
+                    <ProductCard 
+                      key={product.name} 
+                      product={product} 
+                      onImageChange={(newImageUrl) => handleImageChange(category.name, product.name, newImageUrl)}
+                    />
                   ))}
                 </div>
               </AccordionContent>
