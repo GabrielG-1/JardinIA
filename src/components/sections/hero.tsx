@@ -64,7 +64,7 @@ export function HeroSection() {
       />
       <div className="absolute inset-0 bg-black/50" />
 
-      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/hero:opacity-100 transition-opacity flex items-center justify-center">
+      <div className="absolute inset-0 z-20 bg-black/50 opacity-0 group-hover/hero:opacity-100 transition-opacity flex items-center justify-center">
             <Button onClick={handleButtonClick} disabled={isUploading}>
                 <Upload className="mr-2 h-4 w-4" />
                 {isUploading ? "Subiendo..." : "Cambiar Fondo"}
