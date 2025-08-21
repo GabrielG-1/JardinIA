@@ -7,7 +7,7 @@ export function HeroSection() {
   return (
     <section id="hero" className="relative h-[calc(100vh-80px)] min-h-[600px] flex items-center justify-center text-white mt-20">
       <Image
-        src="https://placehold.co/1920x1080.png"
+        src="https://placehold.co/1920x1080/4F7942/FFFFFF.png"
         alt="Fondo de campo de cultivo"
         fill
         className="object-cover -z-10"
