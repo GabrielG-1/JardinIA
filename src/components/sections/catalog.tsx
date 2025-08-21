@@ -22,40 +22,40 @@ const catalogData: Category[] = [
     name: "Agroquímicos",
     icon: FlaskConical,
     products: [
-      { name: "Herbicida Total", price: "$25.99", image: "https://placehold.co/300x300.png", aiHint: "herbicide bottle" },
-      { name: "Fungicida Preventivo", price: "$19.50", image: "https://placehold.co/300x300.png", aiHint: "fungicide spray" },
-      { name: "Insecticida Orgánico", price: "$22.00", image: "https://placehold.co/300x300.png", aiHint: "insecticide product" },
-      { name: "Acaricida Concentrado", price: "$28.00", image: "https://placehold.co/300x300.png", aiHint: "acaricide bottle" },
+      { name: "Herbicida Total", price: "$25.99", image: "https://placehold.co/200x200.png", aiHint: "herbicide bottle" },
+      { name: "Fungicida Preventivo", price: "$19.50", image: "https://placehold.co/200x200.png", aiHint: "fungicide spray" },
+      { name: "Insecticida Orgánico", price: "$22.00", image: "https://placehold.co/200x200.png", aiHint: "insecticide product" },
+      { name: "Acaricida Concentrado", price: "$28.00", image: "https://placehold.co/200x200.png", aiHint: "acaricide bottle" },
     ],
   },
   {
     name: "Fertilizantes",
     icon: Sprout,
     products: [
-      { name: "Abono Crecimiento", price: "$15.00", image: "https://placehold.co/300x300.png", aiHint: "fertilizer bag" },
-      { name: "Fertilizante Floración", price: "$18.75", image: "https://placehold.co/300x300.png", aiHint: "flowering fertilizer" },
-      { name: "Humus de Lombriz", price: "$12.99", image: "https://placehold.co/300x300.png", aiHint: "worm castings soil" },
-      { name: "Corrector de Carencias", price: "$16.50", image: "https://placehold.co/300x300.png", aiHint: "plant nutrient" },
+      { name: "Abono Crecimiento", price: "$15.00", image: "https://placehold.co/200x200.png", aiHint: "fertilizer bag" },
+      { name: "Fertilizante Floración", price: "$18.75", image: "https://placehold.co/200x200.png", aiHint: "flowering fertilizer" },
+      { name: "Humus de Lombriz", price: "$12.99", image: "https://placehold.co/200x200.png", aiHint: "worm castings soil" },
+      { name: "Corrector de Carencias", price: "$16.50", image: "https://placehold.co/200x200.png", aiHint: "plant nutrient" },
     ],
   },
   {
     name: "Semillas",
     icon: Package,
     products: [
-      { name: "Semillas de Tomate", price: "$3.50", image: "https://placehold.co/300x300.png", aiHint: "seed packet tomato" },
-      { name: "Semillas de Lechuga", price: "$2.99", image: "https://placehold.co/300x300.png", aiHint: "seed packet lettuce" },
-      { name: "Mix de Aromáticas", price: "$5.00", image: "https://placehold.co/300x300.png", aiHint: "herb seed mix" },
-      { name: "Semillas de Zanahoria", price: "$3.20", image: "https://placehold.co/300x300.png", aiHint: "carrot seed packet" },
+      { name: "Semillas de Tomate", price: "$3.50", image: "https://placehold.co/200x200.png", aiHint: "seed packet tomato" },
+      { name: "Semillas de Lechuga", price: "$2.99", image: "https://placehold.co/200x200.png", aiHint: "seed packet lettuce" },
+      { name: "Mix de Aromáticas", price: "$5.00", image: "https://placehold.co/200x200.png", aiHint: "herb seed mix" },
+      { name: "Semillas de Zanahoria", price: "$3.20", image: "https://placehold.co/200x200.png", aiHint: "carrot seed packet" },
     ],
   },
   {
     name: "Nutrición Animal",
     icon: Wheat,
     products: [
-      { name: "Alimento para Aves", price: "$30.00", image: "https://placehold.co/300x300.png", aiHint: "bird feed bag" },
-      { name: "Pienso para Conejos", price: "$28.50", image: "https://placehold.co/300x300.png", aiHint: "rabbit food" },
-      { name: "Suplemento para Ganado", price: "$55.20", image: "https://placehold.co/300x300.png", aiHint: "livestock feed" },
-      { name: "Snacks para Mascotas", price: "$8.99", image: "https://placehold.co/300x300.png", aiHint: "pet snacks" },
+      { name: "Alimento para Aves", price: "$30.00", image: "https://placehold.co/200x200.png", aiHint: "bird feed bag" },
+      { name: "Pienso para Conejos", price: "$28.50", image: "https://placehold.co/200x200.png", aiHint: "rabbit food" },
+      { name: "Suplemento para Ganado", price: "$55.20", image: "https://placehold.co/200x200.png", aiHint: "livestock feed" },
+      { name: "Snacks para Mascotas", price: "$8.99", image: "https://placehold.co/200x200.png", aiHint: "pet snacks" },
     ],
   },
 ];
@@ -67,8 +67,8 @@ function ProductCard({ product }: { product: Product }) {
         <Image
           src={product.image}
           alt={product.name}
-          width={300}
-          height={300}
+          width={200}
+          height={200}
           className="rounded-t-lg object-cover w-full aspect-square"
           data-ai-hint={product.aiHint}
         />
@@ -92,7 +92,7 @@ export function CatalogSection() {
           <h2 className="text-4xl font-bold font-headline">Nuestro Catálogo</h2>
           <p className="text-muted-foreground mt-2">Explora nuestra selección de productos de alta calidad.</p>
         </div>
-        <Accordion type="single" collapsible className="w-full max-w-6xl mx-auto" defaultValue="item-0">
+        <Accordion type="multiple" className="w-full max-w-6xl mx-auto" defaultValue={["item-0"]}>
           {catalogData.map((category, index) => (
             <AccordionItem key={category.name} value={`item-${index}`}>
               <AccordionTrigger className="text-2xl font-headline hover:no-underline">
