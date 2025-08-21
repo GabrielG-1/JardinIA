@@ -1,0 +1,113 @@
+
+{
+  "catalog": [
+    {
+      "docId": "agroquimicos",
+      "data": {
+        "name": "Agroquímicos",
+        "icon": "FlaskConical",
+        "products": [
+          {
+            "name": "Herbicida Selectivo",
+            "price": "$25.00",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "herbicide bottle"
+          },
+          {
+            "name": "Fungicida Amplio Espectro",
+            "price": "$30.00",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "fungicide spray"
+          },
+          {
+            "name": "Insecticida Orgánico",
+            "price": "$22.50",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "insecticide organic"
+          }
+        ]
+      }
+    },
+    {
+      "docId": "fertilizantes",
+      "data": {
+        "name": "Fertilizantes",
+        "icon": "Sprout",
+        "products": [
+          {
+            "name": "Fertilizante NPK 15-15-15",
+            "price": "$40.00",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "fertilizer bag"
+          },
+          {
+            "name": "Humus de Lombriz",
+            "price": "$15.00",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "worm castings"
+          },
+          {
+            "name": "Abono Orgánico Compostado",
+            "price": "$18.00",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "compost bag"
+          }
+        ]
+      }
+    },
+    {
+      "docId": "semillas",
+      "data": {
+        "name": "Semillas",
+        "icon": "Wheat",
+        "products": [
+          {
+            "name": "Semillas de Tomate",
+            "price": "$5.00",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "tomato seeds"
+          },
+          {
+            "name": "Semillas de Lechuga",
+            "price": "$4.50",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "lettuce seeds"
+          },
+          {
+            "name": "Semillas de Maíz",
+            "price": "$8.00",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "corn seeds"
+          },
+          {
+            "name": "Semillas de Girasol",
+            "price": "$6.00",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "sunflower seeds"
+          }
+        ]
+      }
+    },
+    {
+      "docId": "herramientas",
+      "data": {
+        "name": "Herramientas",
+        "icon": "Package",
+        "products": [
+          {
+            "name": "Pala de Jardín",
+            "price": "$12.00",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "garden shovel"
+          },
+          {
+            "name": "Tijeras de Podar",
+            "price": "$15.00",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "pruning shears"
+          }
+        ]
+      }
+    }
+  ]
+}
