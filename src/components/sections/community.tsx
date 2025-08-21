@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { addCommunityTip, getCommunityTips } from "@/services/community-tips-service";
 import { type Tip } from "@/types/tip";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "../ui/skeleton";
+import { Users, Send } from "lucide-react";
 
 export function CommunitySection() {
   const [tips, setTips] = useState<Tip[]>([]);
@@ -35,48 +35,45 @@ export function CommunitySection() {
 
   return (
     <section id="comunidad" className="py-20 px-4">
-      <div className="container mx-auto text-center">
-        <h2 className="text-4xl font-bold mb-4 font-headline">Consejos de la Comunidad</h2>
-        <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
-          Aprende de la experiencia de otros agricultores y jardineros. ¡Y no dudes en compartir tus propios consejos!
-        </p>
+      <div className="container mx-auto">
+        <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-2 font-headline">Consejos de la Comunidad</h2>
+            <p className="text-muted-foreground">
+            Un espacio para compartir conocimientos y experiencias de jardinería.
+            </p>
+        </div>
 
         <div className="grid lg:grid-cols-3 gap-12 text-left">
-          <div className="lg:col-span-2">
-            <h3 className="text-2xl font-bold mb-6 font-headline">Últimos Consejos</h3>
-            <div className="space-y-6">
-              {loading && Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i}>
-                  <CardHeader className="flex flex-row items-center gap-4">
-                    <Skeleton className="h-12 w-12 rounded-full" />
-                    <Skeleton className="h-6 w-1/3" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-5/6 mt-2" />
-                  </CardContent>
+          <div className="lg:col-span-2 space-y-4">
+              {loading && Array.from({ length: 2 }).map((_, i) => (
+                <Card key={i} className="p-6">
+                    <div className="flex items-center gap-4">
+                        <Skeleton className="h-10 w-1 bg-primary" />
+                        <div className="w-full">
+                            <Skeleton className="h-4 w-3/4 mb-4" />
+                            <Skeleton className="h-4 w-1/4 ml-auto" />
+                        </div>
+                    </div>
                 </Card>
               ))}
               {!loading && tips.map((tip) => (
-                <Card key={tip.id} className="bg-card/80">
-                  <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                    <Avatar>
-                      <AvatarFallback>{tip.name.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <CardTitle className="text-lg">{tip.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-foreground/90">{tip.advice}</p>
-                  </CardContent>
+                <Card key={tip.id} className="bg-card/80 p-6 shadow-md">
+                    <div className="flex items-center gap-4">
+                        <div className="w-1.5 h-12 bg-primary rounded-full" />
+                        <div className="flex-grow">
+                            <p className="text-foreground/90 text-lg mb-2">{tip.advice}</p>
+                            <p className="text-right text-muted-foreground font-semibold">- {tip.name}</p>
+                        </div>
+                    </div>
                 </Card>
               ))}
-            </div>
           </div>
 
-          <div>
-            <Card className="sticky top-24 bg-primary/10">
+          <div className="lg:col-span-1">
+            <Card className="sticky top-24 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-2xl font-headline">Comparte tu Sabiduría</CardTitle>
+                <CardTitle className="flex items-center gap-2 font-headline"><Users />Comparte tu Consejo</CardTitle>
+                <CardDescription>¿Tienes un tip de jardinería? ¡Compártelo con la comunidad!</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -84,7 +81,7 @@ export function CommunitySection() {
                     <label htmlFor="name" className="sr-only">Tu Nombre</label>
                     <Input
                       id="name"
-                      placeholder="Tu Nombre"
+                      placeholder="Tu nombre"
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
                       required
@@ -101,7 +98,10 @@ export function CommunitySection() {
                       rows={5}
                     />
                   </div>
-                  <Button type="submit" className="w-full">Enviar Consejo</Button>
+                  <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+                    <Send className="w-4 h-4 mr-2"/>
+                    Publicar Consejo
+                  </Button>
                 </form>
               </CardContent>
             </Card>
