@@ -38,7 +38,8 @@ function ProductCard({
     if (file) {
       setIsUploading(true);
       try {
-        const downloadURL = await uploadProductImage(file, product.name);
+        const safeProductName = product.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+        const downloadURL = await uploadProductImage(file, safeProductName);
         await onImageChange(product.name, downloadURL);
         toast({
           title: "Imagen actualizada",
