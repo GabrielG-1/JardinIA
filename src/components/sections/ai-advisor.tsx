@@ -92,7 +92,10 @@ export function AiAdvisorSection() {
             </div>
             <div>
               <h3 className="font-semibold text-lg flex items-center gap-2"><Dna /> Recomendaciones de Cuidado</h3>
-              <p className="text-muted-foreground whitespace-pre-wrap">{result!.healthDiagnosis.recommendations}</p>
+              <p 
+                className="text-muted-foreground whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{ __html: result!.healthDiagnosis.recommendations }}
+              />
             </div>
           </>
         )}

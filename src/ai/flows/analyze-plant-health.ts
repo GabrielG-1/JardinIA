@@ -30,7 +30,11 @@ const AnalyzePlantHealthOutputSchema = z.object({
   healthDiagnosis: z.object({
     isHealthy: z.boolean().describe('Indica si la planta está sana o no.'),
     diagnosis: z.string().describe('El diagnóstico de la salud de la planta.'),
-    recommendations: z.string().describe('Recomendaciones para el cuidado de la planta.'),
+    recommendations: z
+      .string()
+      .describe(
+        'Recomendaciones para el cuidado de la planta. Usa etiquetas HTML <strong> para resaltar los subtítulos, por ejemplo: "<strong>Verificar el pH del suelo:</strong> El pH ideal para esta planta es..."'
+      ),
   }),
 });
 export type AnalyzePlantHealthOutput = z.infer<typeof AnalyzePlantHealthOutputSchema>;
@@ -56,7 +60,7 @@ Tu análisis debe incluir:
 *   identification.latinName: El nombre en latín de la planta, si es identificable. En caso contrario, indica que no es identificable.
 *   healthDiagnosis.isHealthy: Si la planta parece sana o no (booleano).
 *   healthDiagnosis.diagnosis: Un diagnóstico detallado de la salud de la planta, incluyendo cualquier problema identificado.
-*   healthDiagnosis.recommendations: Recomendaciones de cuidado específicas para solucionar cualquier problema identificado y mejorar la salud de la planta.
+*   healthDiagnosis.recommendations: Recomendaciones de cuidado específicas para solucionar cualquier problema identificado y mejorar la salud de la planta. Para los subtítulos dentro de las recomendaciones, envuélvelos en etiquetas <strong>. Por ejemplo: "<strong>Verificar el pH del suelo:</strong> El pH ideal para esta planta es...".
 `,
 });
 
