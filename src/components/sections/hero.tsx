@@ -12,7 +12,7 @@ export function HeroSection() {
         fill
         className="object-cover -z-10"
         priority
-        data-ai-hint="crop field"
+        data-ai-hint="green field"
       />
       <div className="absolute inset-0 bg-black/50" />
       <div className="relative z-10 text-center p-4 max-w-4xl">
