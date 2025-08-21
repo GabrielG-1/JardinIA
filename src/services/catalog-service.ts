@@ -25,7 +25,6 @@ export type Category = {
   id: string;
   name: string;
   icon: string;
-  order: number;
   products: Product[];
 };
 
@@ -35,7 +34,7 @@ export type Category = {
  * @returns An unsubscribe function to detach the listener.
  */
 export const getCatalog = (callback: (categories: Category[]) => void): Unsubscribe => {
-  const q = query(collection(db, CATALOG_COLLECTION), orderBy("order"));
+  const q = query(collection(db, CATALOG_COLLECTION), orderBy("name"));
 
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const categories: Category[] = [];

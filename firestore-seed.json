@@ -6,7 +6,6 @@
       "data": {
         "name": "Agroquímicos",
         "icon": "FlaskConical",
-        "order": 1,
         "products": [
           {
             "name": "Herbicida Selectivo",
@@ -34,7 +33,6 @@
       "data": {
         "name": "Abonos Orgánicos",
         "icon": "Leaf",
-        "order": 2,
         "products": [
           {
             "name": "Humus de Lombriz",
@@ -56,7 +54,6 @@
       "data": {
         "name": "Fertilizantes",
         "icon": "Sprout",
-        "order": 3,
         "products": [
           {
             "name": "Fertilizante NPK 15-15-15",
@@ -72,7 +69,6 @@
       "data": {
         "name": "Semillas",
         "icon": "Wheat",
-        "order": 4,
         "products": [
           {
             "name": "Semillas de Tomate",
@@ -106,7 +102,6 @@
       "data": {
         "name": "Herramientas",
         "icon": "Package",
-        "order": 5,
         "products": [
           {
             "name": "Pala de Jardín",
