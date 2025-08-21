@@ -96,27 +96,6 @@
           }
         ]
       }
-    },
-    {
-      "docId": "herramientas",
-      "data": {
-        "name": "Herramientas",
-        "icon": "Package",
-        "products": [
-          {
-            "name": "Pala de Jardín",
-            "price": "$12.00",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "garden shovel"
-          },
-          {
-            "name": "Tijeras de Podar",
-            "price": "$15.00",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "pruning shears"
-          }
-        ]
-      }
     }
   ]
 }
