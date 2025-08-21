@@ -5,7 +5,6 @@ import {
   doc,
   getDocs,
   onSnapshot,
-  orderBy,
   query,
   updateDoc,
   type Unsubscribe,
@@ -18,7 +17,7 @@ export type Product = {
   name: string;
   price: string;
   image: string;
-  aiHint: string;
+  aiHint?: string;
 };
 
 export type Category = {
