@@ -25,6 +25,7 @@ export type Category = {
   id: string;
   name: string;
   icon: string;
+  order: number;
   products: Product[];
 };
 
@@ -34,7 +35,7 @@ export type Category = {
  * @returns An unsubscribe function to detach the listener.
  */
 export const getCatalog = (callback: (categories: Category[]) => void): Unsubscribe => {
-  const q = query(collection(db, CATALOG_COLLECTION), orderBy("name"));
+  const q = query(collection(db, CATALOG_COLLECTION), orderBy("order"));
 
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const categories: Category[] = [];
@@ -70,7 +71,6 @@ export const updateProductImage = async (
     // that calls this function, to avoid an extra read here.
     // The component will pass the full updated products array.
     
-    // This function will now expect the full list of products for the category.
   } catch (error) {
     console.error("Error updating product image: ", error);
     throw error;

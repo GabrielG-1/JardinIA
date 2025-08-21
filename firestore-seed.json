@@ -6,6 +6,7 @@
       "data": {
         "name": "Agroquímicos",
         "icon": "FlaskConical",
+        "order": 1,
         "products": [
           {
             "name": "Herbicida Selectivo",
@@ -29,25 +30,11 @@
       }
     },
     {
-      "docId": "fertilizantes",
-      "data": {
-        "name": "Fertilizantes",
-        "icon": "Sprout",
-        "products": [
-          {
-            "name": "Fertilizante NPK 15-15-15",
-            "price": "$40.00",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "fertilizer bag"
-          }
-        ]
-      }
-    },
-    {
       "docId": "abonos_organicos",
       "data": {
         "name": "Abonos Orgánicos",
         "icon": "Leaf",
+        "order": 2,
         "products": [
           {
             "name": "Humus de Lombriz",
@@ -65,10 +52,27 @@
       }
     },
     {
+      "docId": "fertilizantes",
+      "data": {
+        "name": "Fertilizantes",
+        "icon": "Sprout",
+        "order": 3,
+        "products": [
+          {
+            "name": "Fertilizante NPK 15-15-15",
+            "price": "$40.00",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "fertilizer bag"
+          }
+        ]
+      }
+    },
+    {
       "docId": "semillas",
       "data": {
         "name": "Semillas",
         "icon": "Wheat",
+        "order": 4,
         "products": [
           {
             "name": "Semillas de Tomate",
@@ -102,6 +106,7 @@
       "data": {
         "name": "Herramientas",
         "icon": "Package",
+        "order": 5,
         "products": [
           {
             "name": "Pala de Jardín",
