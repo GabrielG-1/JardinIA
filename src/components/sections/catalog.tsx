@@ -227,7 +227,7 @@ export function CatalogSection() {
               </AccordionTrigger>
               <AccordionContent className="px-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
-                  {category.products.map((product) => (
+                  {Array.isArray(category.products) && category.products.map((product) => (
                     <ProductCard 
                       key={product.name} 
                       product={product} 
