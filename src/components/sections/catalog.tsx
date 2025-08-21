@@ -70,7 +70,7 @@ function ProductCard({
           width={200}
           height={200}
           className="rounded-t-lg object-cover w-full aspect-square"
-          data-ai-hint={product.aiHint}
+          {...(product.aiHint && { "data-ai-hint": product.aiHint })}
         />
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/product:opacity-100 transition-opacity flex items-center justify-center">
             <Button onClick={handleButtonClick} disabled={isUploading}>
