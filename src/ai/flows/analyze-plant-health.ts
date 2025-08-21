@@ -23,14 +23,14 @@ export type AnalyzePlantHealthInput = z.infer<typeof AnalyzePlantHealthInputSche
 
 const AnalyzePlantHealthOutputSchema = z.object({
   identification: z.object({
-    isPlant: z.boolean().describe('Whether or not the input is a plant.'),
-    commonName: z.string().describe('The common name of the identified plant.'),
-    latinName: z.string().describe('The Latin name of the identified plant.'),
+    isPlant: z.boolean().describe('Indica si la imagen es de una planta o no.'),
+    commonName: z.string().describe('El nombre común de la planta identificada.'),
+    latinName: z.string().describe('El nombre en latín de la planta identificada.'),
   }),
   healthDiagnosis: z.object({
-    isHealthy: z.boolean().describe('Whether or not the plant is healthy.'),
-    diagnosis: z.string().describe('The diagnosis of the plant health.'),
-    recommendations: z.string().describe('Care recommendations for the plant.'),
+    isHealthy: z.boolean().describe('Indica si la planta está sana o no.'),
+    diagnosis: z.string().describe('El diagnóstico de la salud de la planta.'),
+    recommendations: z.string().describe('Recomendaciones para el cuidado de la planta.'),
   }),
 });
 export type AnalyzePlantHealthOutput = z.infer<typeof AnalyzePlantHealthOutputSchema>;
@@ -43,20 +43,20 @@ const analyzePlantHealthPrompt = ai.definePrompt({
   name: 'analyzePlantHealthPrompt',
   input: {schema: AnalyzePlantHealthInputSchema},
   output: {schema: AnalyzePlantHealthOutputSchema},
-  prompt: `You are an expert botanist specializing in diagnosing plant health issues and providing care recommendations.
+  prompt: `Eres un experto botánico especializado en diagnosticar problemas de salud de las plantas y en ofrecer recomendaciones de cuidado. Tu respuesta debe ser siempre en español.
 
-You will analyze the provided information to determine if the plant is healthy, diagnose any issues, and provide care recommendations.
+Analizarás la información proporcionada para determinar si la planta está sana, diagnosticar cualquier problema y proporcionar recomendaciones de cuidado.
 
-Description: {{{description}}}
-Photo: {{media url=photoDataUri}}
+Descripción: {{{description}}}
+Foto: {{media url=photoDataUri}}
 
-Your analysis should include:
-*   identification.isPlant: Whether the input is a plant or not (boolean).
-*   identification.commonName: The common name of the plant, if identifiable. Otherwise, state that it is not identifiable.
-*   identification.latinName: The Latin name of the plant, if identifiable. Otherwise, state that it is not identifiable.
-*   healthDiagnosis.isHealthy: Whether the plant appears healthy or not (boolean).
-*   healthDiagnosis.diagnosis: A detailed diagnosis of the plant's health, including any identified issues.
-*   healthDiagnosis.recommendations: Specific care recommendations to address any identified issues and improve the plant's health.
+Tu análisis debe incluir:
+*   identification.isPlant: Si la imagen es una planta o no (booleano).
+*   identification.commonName: El nombre común de la planta, si es identificable. En caso contrario, indica que no es identificable.
+*   identification.latinName: El nombre en latín de la planta, si es identificable. En caso contrario, indica que no es identificable.
+*   healthDiagnosis.isHealthy: Si la planta parece sana o no (booleano).
+*   healthDiagnosis.diagnosis: Un diagnóstico detallado de la salud de la planta, incluyendo cualquier problema identificado.
+*   healthDiagnosis.recommendations: Recomendaciones de cuidado específicas para solucionar cualquier problema identificado y mejorar la salud de la planta.
 `,
 });
 

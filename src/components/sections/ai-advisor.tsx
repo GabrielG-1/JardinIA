@@ -86,12 +86,12 @@ export function AiAdvisorSection() {
               <h3 className="font-semibold text-lg flex items-center gap-2"><Stethoscope /> Diagnóstico de Salud</h3>
               <div className="flex items-center gap-2 mb-2">
                 {result!.healthDiagnosis.isHealthy ? <CheckCircle className="text-primary" /> : <XCircle className="text-destructive" />}
-                <p className="font-bold">{result!.healthDiagnosis.isHealthy ? "Planta Saludable" : "Se detectaron problemas"}</p>
+                <p className="font-bold">{result!.healthDiagnosis.isHealthy ? "Planta Saludable" : "Se Detectaron Problemas"}</p>
               </div>
               <p className="text-muted-foreground">{result!.healthDiagnosis.diagnosis}</p>
             </div>
             <div>
-              <h3 className="font-semibold text-lg flex items-center gap-2"><Dna /> Recomendaciones</h3>
+              <h3 className="font-semibold text-lg flex items-center gap-2"><Dna /> Recomendaciones de Cuidado</h3>
               <p className="text-muted-foreground whitespace-pre-wrap">{result!.healthDiagnosis.recommendations}</p>
             </div>
           </>
