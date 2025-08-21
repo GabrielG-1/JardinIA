@@ -21,8 +21,8 @@ if (!getApps().length) {
 }
 
 const db = getFirestore(app);
-// Explicitly pass the bucket URL to ensure it points to the desired one.
-// This is necessary if you have multiple buckets or need to target one in a specific (free tier) region.
-const storage = getStorage(app, "gs://jardnia.appspot.com");
+// Explicitly pass the bucket URL to ensure it points to the desired one
+// in the free tier region. The URL comes from the Firebase Console Storage section.
+const storage = getStorage(app, "gs://jardnia.firebasestorage.app");
 
 export { app, db, storage };
