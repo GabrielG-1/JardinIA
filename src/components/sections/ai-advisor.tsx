@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { UploadCloud, Bot, CheckCircle, XCircle, Leaf, Dna, Stethoscope } from "lucide-react";
+import { UploadCloud, Bot, CheckCircle, XCircle, Leaf, Dna, Stethoscope, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { analyzePlantHealth, type AnalyzePlantHealthOutput } from "@/ai/flows/analyze-plant-health";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { CameraCapture } from "@/components/camera-capture";
 
 export function AiAdvisorSection() {
   const [photoDataUri, setPhotoDataUri] = useState<string | null>(null);
@@ -16,33 +18,44 @@ export function AiAdvisorSection() {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalyzePlantHealthOutput | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 4 * 1024 * 1024) { // 4MB limit for Gemini
-        toast({
-          title: "Archivo demasiado grande",
-          description: "Por favor, sube una imagen de menos de 4MB.",
-          variant: "destructive",
-        });
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoDataUri(reader.result as string);
-        setPreviewUrl(URL.createObjectURL(file));
-      };
-      reader.readAsDataURL(file);
+      processFile(file);
     }
   };
+
+  const processFile = (file: File) => {
+    if (file.size > 4 * 1024 * 1024) { // 4MB limit for Gemini
+      toast({
+        title: "Archivo demasiado grande",
+        description: "Por favor, sube una imagen de menos de 4MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoDataUri(reader.result as string);
+      setPreviewUrl(URL.createObjectURL(file));
+    };
+    reader.readAsDataURL(file);
+  }
+
+  const handlePhotoTaken = (imageDataUri: string) => {
+    setPhotoDataUri(imageDataUri);
+    setPreviewUrl(imageDataUri);
+    setIsCameraOpen(false);
+  }
 
   const handleAnalysis = async () => {
     if (!photoDataUri) {
       toast({
         title: "Falta imagen",
-        description: "Por favor, sube una foto de tu planta.",
+        description: "Por favor, sube o toma una foto de tu planta.",
         variant: "destructive",
       });
       return;
@@ -138,22 +151,46 @@ export function AiAdvisorSection() {
         <div className="grid md:grid-cols-2 gap-8 text-left">
           <Card>
             <CardHeader>
-              <CardTitle>1. Sube una foto</CardTitle>
-              <CardDescription>Una imagen clara nos ayuda a diagnosticar mejor.</CardDescription>
+              <CardTitle>1. Añade una foto</CardTitle>
+              <CardDescription>Usa tu cámara o sube una imagen clara.</CardDescription>
             </CardHeader>
             <CardContent>
-              <label htmlFor="plant-photo" className="cursor-pointer border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center text-center hover:bg-accent/10 transition-colors">
+              <div className="border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center text-center">
                 {previewUrl ? (
-                  <Image src={previewUrl} alt="Vista previa de la planta" width={150} height={150} className="rounded-md object-cover h-[150px]" />
+                  <div className="relative">
+                    <Image src={previewUrl} alt="Vista previa de la planta" width={150} height={150} className="rounded-md object-cover h-[150px]" />
+                    <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 bg-background rounded-full" onClick={() => { setPreviewUrl(null); setPhotoDataUri(null); }}>
+                      <XCircle className="h-5 w-5 text-destructive" />
+                    </Button>
+                  </div>
                 ) : (
-                  <>
-                    <UploadCloud className="w-12 h-12 text-muted-foreground mb-2" />
-                    <span className="text-primary font-semibold">Haz clic para subir</span>
-                    <span className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP (Máx 4MB)</span>
-                  </>
+                  <div className="flex flex-col items-center justify-center h-[150px] space-y-4">
+                     <Dialog open={isCameraOpen} onOpenChange={setIsCameraOpen}>
+                      <DialogTrigger asChild>
+                         <Button variant="outline"><Camera className="mr-2"/> Tomar Foto</Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                          <DialogHeader>
+                              <DialogTitle>Capturar Foto</DialogTitle>
+                          </DialogHeader>
+                          <CameraCapture onPhotoTaken={handlePhotoTaken} />
+                      </DialogContent>
+                    </Dialog>
+
+                    <div className="relative flex items-center w-full">
+                      <div className="flex-grow border-t border-muted-foreground"></div>
+                      <span className="flex-shrink mx-4 text-muted-foreground">o</span>
+                      <div className="flex-grow border-t border-muted-foreground"></div>
+                    </div>
+                    
+                    <label htmlFor="plant-photo" className="cursor-pointer text-primary font-semibold flex items-center gap-2">
+                      <UploadCloud className="w-5 h-5" />
+                      <span>Subir un archivo</span>
+                    </label>
+                    <input id="plant-photo" type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} />
+                  </div>
                 )}
-              </label>
-              <input id="plant-photo" type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} />
+              </div>
             </CardContent>
           </Card>
           
