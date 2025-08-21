@@ -39,7 +39,16 @@
             "price": "$40.00",
             "image": "https://placehold.co/200x200.png",
             "aiHint": "fertilizer bag"
-          },
+          }
+        ]
+      }
+    },
+    {
+      "docId": "abonos_organicos",
+      "data": {
+        "name": "Abonos Orgánicos",
+        "icon": "Leaf",
+        "products": [
           {
             "name": "Humus de Lombriz",
             "price": "$15.00",

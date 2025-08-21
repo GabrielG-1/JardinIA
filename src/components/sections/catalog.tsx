@@ -5,7 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { FlaskConical, Sprout, Package, Wheat, type LucideIcon, Upload, AlertTriangle } from "lucide-react";
+import { FlaskConical, Sprout, Package, Wheat, Leaf, type LucideIcon, Upload, AlertTriangle } from "lucide-react";
 import React, { useRef, useState, useEffect } from "react";
 import { uploadProductImage } from "@/services/storage-service";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,7 @@ const icons: { [key: string]: LucideIcon } = {
   Sprout,
   Package,
   Wheat,
+  Leaf,
 };
 
 function ProductCard({ 
