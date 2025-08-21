@@ -5,69 +5,29 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { FlaskConical, Sprout, Package, Wheat, type LucideIcon, Upload } from "lucide-react";
-import React, { useRef, useState } from "react";
+import { FlaskConical, Sprout, Package, Wheat, type LucideIcon, Upload, AlertTriangle } from "lucide-react";
+import React, { useRef, useState, useEffect } from "react";
 import { uploadProductImage } from "@/services/storage-service";
 import { useToast } from "@/hooks/use-toast";
+import { getCatalog, updateCategoryProducts, type Category, type Product } from "@/services/catalog-service";
+import { Skeleton } from "@/components/ui/skeleton";
 
-
-type Product = {
-  name: string;
-  price: string;
-  image: string;
-  aiHint: string;
+const icons: { [key: string]: LucideIcon } = {
+  FlaskConical,
+  Sprout,
+  Package,
+  Wheat,
 };
 
-type Category = {
-  name: string;
-  icon: LucideIcon;
-  products: Product[];
-};
-
-const initialCatalogData: Category[] = [
-  {
-    name: "Agroquímicos",
-    icon: FlaskConical,
-    products: [
-      { name: "Herbicida Total", price: "$25.99", image: "https://placehold.co/200x200.png", aiHint: "herbicide bottle" },
-      { name: "Fungicida Preventivo", price: "$19.50", image: "https://placehold.co/200x200.png", aiHint: "fungicide spray" },
-      { name: "Insecticida Orgánico", price: "$22.00", image: "https://placehold.co/200x200.png", aiHint: "insecticide product" },
-      { name: "Acaricida Concentrado", price: "$28.00", image: "https://placehold.co/200x200.png", aiHint: "acaricide bottle" },
-    ],
-  },
-  {
-    name: "Fertilizantes",
-    icon: Sprout,
-    products: [
-      { name: "Abono Crecimiento", price: "$15.00", image: "https://placehold.co/200x200.png", aiHint: "fertilizer bag" },
-      { name: "Fertilizante Floración", price: "$18.75", image: "https://placehold.co/200x200.png", aiHint: "flowering fertilizer" },
-      { name: "Humus de Lombriz", price: "$12.99", image: "https://placehold.co/200x200.png", aiHint: "worm castings soil" },
-      { name: "Corrector de Carencias", price: "$16.50", image: "https://placehold.co/200x200.png", aiHint: "plant nutrient" },
-    ],
-  },
-  {
-    name: "Semillas",
-    icon: Package,
-    products: [
-      { name: "Semillas de Tomate", price: "$3.50", image: "https://placehold.co/200x200.png", aiHint: "seed packet tomato" },
-      { name: "Semillas de Lechuga", price: "$2.99", image: "https://placehold.co/200x200.png", aiHint: "seed packet lettuce" },
-      { name: "Mix de Aromáticas", price: "$5.00", image: "https://placehold.co/200x200.png", aiHint: "herb seed mix" },
-      { name: "Semillas de Zanahoria", price: "$3.20", image: "https://placehold.co/200x200.png", aiHint: "carrot seed packet" },
-    ],
-  },
-  {
-    name: "Nutrición Animal",
-    icon: Wheat,
-    products: [
-      { name: "Alimento para Aves", price: "$30.00", image: "https://placehold.co/200x200.png", aiHint: "bird feed bag" },
-      { name: "Pienso para Conejos", price: "$28.50", image: "https://placehold.co/200x200.png", aiHint: "rabbit food" },
-      { name: "Suplemento para Ganado", price: "$55.20", image: "https://placehold.co/200x200.png", aiHint: "livestock feed" },
-      { name: "Snacks para Mascotas", price: "$8.99", image: "https://placehold.co/200x200.png", aiHint: "pet snacks" },
-    ],
-  },
-];
-
-function ProductCard({ product, onImageChange }: { product: Product, onImageChange: (newImageUrl: string) => void }) {
+function ProductCard({ 
+  product, 
+  categoryId,
+  onImageChange 
+}: { 
+  product: Product, 
+  categoryId: string,
+  onImageChange: (productName: string, newImageUrl: string) => Promise<void> 
+}) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
@@ -78,7 +38,7 @@ function ProductCard({ product, onImageChange }: { product: Product, onImageChan
       setIsUploading(true);
       try {
         const downloadURL = await uploadProductImage(file, product.name);
-        onImageChange(downloadURL);
+        await onImageChange(product.name, downloadURL);
         toast({
           title: "Imagen actualizada",
           description: `La imagen de ${product.name} se ha cambiado correctamente.`,
@@ -136,28 +96,116 @@ function ProductCard({ product, onImageChange }: { product: Product, onImageChan
   );
 }
 
-export function CatalogSection() {
-  const [catalogData, setCatalogData] = useState(initialCatalogData);
+const LoadingSkeleton = () => (
+  <div className="w-full max-w-6xl mx-auto space-y-4">
+    {Array.from({ length: 4 }).map((_, i) => (
+      <Card key={i} className="border-border bg-background rounded-lg shadow-sm p-4">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-1/4" />
+        </div>
+      </Card>
+    ))}
+  </div>
+);
 
-  const handleImageChange = (categoryName: string, productName: string, newImageUrl: string) => {
-    setCatalogData(prevData =>
-      prevData.map(category => {
-        if (category.name === categoryName) {
-          return {
-            ...category,
-            products: category.products.map(product => {
-              if (product.name === productName) {
-                return { ...product, image: newImageUrl };
-              }
-              return product;
-            }),
-          };
+
+export function CatalogSection() {
+  const [catalogData, setCatalogData] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const unsubscribe = getCatalog((data) => {
+        setCatalogData(data);
+        setLoading(false);
+        if(data.length === 0){
+          setError("No se encontraron productos. Agregue la colección 'catalog' a su base de datos de Firestore para comenzar.");
         }
-        return category;
-      })
+      });
+      return () => unsubscribe();
+    } catch (err) {
+      console.error(err);
+      setError("No se pudieron cargar los productos. Verifique la configuración de Firebase y las reglas de seguridad.");
+      setLoading(false);
+    }
+  }, []);
+
+  const handleImageChange = async (categoryId: string, productName: string, newImageUrl: string) => {
+    const category = catalogData.find(c => c.id === categoryId);
+    if (!category) return;
+
+    const updatedProducts = category.products.map(product => {
+      if (product.name === productName) {
+        return { ...product, image: newImageUrl };
+      }
+      return product;
+    });
+    
+    // Optimistic UI update
+    setCatalogData(prevData =>
+      prevData.map(c => 
+        c.id === categoryId ? { ...c, products: updatedProducts } : c
+      )
     );
+
+    // Persist to Firestore
+    try {
+      await updateCategoryProducts(categoryId, updatedProducts);
+    } catch (e) {
+        // Revert UI change on error
+        setCatalogData(prevData =>
+            prevData.map(c => 
+                c.id === categoryId ? category : c
+            )
+        );
+        toast({
+            title: "Error al guardar la imagen",
+            description: "No se pudo guardar la imagen en la base de datos.",
+            variant: "destructive"
+        })
+    }
   };
   
+  const { toast } = useToast();
+
+  if (loading) {
+    return (
+        <section id="catalogo" className="py-20" style={{ backgroundColor: 'hsl(var(--card))' }}>
+            <div className="container mx-auto px-4">
+                <div className="text-center mb-12">
+                <h2 className="text-4xl font-bold font-headline">Nuestro Catálogo</h2>
+                <p className="text-muted-foreground mt-2">Explora nuestra selección de productos de alta calidad.</p>
+                </div>
+                <LoadingSkeleton />
+            </div>
+        </section>
+    )
+  }
+
+  if (error) {
+    return (
+        <section id="catalogo" className="py-20" style={{ backgroundColor: 'hsl(var(--card))' }}>
+            <div className="container mx-auto px-4 text-center">
+                 <div className="text-center mb-12">
+                    <h2 className="text-4xl font-bold font-headline">Nuestro Catálogo</h2>
+                 </div>
+                <Card className="max-w-md mx-auto bg-destructive/10 border-destructive/50">
+                    <CardHeader>
+                        <CardTitle className="flex items-center justify-center gap-2 text-destructive">
+                            <AlertTriangle /> Error al Cargar
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-destructive/80">{error}</p>
+                    </CardContent>
+                </Card>
+            </div>
+        </section>
+    )
+  }
+
   return (
     <section id="catalogo" className="py-20" style={{ backgroundColor: 'hsl(var(--card))' }}>
       <div className="container mx-auto px-4">
@@ -165,12 +213,14 @@ export function CatalogSection() {
           <h2 className="text-4xl font-bold font-headline">Nuestro Catálogo</h2>
           <p className="text-muted-foreground mt-2">Explora nuestra selección de productos de alta calidad.</p>
         </div>
-        <Accordion type="multiple" className="w-full max-w-6xl mx-auto" defaultValue={catalogData.map((_, i) => `item-${i}`)}>
-          {catalogData.map((category, index) => (
-            <AccordionItem key={category.name} value={`item-${index}`} className="border-border bg-background rounded-lg mb-4 shadow-sm">
+        <Accordion type="multiple" className="w-full max-w-6xl mx-auto" defaultValue={catalogData.map((c) => c.id)}>
+          {catalogData.map((category) => {
+            const Icon = icons[category.icon] || FlaskConical;
+            return (
+            <AccordionItem key={category.id} value={category.id} className="border-border bg-background rounded-lg mb-4 shadow-sm">
               <AccordionTrigger className="text-2xl font-headline hover:no-underline px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <category.icon className="h-8 w-8 text-primary" />
+                  <Icon className="h-8 w-8 text-primary" />
                   {category.name}
                 </div>
               </AccordionTrigger>
@@ -180,13 +230,14 @@ export function CatalogSection() {
                     <ProductCard 
                       key={product.name} 
                       product={product} 
-                      onImageChange={(newImageUrl) => handleImageChange(category.name, product.name, newImageUrl)}
+                      categoryId={category.id}
+                      onImageChange={(productName, newImageUrl) => handleImageChange(category.id, productName, newImageUrl)}
                     />
                   ))}
                 </div>
               </AccordionContent>
             </AccordionItem>
-          ))}
+          )})}
         </Accordion>
       </div>
     </section>
