@@ -1,8 +1,18 @@
 
-import { db } from '../lib/firebase';
-import { collection, doc, setDoc, writeBatch } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, doc, writeBatch } from 'firebase/firestore';
 import * as fs from 'fs';
 import * as path from 'path';
+
+// Copiamos la configuración de firebase directamente aquí para asegurar la correcta inicialización en el entorno del script
+const firebaseConfig = {
+  apiKey: "AIzaSyAMH8T42vojOtWAuC1MNHiCLds2J9KW0ps",
+  authDomain: "jardnia.firebaseapp.com",
+  projectId: "jardnia",
+  storageBucket: "jardnia.appspot.com",
+  messagingSenderId: "503843993979",
+  appId: "1:503843993979:web:3e217ea66688548147a5de"
+};
 
 // Define la estructura de los datos en el archivo JSON
 interface SeedData {
@@ -24,6 +34,10 @@ interface SeedData {
 const seedFirestore = async () => {
   try {
     console.log('Iniciando la carga de datos a Firestore...');
+
+    // Inicializar Firebase App y Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
     // Ruta al archivo JSON de datos
     const jsonPath = path.resolve(process.cwd(), 'firestore-seed.json');
@@ -53,6 +67,9 @@ const seedFirestore = async () => {
 
     console.log('¡Carga de datos completada exitosamente!');
     console.log(`Se han subido ${seedData.catalog.length} documentos a la colección 'catalog'.`);
+    
+    // Es importante salir del proceso para que la terminal sepa que ha terminado
+    process.exit(0);
 
   } catch (error) {
     console.error('Error durante la carga de datos:', error);
