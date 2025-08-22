@@ -116,9 +116,9 @@
       }
     },
     {
-      "docId": "herramientas_de_jardineria",
+      "docId": "herramientas_y_accesorios",
       "data": {
-        "name": "Herramientas de Jardinería",
+        "name": "Herramientas y Accesorios",
         "icon": "Wrench",
         "products": [
           {
@@ -180,14 +180,26 @@
             "price": "$4.500",
             "image": "https://placehold.co/200x200.png",
             "aiHint": "leaf rake"
+          },
+          {
+            "name": "Guante Delgado",
+            "price": "$800",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "thin gloves"
+          },
+          {
+            "name": "Guante Pigmentado",
+            "price": "$800",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "dotted gloves"
           }
         ]
       }
     },
     {
-      "docId": "insumos_y_contenedores",
+      "docId": "insumos_mallas_y_contenedores",
       "data": {
-        "name": "Insumos y Contenedores",
+        "name": "Insumos, Mallas y Contenedores",
         "icon": "Package",
         "products": [
           {
@@ -225,16 +237,7 @@
             "price": "$2.500",
             "image": "https://placehold.co/200x200.png",
             "aiHint": "seed starter"
-          }
-        ]
-      }
-    },
-    {
-      "docId": "mallas_y_cercos",
-      "data": {
-        "name": "Mallas y Cercos",
-        "icon": "Fence",
-        "products": [
+          },
           {
             "name": "Malla Hexagonal Galva chica",
             "price": "$10.000",
@@ -472,27 +475,8 @@
           }
         ]
       }
-    },
-    {
-      "docId": "accesorios_y_vestuario_de_jardineria",
-      "data": {
-        "name": "Accesorios y Vestuario de Jardinería",
-        "icon": "Shirt",
-        "products": [
-          {
-            "name": "Guante Delgado",
-            "price": "$800",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "thin gloves"
-          },
-          {
-            "name": "Guante Pigmentado",
-            "price": "$800",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "dotted gloves"
-          }
-        ]
-      }
     }
   ]
 }
+
+    
