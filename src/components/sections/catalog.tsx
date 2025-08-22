@@ -231,7 +231,7 @@ export function CatalogSection() {
           <h2 className="text-4xl font-bold font-headline">Nuestro Catálogo</h2>
           <p className="text-muted-foreground mt-2">Explora nuestra selección de productos de alta calidad.</p>
         </div>
-        <Accordion type="multiple" className="w-full max-w-7xl mx-auto" defaultValue={catalogData.map((c) => c.id)}>
+        <Accordion type="multiple" className="w-full max-w-7xl mx-auto">
           {catalogData.map((category) => {
             const Icon = icons[category.icon] || FlaskConical;
             return (
