@@ -28,6 +28,14 @@ const icons: { [key: string]: LucideIcon } = {
   Layers,
 };
 
+const formatPrice = (price: string) => {
+    const number = parseInt(price, 10);
+    if (isNaN(number)) {
+        return price; // Return original if not a number
+    }
+    return `$${number.toLocaleString('es-CL')}`;
+};
+
 function ProductCard({ 
   product, 
   categoryId,
@@ -99,7 +107,7 @@ function ProductCard({
         <CardTitle className="text-sm font-semibold h-10 overflow-hidden leading-tight">{product.name}</CardTitle>
       </CardContent>
       <CardFooter className="p-2 pt-0 flex justify-between items-center">
-        <p className="text-base font-bold text-primary">{product.price}</p>
+        <p className="text-base font-bold text-primary">{formatPrice(product.price)}</p>
         <Button size="sm">Añadir</Button>
       </CardFooter>
     </Card>
