@@ -1,11 +1,12 @@
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Permitir la lectura pública de todos los documentos.
-    // La escritura se deniega por defecto para proteger los datos.
+    // Permite la lectura pública para que todos los usuarios puedan ver el catálogo y los consejos.
     match /{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if request.auth != null;
     }
   }
 }

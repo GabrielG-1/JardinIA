@@ -1,18 +1,11 @@
 
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, writeBatch, getDocs, deleteDoc } from 'firebase/firestore';
+import * as admin from 'firebase-admin';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Copiamos la configuración de firebase directamente aquí para asegurar la correcta inicialización en el entorno del script
-const firebaseConfig = {
-  apiKey: "AIzaSyAMH8T42vojOtWAuC1MNHiCLds2J9KW0ps",
-  authDomain: "jardnia.firebaseapp.com",
-  projectId: "jardnia",
-  storageBucket: "jardnia.appspot.com",
-  messagingSenderId: "503843993979",
-  appId: "1:503843993979:web:3e217ea66688548147a5de"
-};
+// La configuración del proyecto se obtiene de las variables de entorno de Firebase.
+// No es necesario definirla aquí cuando se usa el Admin SDK en un entorno de Firebase.
+// Si corres este script localmente fuera de Firebase, necesitarás configurar las credenciales de la cuenta de servicio.
 
 // Define la estructura de los datos en el archivo JSON
 interface SeedData {
@@ -33,18 +26,21 @@ interface SeedData {
 
 const seedFirestore = async () => {
   try {
-    console.log('Iniciando la carga de datos a Firestore...');
+    console.log('Iniciando la carga de datos a Firestore con Admin SDK...');
 
-    // Inicializar Firebase App y Firestore
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    // Inicializar Firebase Admin SDK
+    // El SDK buscará automáticamente las credenciales en el entorno.
+    if (admin.apps.length === 0) {
+        admin.initializeApp();
+    }
+    const db = admin.firestore();
 
     const catalogCollection = collection(db, 'catalog');
 
     // 1. Borrar todos los documentos existentes en la colección 'catalog'
     console.log('Limpiando la colección "catalog" existente...');
-    const existingDocsSnapshot = await getDocs(catalogCollection);
-    const deleteBatch = writeBatch(db);
+    const existingDocsSnapshot = await catalogCollection.get();
+    const deleteBatch = db.batch();
     let deletedCount = 0;
     existingDocsSnapshot.forEach((doc) => {
       deleteBatch.delete(doc.ref);
@@ -71,10 +67,10 @@ const seedFirestore = async () => {
     }
     
     console.log('Añadiendo los nuevos documentos...');
-    const addBatch = writeBatch(db);
+    const addBatch = db.batch();
 
     seedData.catalog.forEach(category => {
-      const docRef = doc(catalogCollection, category.docId);
+      const docRef = catalogCollection.doc(category.docId);
       addBatch.set(docRef, category.data);
       console.log(`Añadiendo el documento '${category.docId}' al batch.`);
     });
@@ -91,5 +87,11 @@ const seedFirestore = async () => {
     process.exit(1);
   }
 };
+
+// Helper para obtener una referencia de colección con el tipo correcto
+const collection = (db: admin.firestore.Firestore, path: string) => {
+    return db.collection(path);
+}
+
 
 seedFirestore();
