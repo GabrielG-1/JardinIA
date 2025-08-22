@@ -1,0 +1,248 @@
+
+{
+  "catalog": [
+    {
+      "docId": "herramientas-y-accesorios",
+      "data": {
+        "name": "Herramientas y Accesorios",
+        "icon": "Wrench",
+        "products": [
+          {
+            "name": "Tijera de Podar Profesional",
+            "price": "$12.500",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "pruning shears"
+          },
+          {
+            "name": "Guantes de Jardinería Reforzados",
+            "price": "$7.990",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "gardening gloves"
+          },
+          {
+            "name": "Pala de Jardín de Acero",
+            "price": "$9.900",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "garden spade"
+          },
+          {
+            "name": "Rastrillo de Hojas Metálico",
+            "price": "$11.200",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "leaf rake"
+          },
+          {
+            "name": "Delantal de Jardinería",
+            "price": "$15.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "gardening apron"
+          },
+          {
+            "name": "Sombrero de Paja",
+            "price": "$8.500",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "straw hat"
+          },
+          {
+            "name": "Botas de Goma",
+            "price": "$22.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "rubber boots"
+          },
+          {
+            "name": "Pulverizador Presion 1.5 lts",
+            "price": "$8.900",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "pressure sprayer"
+          },
+          {
+            "name": "Pulverizador Presion 500 ml",
+            "price": "$3.200",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "hand sprayer"
+          },
+          {
+            "name": "Fumigador de Mochila 15 lts",
+            "price": "$25.500",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "backpack sprayer"
+          }
+        ]
+      }
+    },
+    {
+      "docId": "insumos-mallas-y-contenedores",
+      "data": {
+        "name": "Insumos, Mallas y Contenedores",
+        "icon": "Package",
+        "products": [
+          {
+            "name": "Malla Raschel 80% Sombra (Rollo 10m)",
+            "price": "$25.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "shade cloth"
+          },
+          {
+            "name": "Cerco de Madera Tratada (1m x 2m)",
+            "price": "$18.900",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "wood fence"
+          },
+          {
+            "name": "Macetero de Terracota 30cm",
+            "price": "$9.500",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "terracotta pot"
+          },
+          {
+            "name": "Bandeja de Almácigos 72 cavidades",
+            "price": "$4.200",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "seedling tray"
+          }
+        ]
+      }
+    },
+    {
+      "docId": "abonos-sustratos-y-tierras",
+      "data": {
+        "name": "Abonos, Sustratos y Tierras",
+        "icon": "Layers",
+        "products": [
+          {
+            "name": "Compost Premium (Saco 25kg)",
+            "price": "$15.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "compost bag"
+          },
+          {
+            "name": "Humus de Lombriz (Bolsa 5kg)",
+            "price": "$8.500",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "worm castings"
+          },
+          {
+            "name": "Tierra de Hojas (Saco 40L)",
+            "price": "$12.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "potting soil"
+          },
+          {
+            "name": "Sustrato para Suculentas (Bolsa 3kg)",
+            "price": "$7.200",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "succulent soil"
+          }
+        ]
+      }
+    },
+    {
+      "docId": "semillas-de-flores",
+      "data": {
+        "name": "Semillas de Flores",
+        "icon": "Flower",
+        "products": [
+          {
+            "name": "Semillas de Girasol",
+            "price": "$2.500",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "sunflower seeds"
+          },
+          {
+            "name": "Semillas de Lavanda",
+            "price": "$3.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "lavender seeds"
+          },
+          {
+            "name": "Semillas de Caléndula",
+            "price": "$2.200",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "marigold seeds"
+          }
+        ]
+      }
+    },
+    {
+      "docId": "semillas-de-hortalizas-y-hierbas",
+      "data": {
+        "name": "Semillas de Hortalizas y Hierbas",
+        "icon": "Carrot",
+        "products": [
+          {
+            "name": "Semillas de Tomate Cal Ace",
+            "price": "$2.800",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "tomato seeds"
+          },
+          {
+            "name": "Semillas de Lechuga",
+            "price": "$2.300",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "lettuce seeds"
+          },
+          {
+            "name": "Semillas de Albahaca",
+            "price": "$2.500",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "basil seeds"
+          }
+        ]
+      }
+    },
+    {
+      "docId": "semillas-de-pasto-y-forraje",
+      "data": {
+        "name": "Semillas de Pasto y Forraje",
+        "icon": "Wheat",
+        "products": [
+          {
+            "name": "Semillas de Trébol Blanco (1kg)",
+            "price": "$9.900",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "clover seeds"
+          },
+          {
+            "name": "Semillas de Alfalfa (1kg)",
+            "price": "$11.500",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "alfalfa seeds"
+          },
+          {
+            "name": "Mezcla de Pasto para Cancha",
+            "price": "$14.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "grass seed"
+          }
+        ]
+      }
+    },
+    {
+      "docId": "agroquimicos-y-pesticidas",
+      "data": {
+        "name": "Agroquímicos y Pesticidas",
+        "icon": "FlaskConical",
+        "products": [
+          {
+            "name": "Herbicida Glifosato (1L)",
+            "price": "$18.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "herbicide bottle"
+          },
+          {
+            "name": "Insecticida de Amplio Espectro (500ml)",
+            "price": "$13.500",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "insecticide spray"
+          },
+          {
+            "name": "Fungicida para Oídio (250g)",
+            "price": "$11.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "fungicide powder"
+          }
+        ]
+      }
+    }
+  ]
+}
