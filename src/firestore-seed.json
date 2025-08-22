@@ -83,9 +83,9 @@
       }
     },
     {
-      "docId": "fertilizantes",
+      "docId": "abonos_sustratos_y_tierras",
       "data": {
-        "name": "Fertilizantes",
+        "name": "Abonos, Sustratos y Tierras",
         "icon": "Sprout",
         "products": [
           {
@@ -111,6 +111,36 @@
             "price": "$42.500",
             "image": "https://placehold.co/200x200.png",
             "aiHint": "potassium nitrate"
+          },
+          {
+            "name": "Tierra organica",
+            "price": "$5.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "organic soil"
+          },
+          {
+            "name": "Perlita AG",
+            "price": "$26.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "perlite bag"
+          },
+          {
+            "name": "Turba XL 280 litros",
+            "price": "$50.890",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "peat moss"
+          },
+          {
+            "name": "Fibra de coco",
+            "price": "$3.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "coco coir"
+          },
+          {
+            "name": "tierra de Hojas",
+            "price": "$3.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "leaf mold"
           }
         ]
       }
@@ -192,6 +222,30 @@
             "price": "$800",
             "image": "https://placehold.co/200x200.png",
             "aiHint": "dotted gloves"
+          },
+          {
+            "name": "Pulverizador Presion 1.5 lts",
+            "price": "$3.800",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "pressure sprayer"
+          },
+          {
+            "name": "Pulverizador Presion 500 ml",
+            "price": "$2.200",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "small sprayer"
+          },
+          {
+            "name": "Pulverizador Oslo 15",
+            "price": "$115.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "backpack sprayer"
+          },
+          {
+            "name": "Fumigador 8 lts",
+            "price": "$15.000",
+            "image": "https://placehold.co/200x200.png",
+            "aiHint": "garden sprayer"
           }
         ]
       }
@@ -243,39 +297,6 @@
             "price": "$10.000",
             "image": "https://placehold.co/200x200.png",
             "aiHint": "chicken wire"
-          }
-        ]
-      }
-    },
-    {
-      "docId": "pulverizadores_y_fumigadores",
-      "data": {
-        "name": "Pulverizadores y Fumigadores",
-        "icon": "SprayCan",
-        "products": [
-          {
-            "name": "Pulverizador Presion 1.5 lts",
-            "price": "$3.800",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "pressure sprayer"
-          },
-          {
-            "name": "Pulverizador Presion 500 ml",
-            "price": "$2.200",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "small sprayer"
-          },
-          {
-            "name": "Pulverizador Oslo 15",
-            "price": "$115.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "backpack sprayer"
-          },
-          {
-            "name": "Fumigador 8 lts",
-            "price": "$15.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "garden sprayer"
           }
         ]
       }
@@ -417,45 +438,6 @@
       }
     },
     {
-      "docId": "sustratos_y_tierras",
-      "data": {
-        "name": "Sustratos y Tierras",
-        "icon": "Layers",
-        "products": [
-          {
-            "name": "Tierra organica",
-            "price": "$5.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "organic soil"
-          },
-          {
-            "name": "Perlita AG",
-            "price": "$26.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "perlite bag"
-          },
-          {
-            "name": "Turba XL 280 litros",
-            "price": "$50.890",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "peat moss"
-          },
-          {
-            "name": "Fibra de coco",
-            "price": "$3.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "coco coir"
-          },
-          {
-            "name": "tierra de Hojas",
-            "price": "$3.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "leaf mold"
-          }
-        ]
-      }
-    },
-    {
       "docId": "tratamientos_y_bioestimulantes",
       "data": {
         "name": "Tratamientos y Bioestimulantes",
@@ -478,5 +460,3 @@
     }
   ]
 }
-
-    
