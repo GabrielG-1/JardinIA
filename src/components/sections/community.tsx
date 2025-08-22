@@ -61,7 +61,7 @@ export function CommunitySection() {
                     <div className="flex items-center gap-4">
                         <div className="w-1.5 h-12 bg-primary rounded-full" />
                         <div className="flex-grow">
-                            <p className="text-foreground/90 text-lg mb-2">{tip.advice}</p>
+                            <p className="text-foreground/90 text-lg mb-2 break-words">{tip.advice}</p>
                             <p className="text-right text-muted-foreground font-semibold">- {tip.name}</p>
                         </div>
                     </div>
