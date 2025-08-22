@@ -45,6 +45,7 @@ export async function analyzePlantHealth(input: AnalyzePlantHealthInput): Promis
 
 const analyzePlantHealthPrompt = ai.definePrompt({
   name: 'analyzePlantHealthPrompt',
+  model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: AnalyzePlantHealthInputSchema},
   output: {schema: AnalyzePlantHealthOutputSchema},
   prompt: `Eres un experto botánico especializado en diagnosticar problemas de salud de las plantas y en ofrecer recomendaciones de cuidado. Tu respuesta debe ser siempre en español y en un formato JSON válido que se ajuste al esquema de salida.
