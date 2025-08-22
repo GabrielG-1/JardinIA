@@ -1,8 +1,8 @@
 
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, doc, writeBatch, getDocs, deleteDoc } from 'firebase/firestore';
-import *s as fs from 'fs';
-import *s as path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Copiamos la configuración de firebase directamente aquí para asegurar la correcta inicialización en el entorno del script
 const firebaseConfig = {
