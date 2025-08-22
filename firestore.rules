@@ -1,12 +1,26 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Permite la lectura pública para que todos los usuarios puedan ver el catálogo y los consejos.
-    match /{document=**} {
+    
+    // El catálogo solo puede ser modificado por un administrador (a través del script de seed)
+    // y leído por cualquiera.
+    match /catalog/{categoryId} {
       allow read: if true;
       allow write: if request.auth != null;
+    }
+
+    // Los consejos de la comunidad pueden ser creados por cualquier persona,
+    // pero no pueden ser actualizados o eliminados públicamente.
+    match /community-tips/{tipId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if request.auth != null;
+    }
+
+    // Regla de respaldo para cualquier otra colección (si la hubiera)
+    match /{document=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }
