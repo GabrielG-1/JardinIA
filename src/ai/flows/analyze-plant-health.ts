@@ -33,7 +33,7 @@ const AnalyzePlantHealthOutputSchema = z.object({
     recommendations: z
       .string()
       .describe(
-        'Recomendaciones para el cuidado de la planta. Usa etiquetas HTML <strong> para resaltar los subtítulos, por ejemplo: "<strong>Verificar el pH del suelo:</strong> El pH ideal para esta planta es..."'
+        'Recomendaciones para el cuidado de la planta. Usa etiquetas HTML <strong> para resaltar los subtítulos, y añade una etiqueta <br> después de cada subtítulo. Por ejemplo: "<strong>Verificar el pH del suelo:</strong><br>El pH ideal para esta planta es..."'
       ),
   }),
 });
@@ -61,7 +61,7 @@ Analiza la imagen y la descripción para rellenar los siguientes campos:
 - identification.latinName: Nombre en latín de la planta. Si no es identificable, indica "No identificable".
 - healthDiagnosis.isHealthy: ¿La planta parece sana? (true/false)
 - healthDiagnosis.diagnosis: Diagnóstico detallado de la salud, incluyendo problemas.
-- healthDiagnosis.recommendations: Recomendaciones de cuidado. Para los subtítulos dentro de las recomendaciones, envuélvelos en etiquetas <strong>. Por ejemplo: "<strong>Verificar el pH del suelo:</strong> El pH ideal para esta planta es...".
+- healthDiagnosis.recommendations: Recomendaciones de cuidado. Para los subtítulos dentro de las recomendaciones, envuélvelos en etiquetas <strong> y añade una etiqueta <br> después de cada subtítulo. Por ejemplo: "<strong>Verificar el pH del suelo:</strong><br>El pH ideal para esta planta es...".
 `,
 });
 

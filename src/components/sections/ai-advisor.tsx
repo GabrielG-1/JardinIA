@@ -78,7 +78,7 @@ export function AiAdvisorSection() {
   };
 
   const AnalysisResult = () => (
-    <Card className="mt-8">
+    <Card className="mt-8 text-left">
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><Bot /> Diagnóstico de la IA</CardTitle>
       </CardHeader>
@@ -105,8 +105,8 @@ export function AiAdvisorSection() {
             </div>
             <div>
               <h3 className="font-semibold text-lg flex items-center gap-2"><Dna /> Recomendaciones de Cuidado</h3>
-              <p 
-                className="text-muted-foreground whitespace-pre-wrap"
+              <div 
+                className="text-muted-foreground"
                 dangerouslySetInnerHTML={{ __html: result!.healthDiagnosis.recommendations }}
               />
             </div>
