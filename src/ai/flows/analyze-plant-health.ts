@@ -33,7 +33,7 @@ const AnalyzePlantHealthOutputSchema = z.object({
     recommendations: z
       .string()
       .describe(
-        'Recomendaciones para el cuidado de la planta. Usa etiquetas HTML <strong> para resaltar los subtítulos, y añade una etiqueta <br> después de cada subtítulo. Por ejemplo: "<strong>Verificar el pH del suelo:</strong><br>El pH ideal para esta planta es..."'
+        'Recomendaciones para el cuidado de la planta. Usa etiquetas <strong> para resaltar los subtítulos, y añade una etiqueta <br> después de cada subtítulo. Por ejemplo: "<strong>Verificar el pH del suelo:</strong><br>El pH ideal para esta planta es..."'
       ),
   }),
 });
@@ -48,6 +48,9 @@ const analyzePlantHealthPrompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: AnalyzePlantHealthInputSchema},
   output: {schema: AnalyzePlantHealthOutputSchema},
+  config: {
+    temperature: 0.2, // Lower temperature for more deterministic and consistent responses
+  },
   prompt: `Eres un experto botánico especializado en diagnosticar problemas de salud de las plantas y en ofrecer recomendaciones de cuidado. Tu respuesta debe ser siempre en español y en un formato JSON válido que se ajuste al esquema de salida.
 
 Analizarás la información proporcionada para determinar si la planta está sana, diagnosticar cualquier problema y proporcionar recomendaciones de cuidado.
