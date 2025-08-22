@@ -251,13 +251,13 @@
         "icon": "Spray",
         "products": [
           {
-            "name": "Pulverizador Presion",
+            "name": "Pulverizador Presion 1.5 lts",
             "price": "$3.800",
             "image": "https://placehold.co/200x200.png",
             "aiHint": "pressure sprayer"
           },
           {
-            "name": "Pulverizador Presion",
+            "name": "Pulverizador Presion 500 ml",
             "price": "$2.200",
             "image": "https://placehold.co/200x200.png",
             "aiHint": "small sprayer"
@@ -496,3 +496,5 @@
     }
   ]
 }
+
+    
