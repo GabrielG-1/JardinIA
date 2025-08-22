@@ -5,7 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { FlaskConical, Sprout, Package, Wheat, Leaf, type LucideIcon, Upload, AlertTriangle } from "lucide-react";
+import { FlaskConical, Sprout, Package, Wheat, Leaf, type LucideIcon, Upload, AlertTriangle, Wrench, Fence, SprayCan, Flower, Carrot, TestTube, Shirt, Layers } from "lucide-react";
 import React, { useRef, useState, useEffect } from "react";
 import { uploadProductImage } from "@/services/storage-service";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +18,14 @@ const icons: { [key: string]: LucideIcon } = {
   Package,
   Wheat,
   Leaf,
+  Wrench,
+  Fence,
+  SprayCan,
+  Flower,
+  Carrot,
+  TestTube,
+  Shirt,
+  Layers,
 };
 
 function ProductCard({ 
@@ -74,9 +82,9 @@ function ProductCard({
           {...(product.aiHint && { "data-ai-hint": product.aiHint })}
         />
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/product:opacity-100 transition-opacity flex items-center justify-center">
-            <Button onClick={handleButtonClick} disabled={isUploading}>
+            <Button onClick={handleButtonClick} disabled={isUploading} size="sm">
                 <Upload className="mr-2 h-4 w-4" />
-                {isUploading ? "Subiendo..." : "Cambiar Imagen"}
+                {isUploading ? "Subiendo..." : "Cambiar"}
             </Button>
             <input
                 type="file"
@@ -87,12 +95,12 @@ function ProductCard({
             />
         </div>
       </CardHeader>
-      <CardContent className="flex-grow p-4">
-        <CardTitle className="text-lg font-semibold">{product.name}</CardTitle>
+      <CardContent className="flex-grow p-2">
+        <CardTitle className="text-sm font-semibold h-10 overflow-hidden leading-tight">{product.name}</CardTitle>
       </CardContent>
-      <CardFooter className="p-4 pt-0 flex justify-between items-center">
-        <p className="text-xl font-bold text-primary">{product.price}</p>
-        <Button>Añadir</Button>
+      <CardFooter className="p-2 pt-0 flex justify-between items-center">
+        <p className="text-base font-bold text-primary">{product.price}</p>
+        <Button size="sm">Añadir</Button>
       </CardFooter>
     </Card>
   );
@@ -178,7 +186,7 @@ export function CatalogSection() {
             <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
                 <h2 className="text-4xl font-bold font-headline">Nuestro Catálogo</h2>
-                <p className="text-muted-foreground mt-2">Explora nuestra selección de productos de alta calidad.</p>
+                <p className="text-muted-foreground mt-2">Explora nuestra selección de alta calidad.</p>
                 </div>
                 <LoadingSkeleton />
             </div>
@@ -215,7 +223,7 @@ export function CatalogSection() {
           <h2 className="text-4xl font-bold font-headline">Nuestro Catálogo</h2>
           <p className="text-muted-foreground mt-2">Explora nuestra selección de productos de alta calidad.</p>
         </div>
-        <Accordion type="multiple" className="w-full max-w-6xl mx-auto" defaultValue={catalogData.map((c) => c.id)}>
+        <Accordion type="multiple" className="w-full max-w-7xl mx-auto" defaultValue={catalogData.map((c) => c.id)}>
           {catalogData.map((category) => {
             const Icon = icons[category.icon] || FlaskConical;
             return (
@@ -227,7 +235,7 @@ export function CatalogSection() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-4">
                   {Array.isArray(category.products) && category.products.map((product) => (
                     <ProductCard 
                       key={product.name} 

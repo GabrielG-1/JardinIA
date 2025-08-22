@@ -248,7 +248,7 @@
       "docId": "pulverizadores_y_fumigadores",
       "data": {
         "name": "Pulverizadores y Fumigadores",
-        "icon": "Spray",
+        "icon": "SprayCan",
         "products": [
           {
             "name": "Pulverizador Presion 1.5 lts",
@@ -417,7 +417,7 @@
       "docId": "sustratos_y_tierras",
       "data": {
         "name": "Sustratos y Tierras",
-        "icon": "Soil",
+        "icon": "Layers",
         "products": [
           {
             "name": "Tierra organica",
