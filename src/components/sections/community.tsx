@@ -60,8 +60,8 @@ export function CommunitySection() {
                 <Card key={tip.id} className="p-6 shadow-md bg-background">
                     <div className="flex items-center gap-4">
                         <div className="w-1.5 h-12 bg-primary rounded-full" />
-                        <div className="flex-grow">
-                            <p className="text-foreground/90 text-lg mb-2 break-words">{tip.advice}</p>
+                        <div className="flex-grow break-words">
+                            <p className="text-foreground/90 text-lg mb-2">{tip.advice}</p>
                             <p className="text-right text-muted-foreground font-semibold">- {tip.name}</p>
                         </div>
                     </div>
