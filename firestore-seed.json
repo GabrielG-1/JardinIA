@@ -51,14 +51,15 @@
           { "name": "Urea", "price": "18000", "image": "https://placehold.co/200x200.png", "aiHint": "urea fertilizer" },
           { "name": "Mezcla 11-30-11", "price": "19500", "image": "https://placehold.co/200x200.png", "aiHint": "fertilizer bag" },
           { "name": "Superfosfato triple", "price": "33500", "image": "https://placehold.co/200x200.png", "aiHint": "phosphate fertilizer" },
-          { "name": "Salkitre Potasico", "price": "42500", "image": "https://placehold.co/200x200.png", "aiHint": "potassium nitrate" },
+          { "name": "Salitre Potasico", "price": "42500", "image": "https://placehold.co/200x200.png", "aiHint": "potassium nitrate" },
           { "name": "Tierra organica", "price": "5000", "image": "https://placehold.co/200x200.png", "aiHint": "organic soil" },
           { "name": "Perlita AG", "price": "26000", "image": "https://placehold.co/200x200.png", "aiHint": "perlite bag" },
           { "name": "Turba XL 280 litros", "price": "50890", "image": "https://placehold.co/200x200.png", "aiHint": "peat moss" },
           { "name": "Fibra de coco", "price": "3000", "image": "https://placehold.co/200x200.png", "aiHint": "coco coir" },
           { "name": "tierra de Hojas", "price": "3000", "image": "https://placehold.co/200x200.png", "aiHint": "potting soil" },
           { "name": "Enraizantes", "price": "7500", "image": "https://placehold.co/200x200.png", "aiHint": "rooting hormone" },
-          { "name": "Jabon potasico", "price": "3380", "image": "https://placehold.co/200x200.png", "aiHint": "potassium soap" }
+          { "name": "Jabon potasico", "price": "3380", "image": "https://placehold.co/200x200.png", "aiHint": "potassium soap" },
+          { "name": "Humus de Lombriz", "price": "95200", "image": "https://placehold.co/200x200.png", "aiHint": "worm castings" }
         ]
       }
     },
@@ -120,7 +121,6 @@
           { "name": "Repollo Corazon Buy 100", "price": "20500", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds" },
           { "name": "Repollo Morado 100", "price": "18700", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds" },
           { "name": "Tomate cal Ace", "price": "56000", "image": "https://placehold.co/200x200.png", "aiHint": "tomato seeds" },
-          { "name": "Albahaca hoja ancha", "price": "95200", "image": "https://placehold.co/200x200.png", "aiHint": "basil seeds" },
           { "name": "Beterraga detroit 400 grs", "price": "34000", "image": "https://placehold.co/200x200.png", "aiHint": "beetroot seeds" },
           { "name": "Apio Tall Utah", "price": "41800", "image": "https://placehold.co/200x200.png", "aiHint": "celery seeds" },
           { "name": "Arveja Tama x kilo", "price": "7200", "image": "https://placehold.co/200x200.png", "aiHint": "pea seeds" },
@@ -166,3 +166,5 @@
     }
   ]
 }
+
+    
