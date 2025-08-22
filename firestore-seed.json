@@ -7,66 +7,22 @@
         "name": "Herramientas y Accesorios",
         "icon": "Wrench",
         "products": [
-          {
-            "name": "Tijera de Podar Profesional",
-            "price": "$12.500",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "pruning shears"
-          },
-          {
-            "name": "Guantes de Jardinería Reforzados",
-            "price": "$7.990",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "gardening gloves"
-          },
-          {
-            "name": "Pala de Jardín de Acero",
-            "price": "$9.900",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "garden spade"
-          },
-          {
-            "name": "Rastrillo de Hojas Metálico",
-            "price": "$11.200",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "leaf rake"
-          },
-          {
-            "name": "Delantal de Jardinería",
-            "price": "$15.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "gardening apron"
-          },
-          {
-            "name": "Sombrero de Paja",
-            "price": "$8.500",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "straw hat"
-          },
-          {
-            "name": "Botas de Goma",
-            "price": "$22.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "rubber boots"
-          },
-          {
-            "name": "Pulverizador Presion 1.5 lts",
-            "price": "$8.900",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "pressure sprayer"
-          },
-          {
-            "name": "Pulverizador Presion 500 ml",
-            "price": "$3.200",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "hand sprayer"
-          },
-          {
-            "name": "Fumigador de Mochila 15 lts",
-            "price": "$25.500",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "backpack sprayer"
-          }
+          { "name": "Rastrillo 14 dientes", "price": "3500", "image": "https://placehold.co/200x200.png", "aiHint": "rake" },
+          { "name": "Serrucho podar", "price": "4700", "image": "https://placehold.co/200x200.png", "aiHint": "pruning saw" },
+          { "name": "Tijeras podar Nro. 8", "price": "7000", "image": "https://placehold.co/200x200.png", "aiHint": "pruning shears" },
+          { "name": "Pala jardinera", "price": "8600", "image": "https://placehold.co/200x200.png", "aiHint": "garden spade" },
+          { "name": "Palo Barre Hoja", "price": "1500", "image": "https://placehold.co/200x200.png", "aiHint": "rake handle" },
+          { "name": "Set herramientas jardin", "price": "4560", "image": "https://placehold.co/200x200.png", "aiHint": "gardening tools" },
+          { "name": "Tijeras podar la rioja", "price": "15000", "image": "https://placehold.co/200x200.png", "aiHint": "pruning shears" },
+          { "name": "tijeron poda Altura", "price": "20700", "image": "https://placehold.co/200x200.png", "aiHint": "loppers" },
+          { "name": "Rozon", "price": "20500", "image": "https://placehold.co/200x200.png", "aiHint": "machete" },
+          { "name": "Barre Hojas", "price": "4500", "image": "https://placehold.co/200x200.png", "aiHint": "leaf rake" },
+          { "name": "Pulverizador Presion 1.5 lts", "price": "3800", "image": "https://placehold.co/200x200.png", "aiHint": "pressure sprayer" },
+          { "name": "Pulverizador Presion 500 ml", "price": "2200", "image": "https://placehold.co/200x200.png", "aiHint": "hand sprayer" },
+          { "name": "Pulverizador Oslo 15", "price": "115000", "image": "https://placehold.co/200x200.png", "aiHint": "backpack sprayer" },
+          { "name": "Fumigador 8 lts", "price": "15000", "image": "https://placehold.co/200x200.png", "aiHint": "garden sprayer" },
+          { "name": "Guante Delgado", "price": "800", "image": "https://placehold.co/200x200.png", "aiHint": "gardening gloves" },
+          { "name": "Guante Pigmentado", "price": "800", "image": "https://placehold.co/200x200.png", "aiHint": "work gloves" }
         ]
       }
     },
@@ -76,30 +32,13 @@
         "name": "Insumos, Mallas y Contenedores",
         "icon": "Package",
         "products": [
-          {
-            "name": "Malla Raschel 80% Sombra (Rollo 10m)",
-            "price": "$25.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "shade cloth"
-          },
-          {
-            "name": "Cerco de Madera Tratada (1m x 2m)",
-            "price": "$18.900",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "wood fence"
-          },
-          {
-            "name": "Macetero de Terracota 30cm",
-            "price": "$9.500",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "terracotta pot"
-          },
-          {
-            "name": "Bandeja de Almácigos 72 cavidades",
-            "price": "$4.200",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "seedling tray"
-          }
+          { "name": "Bolsa planta 20x20", "price": "6000", "image": "https://placehold.co/200x200.png", "aiHint": "nursery bag" },
+          { "name": "bolsa plante 25x25", "price": "6500", "image": "https://placehold.co/200x200.png", "aiHint": "nursery bag" },
+          { "name": "sacos paperos", "price": "300", "image": "https://placehold.co/200x200.png", "aiHint": "burlap sack" },
+          { "name": "mallas paperas", "price": "250", "image": "https://placehold.co/200x200.png", "aiHint": "mesh bag" },
+          { "name": "Bandejas 200 cavidades", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "seedling tray" },
+          { "name": "Bandejas 105 cavidades", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "seedling tray" },
+          { "name": "Malla Hexagonal Galva chica", "price": "10000", "image": "https://placehold.co/200x200.png", "aiHint": "wire mesh" }
         ]
       }
     },
@@ -109,111 +48,17 @@
         "name": "Abonos, Sustratos y Tierras",
         "icon": "Layers",
         "products": [
-          {
-            "name": "Compost Premium (Saco 25kg)",
-            "price": "$15.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "compost bag"
-          },
-          {
-            "name": "Humus de Lombriz (Bolsa 5kg)",
-            "price": "$8.500",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "worm castings"
-          },
-          {
-            "name": "Tierra de Hojas (Saco 40L)",
-            "price": "$12.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "potting soil"
-          },
-          {
-            "name": "Sustrato para Suculentas (Bolsa 3kg)",
-            "price": "$7.200",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "succulent soil"
-          }
-        ]
-      }
-    },
-    {
-      "docId": "semillas-de-flores",
-      "data": {
-        "name": "Semillas de Flores",
-        "icon": "Flower",
-        "products": [
-          {
-            "name": "Semillas de Girasol",
-            "price": "$2.500",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "sunflower seeds"
-          },
-          {
-            "name": "Semillas de Lavanda",
-            "price": "$3.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "lavender seeds"
-          },
-          {
-            "name": "Semillas de Caléndula",
-            "price": "$2.200",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "marigold seeds"
-          }
-        ]
-      }
-    },
-    {
-      "docId": "semillas-de-hortalizas-y-hierbas",
-      "data": {
-        "name": "Semillas de Hortalizas y Hierbas",
-        "icon": "Carrot",
-        "products": [
-          {
-            "name": "Semillas de Tomate Cal Ace",
-            "price": "$2.800",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "tomato seeds"
-          },
-          {
-            "name": "Semillas de Lechuga",
-            "price": "$2.300",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "lettuce seeds"
-          },
-          {
-            "name": "Semillas de Albahaca",
-            "price": "$2.500",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "basil seeds"
-          }
-        ]
-      }
-    },
-    {
-      "docId": "semillas-de-pasto-y-forraje",
-      "data": {
-        "name": "Semillas de Pasto y Forraje",
-        "icon": "Wheat",
-        "products": [
-          {
-            "name": "Semillas de Trébol Blanco (1kg)",
-            "price": "$9.900",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "clover seeds"
-          },
-          {
-            "name": "Semillas de Alfalfa (1kg)",
-            "price": "$11.500",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "alfalfa seeds"
-          },
-          {
-            "name": "Mezcla de Pasto para Cancha",
-            "price": "$14.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "grass seed"
-          }
+          { "name": "Urea", "price": "18000", "image": "https://placehold.co/200x200.png", "aiHint": "urea fertilizer" },
+          { "name": "Mezcla 11-30-11", "price": "19500", "image": "https://placehold.co/200x200.png", "aiHint": "fertilizer bag" },
+          { "name": "Superfosfato triple", "price": "33500", "image": "https://placehold.co/200x200.png", "aiHint": "phosphate fertilizer" },
+          { "name": "Salkitre Potasico", "price": "42500", "image": "https://placehold.co/200x200.png", "aiHint": "potassium nitrate" },
+          { "name": "Tierra organica", "price": "5000", "image": "https://placehold.co/200x200.png", "aiHint": "organic soil" },
+          { "name": "Perlita AG", "price": "26000", "image": "https://placehold.co/200x200.png", "aiHint": "perlite bag" },
+          { "name": "Turba XL 280 litros", "price": "50890", "image": "https://placehold.co/200x200.png", "aiHint": "peat moss" },
+          { "name": "Fibra de coco", "price": "3000", "image": "https://placehold.co/200x200.png", "aiHint": "coco coir" },
+          { "name": "tierra de Hojas", "price": "3000", "image": "https://placehold.co/200x200.png", "aiHint": "potting soil" },
+          { "name": "Enraizantes", "price": "7500", "image": "https://placehold.co/200x200.png", "aiHint": "rooting hormone" },
+          { "name": "Jabon potasico", "price": "3380", "image": "https://placehold.co/200x200.png", "aiHint": "potassium soap" }
         ]
       }
     },
@@ -223,24 +68,99 @@
         "name": "Agroquímicos y Pesticidas",
         "icon": "FlaskConical",
         "products": [
-          {
-            "name": "Herbicida Glifosato (1L)",
-            "price": "$18.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "herbicide bottle"
-          },
-          {
-            "name": "Insecticida de Amplio Espectro (500ml)",
-            "price": "$13.500",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "insecticide spray"
-          },
-          {
-            "name": "Fungicida para Oídio (250g)",
-            "price": "$11.000",
-            "image": "https://placehold.co/200x200.png",
-            "aiHint": "fungicide powder"
-          }
+          { "name": "Linurex", "price": "43200", "image": "https://placehold.co/200x200.png", "aiHint": "herbicide" },
+          { "name": "Zero 5 EC", "price": "18500", "image": "https://placehold.co/200x200.png", "aiHint": "insecticide" },
+          { "name": "Betanal", "price": "58000", "image": "https://placehold.co/200x200.png", "aiHint": "herbicide" },
+          { "name": "Rango 480", "price": "15500", "image": "https://placehold.co/200x200.png", "aiHint": "fungicide" },
+          { "name": "Toximol", "price": "4925", "image": "https://placehold.co/200x200.png", "aiHint": "pesticide" },
+          { "name": "Ciperkil", "price": "8879", "image": "https://placehold.co/200x200.png", "aiHint": "insecticide" },
+          { "name": "Dimetoato plus", "price": "7000", "image": "https://placehold.co/200x200.png", "aiHint": "pesticide" },
+          { "name": "Control Hongos", "price": "6270", "image": "https://placehold.co/200x200.png", "aiHint": "fungicide" },
+          { "name": "Oxicloruro de cobre", "price": "6760", "image": "https://placehold.co/200x200.png", "aiHint": "fungicide powder" },
+          { "name": "control Oidio", "price": "6300", "image": "https://placehold.co/200x200.png", "aiHint": "fungicide" },
+          { "name": "Rastop pellet", "price": "2265", "image": "https://placehold.co/200x200.png", "aiHint": "rodenticide pellets" },
+          { "name": "Rastop Pasta", "price": "4587", "image": "https://placehold.co/200x200.png", "aiHint": "rodenticide paste" }
+        ]
+      }
+    },
+    {
+      "docId": "semillas-de-flores",
+      "data": {
+        "name": "Semillas de Flores",
+        "icon": "Flower",
+        "products": [
+          { "name": "sem clavel gigante rosa", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "carnation seeds" },
+          { "name": "Sem Alheli Blanco", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "stock flower seeds" },
+          { "name": "sem Coronado", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "poppy seeds" },
+          { "name": "Sem Alegris de la casa", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "impatiens seeds" },
+          { "name": "Sem Clavel gijante blanco", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "carnation seeds" },
+          { "name": "Sem Gerbera", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "gerbera seeds" },
+          { "name": "Sem Pensamiento Rosa", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "pansy seeds" },
+          { "name": "Pensamiento Suiza Rojo", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "pansy seeds" }
+        ]
+      }
+    },
+    {
+      "docId": "semillas-de-hortalizas-y-hierbas",
+      "data": {
+        "name": "Semillas de Hortalizas y Hierbas",
+        "icon": "Carrot",
+        "products": [
+          { "name": "Cilantro Santo", "price": "30000", "image": "https://placehold.co/200x200.png", "aiHint": "coriander seeds" },
+          { "name": "cilantro Arcanjel", "price": "23000", "image": "https://placehold.co/200x200.png", "aiHint": "coriander seeds" },
+          { "name": "Aji Cristal", "price": "79200", "image": "https://placehold.co/200x200.png", "aiHint": "chili seeds" },
+          { "name": "Sem Aji Cacho cabra", "price": "80600", "image": "https://placehold.co/200x200.png", "aiHint": "chili seeds" },
+          { "name": "Pimenton Amarillo", "price": "39200", "image": "https://placehold.co/200x200.png", "aiHint": "pepper seeds" },
+          { "name": "Perejil Crespo", "price": "20630", "image": "https://placehold.co/200x200.png", "aiHint": "parsley seeds" },
+          { "name": "Puerro de Caretan", "price": "23800", "image": "https://placehold.co/200x200.png", "aiHint": "leek seeds" },
+          { "name": "Sem lechuga Escarola", "price": "65970", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
+          { "name": "Repollo Corazon de Buey", "price": "56200", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds" },
+          { "name": "repollo Morado", "price": "52970", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds" },
+          { "name": "Lechuga escarola 100", "price": "26800", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
+          { "name": "Repollo Corazon Buy 100", "price": "20500", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds" },
+          { "name": "Repollo Morado 100", "price": "18700", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds" },
+          { "name": "Tomate cal Ace", "price": "56000", "image": "https://placehold.co/200x200.png", "aiHint": "tomato seeds" },
+          { "name": "Albahaca hoja ancha", "price": "95200", "image": "https://placehold.co/200x200.png", "aiHint": "basil seeds" },
+          { "name": "Beterraga detroit 400 grs", "price": "34000", "image": "https://placehold.co/200x200.png", "aiHint": "beetroot seeds" },
+          { "name": "Apio Tall Utah", "price": "41800", "image": "https://placehold.co/200x200.png", "aiHint": "celery seeds" },
+          { "name": "Arveja Tama x kilo", "price": "7200", "image": "https://placehold.co/200x200.png", "aiHint": "pea seeds" },
+          { "name": "Haba Agua Dulce", "price": "7700", "image": "https://placehold.co/200x200.png", "aiHint": "bean seeds" },
+          { "name": "Beterraga Hibrida boro", "price": "98000", "image": "https://placehold.co/200x200.png", "aiHint": "beetroot seeds" },
+          { "name": "lecguga Isabela", "price": "53200", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
+          { "name": "Cebollin Tokio", "price": "98000", "image": "https://placehold.co/200x200.png", "aiHint": "onion seeds" },
+          { "name": "Morron Verde", "price": "61600", "image": "https://placehold.co/200x200.png", "aiHint": "pepper seeds" },
+          { "name": "Pepino Market more Lata", "price": "55750", "image": "https://placehold.co/200x200.png", "aiHint": "cucumber seeds" },
+          { "name": "Espinaca Seminis", "price": "80300", "image": "https://placehold.co/200x200.png", "aiHint": "spinach seeds" },
+          { "name": "beterraga detroit dark", "price": "34000", "image": "https://placehold.co/200x200.png", "aiHint": "beetroot seeds" },
+          { "name": "Lechuga 4 estaciones", "price": "25000", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
+          { "name": "semilla acelga 5 grs", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "chard seeds" },
+          { "name": "Puerro verde 1 grs", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "leek seeds" },
+          { "name": "Perejil liso", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "parsley seeds" },
+          { "name": "Coliflor bola nieve", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "cauliflower seeds" },
+          { "name": "remolacha beterraga", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "beetroot seeds" },
+          { "name": "lechuga Lollo Bionda", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
+          { "name": "Lechuga Romana larga", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
+          { "name": "Lechuga kagraner somer", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
+          { "name": "Lechuga maravilla 4 esta.", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
+          { "name": "Repollo corazon Buey", "price": "2500", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds" },
+          { "name": "Lechuga grand rapid", "price": "67100", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
+          { "name": "Lechuga blanca de paris", "price": "67200", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
+          { "name": "Lechuga Lollo rosa", "price": "74500", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
+          { "name": "Lechuga Gallega Invierno", "price": "78370", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
+          { "name": "Puerro largo caretan", "price": "62500", "image": "https://placehold.co/200x200.png", "aiHint": "leek seeds" },
+          { "name": "Coliflor bola de Nieve", "price": "69660", "image": "https://placehold.co/200x200.png", "aiHint": "cauliflower seeds" }
+        ]
+      }
+    },
+    {
+      "docId": "semillas-de-pasto-y-forraje",
+      "data": {
+        "name": "Semillas de Pasto y Forraje",
+        "icon": "Wheat",
+        "products": [
+          { "name": "Trebol enano x kilo", "price": "15800", "image": "https://placehold.co/200x200.png", "aiHint": "clover seeds" },
+          { "name": "Trevol rosado Quiñiqueli", "price": "8500", "image": "https://placehold.co/200x200.png", "aiHint": "clover seeds" },
+          { "name": "Ballica tama x kilo", "price": "4000", "image": "https://placehold.co/200x200.png", "aiHint": "ryegrass seeds" }
         ]
       }
     }
