@@ -1,26 +1,35 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // El catálogo solo puede ser modificado por un administrador (a través del script de seed)
-    // y leído por cualquiera.
-    match /catalog/{categoryId} {
+
+    // The catalog can be read by anyone, but only changed by authenticated users (admins/scripts).
+    match /catalog/{docId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
 
-    // Los consejos de la comunidad pueden ser creados por cualquier persona,
-    // pero no pueden ser actualizados o eliminados públicamente.
+    // Community tips can be read by anyone.
+    // Anyone can create a new tip.
+    // Only authenticated users can update or delete tips (for moderation).
     match /community-tips/{tipId} {
       allow read: if true;
       allow create: if true;
       allow update, delete: if request.auth != null;
     }
+    
+    // Settings can be read by anyone (e.g., for hero image).
+    // Only authenticated users can change settings.
+    match /settings/{docId} {
+        allow read: if true;
+        allow write: if request.auth != null;
+    }
 
-    // Regla de respaldo para cualquier otra colección (si la hubiera)
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    // Explicitly deny writes to any other path to be safe.
+    match /{path=**} {
+        allow read: if path[0] == 'catalog' || path[0] == 'community-tips' || path[0] == 'settings';
+        allow write: if false;
     }
   }
 }
