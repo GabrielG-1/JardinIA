@@ -12,7 +12,12 @@ import { analyzePlantHealth, type AnalyzePlantHealthOutput } from "@/ai/flows/an
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CameraCapture } from "@/components/camera-capture";
-import type { Product } from "@/services/catalog-service";
+
+// No necesitamos el tipo Product completo aquí, solo el de la respuesta de la IA
+type RecommendedProduct = {
+    name: string;
+    price: string;
+};
 
 export function AiAdvisorSection() {
   const [photoDataUri, setPhotoDataUri] = useState<string | null>(null);
@@ -88,22 +93,16 @@ export function AiAdvisorSection() {
     return `$${number.toLocaleString('es-CL')}`;
   };
 
-  const ProductRecommendationCard = ({ product }: { product: Product }) => {
-    const imageUrl = product && product.image ? product.image : 'https://placehold.co/150x150.png';
+  const ProductRecommendationCard = ({ product }: { product: RecommendedProduct }) => {
     return (
-        <Card className="flex flex-col">
-        <CardHeader className="p-0">
-            <Image src={imageUrl} alt={product.name} width={150} height={150} className="rounded-t-lg object-cover w-full aspect-square" />
-        </CardHeader>
-        <CardContent className="flex-grow p-3">
-            <h4 className="font-semibold text-sm h-10">{product.name}</h4>
-            <p className="font-bold text-primary mt-1">{formatPrice(product.price)}</p>
-        </CardContent>
-        <CardFooter className="p-3 pt-0">
-            <Button size="sm" className="w-full">
+        <Card className="flex flex-row items-center justify-between p-3">
+            <div className="flex-grow">
+                <h4 className="font-semibold text-sm">{product.name}</h4>
+                <p className="font-bold text-primary mt-1">{formatPrice(product.price)}</p>
+            </div>
+             <Button size="sm" className="shrink-0">
                 <ShoppingCart className="mr-2 h-4 w-4"/> Añadir
             </Button>
-        </CardFooter>
         </Card>
     );
   };
@@ -148,7 +147,7 @@ export function AiAdvisorSection() {
               {validProducts.length > 0 && (
                    <div>
                       <h3 className="font-semibold text-lg flex items-center gap-2"><ShoppingCart /> Productos Recomendados</h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+                      <div className="space-y-3 mt-4">
                           {validProducts.map((product) => (
                               <ProductRecommendationCard key={product.name} product={product} />
                           ))}

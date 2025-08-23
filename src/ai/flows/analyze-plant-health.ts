@@ -25,11 +25,9 @@ const AnalyzePlantHealthInputSchema = z.object({
 export type AnalyzePlantHealthInput = z.infer<typeof AnalyzePlantHealthInputSchema>;
 
 
-const ProductSchema = z.object({
-  name: z.string(),
-  price: z.string(),
-  image: z.string(),
-  aiHint: z.string().optional(),
+const RecommendedProductSchema = z.object({
+  name: z.string().describe("El nombre del producto."),
+  price: z.string().describe("El precio del producto."),
 });
 
 const AnalyzePlantHealthOutputSchema = z.object({
@@ -47,7 +45,7 @@ const AnalyzePlantHealthOutputSchema = z.object({
         'Recomendaciones para el cuidado de la planta. Usa etiquetas <strong> para resaltar los subtítulos, y añade una etiqueta <br> después de cada subtítulo. Por ejemplo: "<strong>Verificar el pH del suelo:</strong><br>El pH ideal para esta planta es..."'
       ),
   }),
-  recommendedProducts: z.array(ProductSchema).optional().describe('Una lista de productos recomendados de la tienda que pueden ayudar a tratar el problema.'),
+  recommendedProducts: z.array(RecommendedProductSchema).optional().describe('Una lista de productos recomendados de la tienda que pueden ayudar a tratar el problema.'),
 });
 export type AnalyzePlantHealthOutput = z.infer<typeof AnalyzePlantHealthOutputSchema>;
 
@@ -62,13 +60,14 @@ const productSearchTool = ai.defineTool(
         name: 'productSearch',
         description: 'Busca en el catálogo de la tienda productos relevantes para el cuidado de las plantas, como pesticidas, fertilizantes, etc.',
         inputSchema: z.object({ query: z.string().describe('Términos de búsqueda para encontrar un producto. Por ejemplo: "hongos", "oidio", "insecticida", "fertilizante rico en nitrógeno".') }),
-        outputSchema: z.array(ProductSchema),
+        outputSchema: z.array(RecommendedProductSchema),
     },
     async (input) => {
         console.log(`Buscando productos con el término: ${input.query}`);
         const products = await searchProducts(input.query);
         // Devolvemos solo los primeros 3 para no sobrecargar la respuesta
-        return products.slice(0, 3);
+        // y solo los campos necesarios.
+        return products.slice(0, 3).map(p => ({ name: p.name, price: p.price }));
     }
 );
 
