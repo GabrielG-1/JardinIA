@@ -1,16 +1,18 @@
+
 "use client";
 
 import { useState } from "react";
 import Image from "next/image";
-import { UploadCloud, Bot, CheckCircle, XCircle, Leaf, Dna, Stethoscope, Camera } from "lucide-react";
+import { UploadCloud, Bot, CheckCircle, XCircle, Leaf, Dna, Stethoscope, Camera, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { analyzePlantHealth, type AnalyzePlantHealthOutput } from "@/ai/flows/analyze-plant-health";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CameraCapture } from "@/components/camera-capture";
+import type { Product } from "@/services/catalog-service";
 
 export function AiAdvisorSection() {
   const [photoDataUri, setPhotoDataUri] = useState<string | null>(null);
@@ -76,6 +78,31 @@ export function AiAdvisorSection() {
       setLoading(false);
     }
   };
+  
+  const formatPrice = (price: string) => {
+    const number = parseInt(price, 10);
+    if (isNaN(number)) {
+      return price;
+    }
+    return `$${number.toLocaleString('es-CL')}`;
+  };
+
+  const ProductRecommendationCard = ({ product }: { product: Product }) => (
+    <Card className="flex flex-col">
+      <CardHeader className="p-0">
+         <Image src={product.image} alt={product.name} width={150} height={150} className="rounded-t-lg object-cover w-full aspect-square" />
+      </CardHeader>
+      <CardContent className="flex-grow p-3">
+        <h4 className="font-semibold text-sm h-10">{product.name}</h4>
+        <p className="font-bold text-primary mt-1">{formatPrice(product.price)}</p>
+      </CardContent>
+      <CardFooter className="p-3 pt-0">
+        <Button size="sm" className="w-full">
+            <ShoppingCart className="mr-2 h-4 w-4"/> Añadir
+        </Button>
+      </CardFooter>
+    </Card>
+  );
 
   const AnalysisResult = () => (
     <Card className="mt-8 text-left">
@@ -110,6 +137,16 @@ export function AiAdvisorSection() {
                 dangerouslySetInnerHTML={{ __html: result!.healthDiagnosis.recommendations }}
               />
             </div>
+            {result!.recommendedProducts && result!.recommendedProducts.length > 0 && (
+                 <div>
+                    <h3 className="font-semibold text-lg flex items-center gap-2"><ShoppingCart /> Productos Recomendados</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+                        {result!.recommendedProducts.map((product) => (
+                            <ProductRecommendationCard key={product.name} product={product} />
+                        ))}
+                    </div>
+                </div>
+            )}
           </>
         )}
       </CardContent>

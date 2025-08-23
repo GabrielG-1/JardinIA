@@ -51,32 +51,28 @@ export const getCatalog = (callback: (categories: Category[]) => void): Unsubscr
 };
 
 /**
- * Updates the image URL of a specific product within a category.
- * @param categoryId - The ID of the category document in Firestore.
- * @param productName - The name of the product to update.
- * @param newImageUrl - The new download URL for the product's image.
+ * Searches for products across all categories.
+ * @param searchTerm - The term to search for in product names.
+ * @returns A promise that resolves to an array of matching products.
  */
-export const updateProductImage = async (
-  categoryId: string,
-  productName: string,
-  newImageUrl: string
-) => {
-  try {
-    const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
-    
-    // To update an item in an array, we need to read the whole document,
-    // update the array in memory, and then write the entire array back.
-    // This is a limitation of Firestore's array handling.
-    // For more complex scenarios, a subcollection for products would be better.
-    
-    // For this app, let's assume we can get the current state from the component
-    // that calls this function, to avoid an extra read here.
-    
-  } catch (error) {
-    console.error("Error updating product image: ", error);
-    throw error;
-  }
-};
+export const searchProducts = async (searchTerm: string): Promise<Product[]> => {
+    const q = query(collection(db, CATALOG_COLLECTION));
+    const querySnapshot = await getDocs(q);
+    const allProducts: Product[] = [];
+    const lowercasedSearchTerm = searchTerm.toLowerCase();
+
+    querySnapshot.forEach((doc) => {
+        const category = doc.data() as Omit<Category, 'id'>;
+        if (Array.isArray(category.products)) {
+            const matchingProducts = category.products.filter(product => 
+                product.name.toLowerCase().includes(lowercasedSearchTerm)
+            );
+            allProducts.push(...matchingProducts);
+        }
+    });
+
+    return allProducts;
+}
 
 
 export const updateCategoryProducts = async (categoryId: string, products: Product[]) => {

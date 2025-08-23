@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -10,6 +11,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { searchProducts, type Product } from '@/services/catalog-service';
 
 const AnalyzePlantHealthInputSchema = z.object({
   photoDataUri: z
@@ -21,6 +23,14 @@ const AnalyzePlantHealthInputSchema = z.object({
   description: z.string().describe('The description of the plant.'),
 });
 export type AnalyzePlantHealthInput = z.infer<typeof AnalyzePlantHealthInputSchema>;
+
+
+const ProductSchema = z.object({
+  name: z.string(),
+  price: z.string(),
+  image: z.string(),
+  aiHint: z.string().optional(),
+});
 
 const AnalyzePlantHealthOutputSchema = z.object({
   identification: z.object({
@@ -37,38 +47,61 @@ const AnalyzePlantHealthOutputSchema = z.object({
         'Recomendaciones para el cuidado de la planta. Usa etiquetas <strong> para resaltar los subtítulos, y añade una etiqueta <br> después de cada subtítulo. Por ejemplo: "<strong>Verificar el pH del suelo:</strong><br>El pH ideal para esta planta es..."'
       ),
   }),
+  recommendedProducts: z.array(ProductSchema).optional().describe('Una lista de productos recomendados de la tienda que pueden ayudar a tratar el problema.'),
 });
 export type AnalyzePlantHealthOutput = z.infer<typeof AnalyzePlantHealthOutputSchema>;
+
 
 export async function analyzePlantHealth(input: AnalyzePlantHealthInput): Promise<AnalyzePlantHealthOutput> {
   return analyzePlantHealthFlow(input);
 }
 
+
+const productSearchTool = ai.defineTool(
+    {
+        name: 'productSearch',
+        description: 'Busca en el catálogo de la tienda productos relevantes para el cuidado de las plantas, como pesticidas, fertilizantes, etc.',
+        inputSchema: z.object({ query: z.string().describe('El tipo de producto a buscar. Por ejemplo: "insecticida", "fungicida", "fertilizante rico en nitrógeno".') }),
+        outputSchema: z.array(ProductSchema),
+    },
+    async (input) => {
+        console.log(`Buscando productos con el término: ${input.query}`);
+        const products = await searchProducts(input.query);
+        // Devolvemos solo los primeros 3 para no sobrecargar la respuesta
+        return products.slice(0, 3);
+    }
+);
+
+
 const analyzePlantHealthPrompt = ai.definePrompt({
   name: 'analyzePlantHealthPrompt',
   model: 'googleai/gemini-1.5-flash-latest',
+  tools: [productSearchTool],
   input: {schema: AnalyzePlantHealthInputSchema},
   output: {schema: AnalyzePlantHealthOutputSchema},
   config: {
-    temperature: 0.2, // Lower temperature for more deterministic and consistent responses
+    temperature: 0.2, 
   },
-  prompt: `Eres un experto botánico especializado en diagnosticar problemas de salud de las plantas y en ofrecer recomendaciones de cuidado. Tu respuesta debe ser siempre en español y en un formato JSON válido que se ajuste al esquema de salida.
+  prompt: `Eres un experto botánico y agrónomo. Tu tarea es diagnosticar problemas de salud en plantas y ofrecer recomendaciones claras. Tu respuesta debe ser siempre en español y en un formato JSON válido.
 
-Analizarás la información proporcionada para determinar si la planta está sana, diagnosticar cualquier problema y proporcionar recomendaciones de cuidado.
-{{#if photoDataUri}}
-Foto: {{media url=photoDataUri}}
-{{/if}}
-Descripción: {{{description}}}
+1.  **Analiza la Información:** Revisa la imagen (si se proporciona) y la descripción para identificar la planta y su estado de salud.
+    {{#if photoDataUri}}
+    Foto: {{media url=photoDataUri}}
+    {{/if}}
+    Descripción: {{{description}}}
 
+2.  **Completa el Diagnóstico:** Rellena los campos de identificación y diagnóstico de salud.
+    -   'isPlant': ¿Es una planta?
+    -   'commonName': Nombre común. Si no es identificable, indica "No identificable".
+    -   'latinName': Nombre en latín. Si no es identificable, indica "No identificable".
+    -   'isHealthy': ¿La planta parece sana?
+    -   'diagnosis': Diagnóstico detallado del problema.
+    -   'recommendations': Recomendaciones de cuidado. **Importante:** Para los subtítulos dentro de las recomendaciones, envuélvelos en etiquetas '<strong>' y añade una etiqueta '<br>' después de cada uno.
 
-Analiza la imagen (si se proporciona) y la descripción para rellenar los siguientes campos:
-- identification.isPlant: ¿Es la imagen de una planta? (true/false). Si no hay foto, asume que es true si la descripción tiene sentido.
-- identification.commonName: Nombre común de la planta. Si no es identificable, indica "No identificable".
-- identification.latinName: Nombre en latín de la planta. Si no es identificable, indica "No identificable".
-- healthDiagnosis.isHealthy: ¿La planta parece sana? (true/false)
-- healthDiagnosis.diagnosis: Diagnóstico detallado de la salud, incluyendo problemas.
-- healthDiagnosis.recommendations: Recomendaciones de cuidado. Para los subtítulos dentro de las recomendaciones, envuélvelos en etiquetas <strong> y añade una etiqueta <br> después de cada subtítulo. Por ejemplo: "<strong>Verificar el pH del suelo:</strong><br>El pH ideal para esta planta es...".
-`,
+3.  **Recomienda Productos (Paso Clave):**
+    -   Basándote en tu diagnóstico, determina si un producto de la tienda podría ayudar (ej. insecticida para pulgones, fungicida para oidio, fertilizante para deficiencia de nutrientes).
+    -   Si es así, **utiliza la herramienta 'productSearch'** para encontrar productos relevantes. Sé específico en tu búsqueda. Por ejemplo, si detectas hongos, usa la query "fungicida" o "control de hongos". Si ves insectos, usa "insecticida".
+    -   Incluye los productos encontrados en el campo 'recommendedProducts'. Si no encuentras o no consideras necesario ningún producto, deja este campo vacío.`,
 });
 
 const analyzePlantHealthFlow = ai.defineFlow(
