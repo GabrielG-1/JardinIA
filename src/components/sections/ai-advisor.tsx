@@ -80,7 +80,8 @@ export function AiAdvisorSection() {
   };
   
   const formatPrice = (price: string) => {
-    const number = parseInt(price, 10);
+    const parsedPrice = typeof price === 'string' ? price.replace(/\D/g, '') : price;
+    const number = parseInt(parsedPrice as string, 10);
     if (isNaN(number)) {
       return price;
     }
@@ -157,7 +158,7 @@ export function AiAdvisorSection() {
             )}
           </CardContent>
         </Card>
-      )
+      );
   };
 
   const LoadingSkeleton = () => (
@@ -242,7 +243,7 @@ export function AiAdvisorSection() {
             <CardHeader>
               <CardTitle>2. Describe el estado</CardTitle>
               <CardDescription>¿Qué síntomas has notado?</CardDescription>
-            </Header>
+            </CardHeader>
             <CardContent>
               <Textarea
                 placeholder="Ej: Las hojas se están poniendo amarillas y tienen manchas marrones..."
@@ -264,3 +265,5 @@ export function AiAdvisorSection() {
     </section>
   );
 }
+
+    
