@@ -3,33 +3,29 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // The catalog can be read by anyone, but only changed by authenticated users (admins/scripts).
-    match /catalog/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-
-    // Community tips can be read by anyone.
-    // Anyone can create a new tip.
-    // Only authenticated users can update or delete tips (for moderation).
-    match /community-tips/{tipId} {
-      allow read: if true;
-      allow create: if true;
-      allow update, delete: if request.auth != null;
-    }
     
-    // Settings can be read by anyone (e.g., for hero image).
-    // Only authenticated users can change settings.
-    match /settings/{docId} {
-        allow read: if true;
-        allow write: if request.auth != null;
+    // El catálogo de productos debe ser de lectura pública
+    // Se permite la actualización para poder cambiar las imágenes de los productos
+    match /catalog/{categoryId} {
+      allow read: if true;
+      allow update: if true; 
     }
 
-    // Explicitly deny writes to any other path to be safe.
-    match /{path=**} {
-        allow read: if path[0] == 'catalog' || path[0] == 'community-tips' || path[0] == 'settings';
-        allow write: if false;
+    // Los consejos de la comunidad pueden ser leídos por todos,
+    // y cualquiera puede crear nuevos consejos o añadir respuestas (actualizar)
+    match /community-tips/{tipId} {
+      allow read, create, update: if true;
+    }
+
+    // La configuración del Hero debe ser de lectura pública para mostrar la imagen
+    match /settings/hero {
+      allow read: if true;
+      allow update: if true;
+    }
+
+    // Por defecto, denegar el acceso a cualquier otra colección no especificada
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
