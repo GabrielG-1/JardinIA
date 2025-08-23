@@ -110,7 +110,7 @@ const analyzePlantHealthFlow = ai.defineFlow(
     outputSchema: AnalyzePlantHealthOutputSchema,
   },
   async (input) => {
-    const { response } = await analyzePlantHealthPrompt.generate(input);
+    const { response } = await analyzePlantHealthPrompt(input);
     const rawText = response.text;
     
     try {
@@ -123,3 +123,4 @@ const analyzePlantHealthFlow = ai.defineFlow(
     }
   }
 );
+
