@@ -87,22 +87,25 @@ export function AiAdvisorSection() {
     return `$${number.toLocaleString('es-CL')}`;
   };
 
-  const ProductRecommendationCard = ({ product }: { product: Product }) => (
-    <Card className="flex flex-col">
-      <CardHeader className="p-0">
-         <Image src={product.image || 'https://placehold.co/150x150.png'} alt={product.name} width={150} height={150} className="rounded-t-lg object-cover w-full aspect-square" />
-      </CardHeader>
-      <CardContent className="flex-grow p-3">
-        <h4 className="font-semibold text-sm h-10">{product.name}</h4>
-        <p className="font-bold text-primary mt-1">{formatPrice(product.price)}</p>
-      </CardContent>
-      <CardFooter className="p-3 pt-0">
-        <Button size="sm" className="w-full">
-            <ShoppingCart className="mr-2 h-4 w-4"/> Añadir
-        </Button>
-      </CardFooter>
-    </Card>
-  );
+  const ProductRecommendationCard = ({ product }: { product: Product }) => {
+    const imageUrl = product.image ? product.image : 'https://placehold.co/150x150.png';
+    return (
+        <Card className="flex flex-col">
+        <CardHeader className="p-0">
+            <Image src={imageUrl} alt={product.name} width={150} height={150} className="rounded-t-lg object-cover w-full aspect-square" />
+        </CardHeader>
+        <CardContent className="flex-grow p-3">
+            <h4 className="font-semibold text-sm h-10">{product.name}</h4>
+            <p className="font-bold text-primary mt-1">{formatPrice(product.price)}</p>
+        </CardContent>
+        <CardFooter className="p-3 pt-0">
+            <Button size="sm" className="w-full">
+                <ShoppingCart className="mr-2 h-4 w-4"/> Añadir
+            </Button>
+        </CardFooter>
+        </Card>
+    );
+  };
 
   const AnalysisResult = () => {
       const validProducts = result?.recommendedProducts?.filter(p => p && p.name) || [];
@@ -239,7 +242,7 @@ export function AiAdvisorSection() {
             <CardHeader>
               <CardTitle>2. Describe el estado</CardTitle>
               <CardDescription>¿Qué síntomas has notado?</CardDescription>
-            </CardHeader>
+            </Header>
             <CardContent>
               <Textarea
                 placeholder="Ej: Las hojas se están poniendo amarillas y tienen manchas marrones..."
@@ -261,5 +264,3 @@ export function AiAdvisorSection() {
     </section>
   );
 }
-
-    
