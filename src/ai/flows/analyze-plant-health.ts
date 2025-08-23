@@ -59,7 +59,6 @@ const productSearchTool = ai.defineTool(
     async (input) => {
         console.log(`Buscando productos con el término: ${input.query}`);
         const products = await searchProducts(input.query);
-        // Devolvemos solo los nombres de los primeros 3 productos en un string
         return products.slice(0, 3).map(p => p.name).join(', ');
     }
 );
@@ -70,30 +69,38 @@ const analyzePlantHealthPrompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash-latest',
   tools: [productSearchTool],
   input: {schema: AnalyzePlantHealthInputSchema},
-  output: {schema: AnalyzePlantHealthOutputSchema},
   config: {
     temperature: 0.2, 
   },
-  prompt: `Eres un experto botánico y agrónomo. Tu tarea es diagnosticar problemas de salud en plantas, ofrecer recomendaciones y, muy importante, recomendar productos de la tienda si es aplicable. Tu respuesta debe ser siempre en español y en un formato JSON válido.
+  prompt: `Eres un experto botánico y agrónomo. Tu única tarea es devolver un objeto JSON válido basado en la información proporcionada. La respuesta DEBE ser un JSON y nada más.
 
-1.  **Analiza la Información:** Revisa la imagen (si se proporciona) y la descripción para identificar la planta y su estado de salud.
-    {{#if photoDataUri}}
-    Foto: {{media url=photoDataUri}}
-    {{/if}}
-    Descripción: {{{description}}}
+Información de entrada:
+{{#if photoDataUri}}
+Foto: {{media url=photoDataUri}}
+{{/if}}
+Descripción: {{{description}}}
 
-2.  **Completa el Diagnóstico:** Rellena los campos de identificación y diagnóstico de salud.
-    -   'isPlant': ¿Es una planta?
-    -   'commonName': Nombre común. Si no es identificable, indica "No identificable".
-    -   'latinName': Nombre en latín. Si no es identificable, indica "No identificable".
-    -   'isHealthy': ¿La planta parece sana?
-    -   'diagnosis': Diagnóstico detallado del problema.
-    -   'recommendations': Recomendaciones de cuidado. **Importante:** Para los subtítulos dentro de las recomendaciones, envuélvelos en etiquetas '<strong>' y añade una etiqueta '<br>' después de cada uno.
+Pasos a seguir:
+1.  **Analiza la Información:** Revisa la imagen y la descripción para identificar la planta y su estado de salud.
+2.  **RECOMIENDA PRODUCTOS (Paso Obligatorio si hay un problema):**
+    -   Si la planta tiene una enfermedad (hongos, plagas, etc.) o una deficiencia nutricional, **TIENES QUE usar la herramienta 'productSearch'** para encontrar productos que puedan ayudar.
+    -   **Piensa en los mejores términos de búsqueda.** Por ejemplo, si diagnosticas 'oidio', busca términos como "oidio" o "control hongos".
+    -   Si la herramienta encuentra productos, **DEBES** añadirlos a tus recomendaciones en el JSON. Crea un subtítulo '<strong>Productos Recomendados de la Tienda:</strong><br>' y luego lista los nombres exactos de los productos que te devolvió la herramienta.
 
-3.  **RECOMIENDA PRODUCTOS (Paso Obligatorio si hay un problema):**
-    -   Basándote en tu diagnóstico, si la planta tiene una enfermedad (hongos, plagas, etc.) o una deficiencia nutricional, **TIENES QUE usar la herramienta 'productSearch'** para encontrar productos que puedan ayudar.
-    -   **Piensa en los mejores términos de búsqueda.** Por ejemplo, si diagnosticas 'oidio', busca términos como "oidio" o "control hongos". Si ves pulgones, busca "insecticida". Si falta nitrógeno, busca "fertilizante urea".
-    -   Si la herramienta encuentra productos, **DEBES** añadirlos a tus recomendaciones. Crea un subtítulo '<strong>Productos Recomendados de la Tienda:</strong><br>' y luego lista los nombres exactos de los productos que te devolvió la herramienta.`,
+3.  **Genera el JSON:** Rellena la siguiente estructura JSON con tu análisis. No añadas comentarios ni texto fuera del JSON.
+
+{
+  "identification": {
+    "isPlant": boolean, // ¿Es una planta?
+    "commonName": "string", // Nombre común. Si no es identificable, "No identificable".
+    "latinName": "string" // Nombre en latín. Si no es identificable, "No identificable".
+  },
+  "healthDiagnosis": {
+    "isHealthy": boolean, // ¿La planta parece sana?
+    "diagnosis": "string", // Diagnóstico detallado del problema.
+    "recommendations": "string" // Recomendaciones de cuidado en HTML. Usa <strong> para subtítulos y <br> para saltos de línea. Incluye aquí los productos recomendados.
+  }
+}`,
 });
 
 const analyzePlantHealthFlow = ai.defineFlow(
@@ -102,8 +109,17 @@ const analyzePlantHealthFlow = ai.defineFlow(
     inputSchema: AnalyzePlantHealthInputSchema,
     outputSchema: AnalyzePlantHealthOutputSchema,
   },
-  async input => {
-    const {output} = await analyzePlantHealthPrompt(input);
-    return output!;
+  async (input) => {
+    const { response } = await analyzePlantHealthPrompt.generate(input);
+    const rawText = response.text;
+    
+    try {
+        const parsedJson = JSON.parse(rawText);
+        return AnalyzePlantHealthOutputSchema.parse(parsedJson);
+    } catch (e) {
+        console.error("Error al parsear el JSON de la IA:", e);
+        console.error("Texto recibido de la IA:", rawText);
+        throw new Error("La respuesta de la IA no tenía un formato JSON válido.");
+    }
   }
 );
