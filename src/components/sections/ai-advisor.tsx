@@ -52,10 +52,10 @@ export function AiAdvisorSection() {
   }
 
   const handleAnalysis = async () => {
-    if (!photoDataUri) {
+    if (!photoDataUri && !description.trim()) {
       toast({
-        title: "Falta imagen",
-        description: "Por favor, sube o toma una foto de tu planta.",
+        title: "No hay información suficiente",
+        description: "Por favor, sube una foto o describe el estado de tu planta.",
         variant: "destructive",
       });
       return;
@@ -63,7 +63,7 @@ export function AiAdvisorSection() {
     setLoading(true);
     setResult(null);
     try {
-      const res = await analyzePlantHealth({ photoDataUri, description });
+      const res = await analyzePlantHealth({ photoDataUri: photoDataUri ?? undefined, description });
       setResult(res);
     } catch (err) {
       console.error(err);
@@ -86,7 +86,7 @@ export function AiAdvisorSection() {
         {!result!.identification.isPlant ? (
           <div className="flex items-center gap-2 text-lg">
             <XCircle className="text-destructive" />
-            <p>La imagen no parece ser de una planta.</p>
+            <p>La imagen o descripción no parece ser de una planta.</p>
           </div>
         ) : (
           <>
@@ -106,7 +106,7 @@ export function AiAdvisorSection() {
             <div>
               <h3 className="font-semibold text-lg flex items-center gap-2"><Dna /> Recomendaciones de Cuidado</h3>
               <div 
-                className="text-muted-foreground"
+                className="text-muted-foreground text-left"
                 dangerouslySetInnerHTML={{ __html: result!.healthDiagnosis.recommendations }}
               />
             </div>
@@ -151,7 +151,7 @@ export function AiAdvisorSection() {
         <div className="grid md:grid-cols-2 gap-8 text-left">
           <Card>
             <CardHeader>
-              <CardTitle>1. Añade una foto</CardTitle>
+              <CardTitle>1. Añade una foto (Opcional)</CardTitle>
               <CardDescription>Usa tu cámara o sube una imagen clara.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -197,7 +197,7 @@ export function AiAdvisorSection() {
           <Card>
             <CardHeader>
               <CardTitle>2. Describe el estado</CardTitle>
-              <CardDescription>¿Qué síntomas has notado? (Opcional)</CardDescription>
+              <CardDescription>¿Qué síntomas has notado?</CardDescription>
             </CardHeader>
             <CardContent>
               <Textarea
@@ -210,7 +210,7 @@ export function AiAdvisorSection() {
           </Card>
         </div>
         
-        <Button size="lg" onClick={handleAnalysis} disabled={loading} className="mt-8">
+        <Button size="lg" onClick={handleAnalysis} disabled={loading || (!photoDataUri && !description.trim())} className="mt-8">
           {loading ? "Analizando..." : "Obtener Diagnóstico"}
         </Button>
         

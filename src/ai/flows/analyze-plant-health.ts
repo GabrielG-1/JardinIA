@@ -14,6 +14,7 @@ import {z} from 'genkit';
 const AnalyzePlantHealthInputSchema = z.object({
   photoDataUri: z
     .string()
+    .optional()
     .describe(
       'A photo of a plant, as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.'
     ),
@@ -54,12 +55,14 @@ const analyzePlantHealthPrompt = ai.definePrompt({
   prompt: `Eres un experto botánico especializado en diagnosticar problemas de salud de las plantas y en ofrecer recomendaciones de cuidado. Tu respuesta debe ser siempre en español y en un formato JSON válido que se ajuste al esquema de salida.
 
 Analizarás la información proporcionada para determinar si la planta está sana, diagnosticar cualquier problema y proporcionar recomendaciones de cuidado.
-
-Descripción: {{{description}}}
+{{#if photoDataUri}}
 Foto: {{media url=photoDataUri}}
+{{/if}}
+Descripción: {{{description}}}
 
-Analiza la imagen y la descripción para rellenar los siguientes campos:
-- identification.isPlant: ¿Es la imagen de una planta? (true/false)
+
+Analiza la imagen (si se proporciona) y la descripción para rellenar los siguientes campos:
+- identification.isPlant: ¿Es la imagen de una planta? (true/false). Si no hay foto, asume que es true si la descripción tiene sentido.
 - identification.commonName: Nombre común de la planta. Si no es identificable, indica "No identificable".
 - identification.latinName: Nombre en latín de la planta. Si no es identificable, indica "No identificable".
 - healthDiagnosis.isHealthy: ¿La planta parece sana? (true/false)
