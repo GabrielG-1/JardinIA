@@ -61,7 +61,7 @@ const productSearchTool = ai.defineTool(
     {
         name: 'productSearch',
         description: 'Busca en el catálogo de la tienda productos relevantes para el cuidado de las plantas, como pesticidas, fertilizantes, etc.',
-        inputSchema: z.object({ query: z.string().describe('El tipo de producto a buscar. Por ejemplo: "insecticida", "fungicida", "fertilizante rico en nitrógeno".') }),
+        inputSchema: z.object({ query: z.string().describe('Términos de búsqueda para encontrar un producto. Por ejemplo: "hongos", "oidio", "insecticida", "fertilizante rico en nitrógeno".') }),
         outputSchema: z.array(ProductSchema),
     },
     async (input) => {
@@ -82,7 +82,7 @@ const analyzePlantHealthPrompt = ai.definePrompt({
   config: {
     temperature: 0.2, 
   },
-  prompt: `Eres un experto botánico y agrónomo. Tu tarea es diagnosticar problemas de salud en plantas y ofrecer recomendaciones claras. Tu respuesta debe ser siempre en español y en un formato JSON válido.
+  prompt: `Eres un experto botánico y agrónomo. Tu tarea es diagnosticar problemas de salud en plantas, ofrecer recomendaciones y, muy importante, recomendar productos de la tienda si es aplicable. Tu respuesta debe ser siempre en español y en un formato JSON válido.
 
 1.  **Analiza la Información:** Revisa la imagen (si se proporciona) y la descripción para identificar la planta y su estado de salud.
     {{#if photoDataUri}}
@@ -98,10 +98,11 @@ const analyzePlantHealthPrompt = ai.definePrompt({
     -   'diagnosis': Diagnóstico detallado del problema.
     -   'recommendations': Recomendaciones de cuidado. **Importante:** Para los subtítulos dentro de las recomendaciones, envuélvelos en etiquetas '<strong>' y añade una etiqueta '<br>' después de cada uno.
 
-3.  **Recomienda Productos (Paso Clave):**
-    -   Basándote en tu diagnóstico, determina si un producto de la tienda podría ayudar (ej. insecticida para pulgones, fungicida para oidio, fertilizante para deficiencia de nutrientes).
-    -   Si es así, **utiliza la herramienta 'productSearch'** para encontrar productos relevantes. Sé específico en tu búsqueda. Por ejemplo, si detectas hongos, usa la query "fungicida" o "control de hongos". Si ves insectos, usa "insecticida".
-    -   Incluye los productos encontrados en el campo 'recommendedProducts'. Si no encuentras o no consideras necesario ningún producto, deja este campo vacío.`,
+3.  **RECOMIENDA PRODUCTOS (Paso Obligatorio si hay un problema):**
+    -   Basándote en tu diagnóstico, si la planta tiene una enfermedad (hongos, plagas, etc.) o una deficiencia nutricional, **TIENES QUE usar la herramienta 'productSearch'** para encontrar productos que puedan ayudar.
+    -   **Piensa en los mejores términos de búsqueda.** Por ejemplo, si diagnosticas 'oidio', busca términos como "oidio" o "control hongos". Si ves pulgones, busca "insecticida". Si falta nitrógeno, busca "fertilizante urea".
+    -   **Es crucial que uses la herramienta para conectar tu diagnóstico con los productos de la tienda.**
+    -   Incluye los productos encontrados en el campo 'recommendedProducts'. Si la planta está sana o si, tras buscar, no encuentras ningún producto relevante, deja este campo vacío.`,
 });
 
 const analyzePlantHealthFlow = ai.defineFlow(
