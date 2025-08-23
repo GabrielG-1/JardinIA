@@ -79,8 +79,9 @@ export const addReplyToTip = async (tipId: string, reply: { name: string; advice
 export const getCommunityTips = (callback: (tips: Tip[]) => void): Unsubscribe => {
   const q = query(
     collection(db, TIPS_COLLECTION), 
-    where("isApproved", "==", true), // Only get approved tips
-    orderBy("createdAt", "desc")
+    where("isApproved", "==", true) // Only get approved tips
+    // The orderBy clause was removed to avoid needing a composite index.
+    // We will sort the results on the client-side.
   );
   
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -93,6 +94,14 @@ export const getCommunityTips = (callback: (tips: Tip[]) => void): Unsubscribe =
       }
       tips.push({ id: doc.id, ...data } as Tip);
     });
+
+    // Sort tips by creation date, newest first.
+    tips.sort((a, b) => {
+      const dateA = a.createdAt?.toDate()?.getTime() || 0;
+      const dateB = b.createdAt?.toDate()?.getTime() || 0;
+      return dateB - dateA;
+    });
+
     callback(tips);
   }, (error) => {
     console.error("Error fetching community tips:", error);
