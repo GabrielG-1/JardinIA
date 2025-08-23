@@ -25,11 +25,6 @@ const AnalyzePlantHealthInputSchema = z.object({
 export type AnalyzePlantHealthInput = z.infer<typeof AnalyzePlantHealthInputSchema>;
 
 
-const RecommendedProductSchema = z.object({
-  name: z.string().describe("El nombre del producto."),
-  price: z.string().describe("El precio del producto."),
-});
-
 const AnalyzePlantHealthOutputSchema = z.object({
   identification: z.object({
     isPlant: z.boolean().describe('Indica si la imagen es de una planta o no.'),
@@ -45,7 +40,6 @@ const AnalyzePlantHealthOutputSchema = z.object({
         'Recomendaciones para el cuidado de la planta. Usa etiquetas <strong> para resaltar los subtítulos, y añade una etiqueta <br> después de cada subtítulo. Por ejemplo: "<strong>Verificar el pH del suelo:</strong><br>El pH ideal para esta planta es..."'
       ),
   }),
-  recommendedProducts: z.array(RecommendedProductSchema).optional().describe('Una lista de productos recomendados de la tienda que pueden ayudar a tratar el problema.'),
 });
 export type AnalyzePlantHealthOutput = z.infer<typeof AnalyzePlantHealthOutputSchema>;
 
@@ -60,14 +54,13 @@ const productSearchTool = ai.defineTool(
         name: 'productSearch',
         description: 'Busca en el catálogo de la tienda productos relevantes para el cuidado de las plantas, como pesticidas, fertilizantes, etc.',
         inputSchema: z.object({ query: z.string().describe('Términos de búsqueda para encontrar un producto. Por ejemplo: "hongos", "oidio", "insecticida", "fertilizante rico en nitrógeno".') }),
-        outputSchema: z.array(RecommendedProductSchema),
+        outputSchema: z.string().describe('Una cadena de texto con los nombres de los productos más relevantes (máximo 3), separados por comas.'),
     },
     async (input) => {
         console.log(`Buscando productos con el término: ${input.query}`);
         const products = await searchProducts(input.query);
-        // Devolvemos solo los primeros 3 para no sobrecargar la respuesta
-        // y solo los campos necesarios.
-        return products.slice(0, 3).map(p => ({ name: p.name, price: p.price }));
+        // Devolvemos solo los nombres de los primeros 3 productos en un string
+        return products.slice(0, 3).map(p => p.name).join(', ');
     }
 );
 
@@ -100,8 +93,7 @@ const analyzePlantHealthPrompt = ai.definePrompt({
 3.  **RECOMIENDA PRODUCTOS (Paso Obligatorio si hay un problema):**
     -   Basándote en tu diagnóstico, si la planta tiene una enfermedad (hongos, plagas, etc.) o una deficiencia nutricional, **TIENES QUE usar la herramienta 'productSearch'** para encontrar productos que puedan ayudar.
     -   **Piensa en los mejores términos de búsqueda.** Por ejemplo, si diagnosticas 'oidio', busca términos como "oidio" o "control hongos". Si ves pulgones, busca "insecticida". Si falta nitrógeno, busca "fertilizante urea".
-    -   **Es crucial que uses la herramienta para conectar tu diagnóstico con los productos de la tienda.**
-    -   Incluye los productos encontrados en el campo 'recommendedProducts'. Si la planta está sana o si, tras buscar, no encuentras ningún producto relevante, deja este campo vacío.`,
+    -   Si la herramienta encuentra productos, **DEBES** añadirlos a tus recomendaciones. Crea un subtítulo '<strong>Productos Recomendados de la Tienda:</strong><br>' y luego lista los nombres exactos de los productos que te devolvió la herramienta.`,
 });
 
 const analyzePlantHealthFlow = ai.defineFlow(

@@ -13,11 +13,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CameraCapture } from "@/components/camera-capture";
 
-// No necesitamos el tipo Product completo aquí, solo el de la respuesta de la IA
-type RecommendedProduct = {
-    name: string;
-    price: string;
-};
 
 export function AiAdvisorSection() {
   const [photoDataUri, setPhotoDataUri] = useState<string | null>(null);
@@ -83,33 +78,9 @@ export function AiAdvisorSection() {
       setLoading(false);
     }
   };
-  
-  const formatPrice = (price: string) => {
-    const parsedPrice = typeof price === 'string' ? price.replace(/\D/g, '') : price;
-    const number = parseInt(parsedPrice as string, 10);
-    if (isNaN(number)) {
-      return price;
-    }
-    return `$${number.toLocaleString('es-CL')}`;
-  };
-
-  const ProductRecommendationCard = ({ product }: { product: RecommendedProduct }) => {
-    return (
-        <Card className="flex flex-row items-center justify-between p-3">
-            <div className="flex-grow">
-                <h4 className="font-semibold text-sm">{product.name}</h4>
-                <p className="font-bold text-primary mt-1">{formatPrice(product.price)}</p>
-            </div>
-             <Button size="sm" className="shrink-0">
-                <ShoppingCart className="mr-2 h-4 w-4"/> Añadir
-            </Button>
-        </Card>
-    );
-  };
 
   const AnalysisResult = () => {
     if (!result) return null;
-    const validProducts = result.recommendedProducts?.filter(p => p && p.name) || [];
 
     return (
       <Card className="mt-8 text-left">
@@ -144,16 +115,6 @@ export function AiAdvisorSection() {
                   dangerouslySetInnerHTML={{ __html: result.healthDiagnosis.recommendations }}
                 />
               </div>
-              {validProducts.length > 0 && (
-                   <div>
-                      <h3 className="font-semibold text-lg flex items-center gap-2"><ShoppingCart /> Productos Recomendados</h3>
-                      <div className="space-y-3 mt-4">
-                          {validProducts.map((product) => (
-                              <ProductRecommendationCard key={product.name} product={product} />
-                          ))}
-                      </div>
-                  </div>
-              )}
             </>
           )}
         </CardContent>
