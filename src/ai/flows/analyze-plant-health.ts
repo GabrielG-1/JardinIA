@@ -69,10 +69,14 @@ const analyzePlantHealthPrompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash-latest',
   tools: [productSearchTool],
   input: {schema: AnalyzePlantHealthInputSchema},
+  output: {
+    schema: AnalyzePlantHealthOutputSchema,
+    format: 'json'
+  },
   config: {
     temperature: 0.2, 
   },
-  prompt: `Eres un experto botánico y agrónomo. Tu única tarea es devolver un objeto JSON válido basado en la información proporcionada. La respuesta DEBE ser un JSON y nada más.
+  prompt: `Eres un experto botánico y agrónomo. Tu única tarea es devolver un objeto JSON válido basado en la información proporcionada.
 
 Información de entrada:
 {{#if photoDataUri}}
@@ -87,20 +91,7 @@ Pasos a seguir:
     -   **Piensa en los mejores términos de búsqueda.** Por ejemplo, si diagnosticas 'oidio', busca términos como "oidio" o "control hongos".
     -   Si la herramienta encuentra productos, **DEBES** añadirlos a tus recomendaciones en el JSON. Crea un subtítulo '<strong>Productos Recomendados de la Tienda:</strong><br>' y luego lista los nombres exactos de los productos que te devolvió la herramienta.
 
-3.  **Genera el JSON:** Rellena la siguiente estructura JSON con tu análisis. No añadas comentarios ni texto fuera del JSON.
-
-{
-  "identification": {
-    "isPlant": boolean, // ¿Es una planta?
-    "commonName": "string", // Nombre común. Si no es identificable, "No identificable".
-    "latinName": "string" // Nombre en latín. Si no es identificable, "No identificable".
-  },
-  "healthDiagnosis": {
-    "isHealthy": boolean, // ¿La planta parece sana?
-    "diagnosis": "string", // Diagnóstico detallado del problema.
-    "recommendations": "string" // Recomendaciones de cuidado en HTML. Usa <strong> para subtítulos y <br> para saltos de línea. Incluye aquí los productos recomendados.
-  }
-}`,
+3.  **Genera el JSON:** Rellena la estructura JSON solicitada. No añadas comentarios ni texto fuera del JSON.`,
 });
 
 const analyzePlantHealthFlow = ai.defineFlow(
@@ -111,14 +102,17 @@ const analyzePlantHealthFlow = ai.defineFlow(
   },
   async (input) => {
     const response = await analyzePlantHealthPrompt(input);
-    const rawText = response.text;
+    const output = response.output();
+
+    if (!output) {
+      throw new Error("La respuesta de la IA no tenía un formato válido.");
+    }
     
     try {
-        const parsedJson = JSON.parse(rawText);
-        return AnalyzePlantHealthOutputSchema.parse(parsedJson);
+        return AnalyzePlantHealthOutputSchema.parse(output);
     } catch (e) {
         console.error("Error al parsear el JSON de la IA:", e);
-        console.error("Texto recibido de la IA:", rawText);
+        console.error("Respuesta recibida de la IA:", output);
         throw new Error("La respuesta de la IA no tenía un formato JSON válido.");
     }
   }
