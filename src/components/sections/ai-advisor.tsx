@@ -89,7 +89,7 @@ export function AiAdvisorSection() {
   };
 
   const ProductRecommendationCard = ({ product }: { product: Product }) => {
-    const imageUrl = product.image ? product.image : 'https://placehold.co/150x150.png';
+    const imageUrl = product && product.image ? product.image : 'https://placehold.co/150x150.png';
     return (
         <Card className="flex flex-col">
         <CardHeader className="p-0">
@@ -109,56 +109,57 @@ export function AiAdvisorSection() {
   };
 
   const AnalysisResult = () => {
-      const validProducts = result?.recommendedProducts?.filter(p => p && p.name) || [];
+    if (!result) return null;
+    const validProducts = result.recommendedProducts?.filter(p => p && p.name) || [];
 
-      return (
-        <Card className="mt-8 text-left">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Bot /> Diagnóstico de la IA</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {!result!.identification.isPlant ? (
-              <div className="flex items-center gap-2 text-lg">
-                <XCircle className="text-destructive" />
-                <p>La imagen o descripción no parece ser de una planta.</p>
+    return (
+      <Card className="mt-8 text-left">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Bot /> Diagnóstico de la IA</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {!result.identification.isPlant ? (
+            <div className="flex items-center gap-2 text-lg">
+              <XCircle className="text-destructive" />
+              <p>La imagen o descripción no parece ser de una planta.</p>
+            </div>
+          ) : (
+            <>
+              <div>
+                <h3 className="font-semibold text-lg flex items-center gap-2"><Leaf /> Identificación</h3>
+                <p><strong>Nombre Común:</strong> {result.identification.commonName}</p>
+                <p><strong>Nombre Latino:</strong> {result.identification.latinName}</p>
               </div>
-            ) : (
-              <>
-                <div>
-                  <h3 className="font-semibold text-lg flex items-center gap-2"><Leaf /> Identificación</h3>
-                  <p><strong>Nombre Común:</strong> {result!.identification.commonName}</p>
-                  <p><strong>Nombre Latino:</strong> {result!.identification.latinName}</p>
+              <div>
+                <h3 className="font-semibold text-lg flex items-center gap-2"><Stethoscope /> Diagnóstico de Salud</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  {result.healthDiagnosis.isHealthy ? <CheckCircle className="text-primary" /> : <XCircle className="text-destructive" />}
+                  <p className="font-bold">{result.healthDiagnosis.isHealthy ? "Planta Saludable" : "Se Detectaron Problemas"}</p>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-lg flex items-center gap-2"><Stethoscope /> Diagnóstico de Salud</h3>
-                  <div className="flex items-center gap-2 mb-2">
-                    {result!.healthDiagnosis.isHealthy ? <CheckCircle className="text-primary" /> : <XCircle className="text-destructive" />}
-                    <p className="font-bold">{result!.healthDiagnosis.isHealthy ? "Planta Saludable" : "Se Detectaron Problemas"}</p>
+                <p className="text-muted-foreground">{result.healthDiagnosis.diagnosis}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg flex items-center gap-2"><Dna /> Recomendaciones de Cuidado</h3>
+                <div 
+                  className="text-muted-foreground text-left"
+                  dangerouslySetInnerHTML={{ __html: result.healthDiagnosis.recommendations }}
+                />
+              </div>
+              {validProducts.length > 0 && (
+                   <div>
+                      <h3 className="font-semibold text-lg flex items-center gap-2"><ShoppingCart /> Productos Recomendados</h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+                          {validProducts.map((product) => (
+                              <ProductRecommendationCard key={product.name} product={product} />
+                          ))}
+                      </div>
                   </div>
-                  <p className="text-muted-foreground">{result!.healthDiagnosis.diagnosis}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg flex items-center gap-2"><Dna /> Recomendaciones de Cuidado</h3>
-                  <div 
-                    className="text-muted-foreground text-left"
-                    dangerouslySetInnerHTML={{ __html: result!.healthDiagnosis.recommendations }}
-                  />
-                </div>
-                {validProducts.length > 0 && (
-                     <div>
-                        <h3 className="font-semibold text-lg flex items-center gap-2"><ShoppingCart /> Productos Recomendados</h3>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
-                            {validProducts.map((product) => (
-                                <ProductRecommendationCard key={product.name} product={product} />
-                            ))}
-                        </div>
-                    </div>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
-      );
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+    );
   };
 
   const LoadingSkeleton = () => (
@@ -265,5 +266,3 @@ export function AiAdvisorSection() {
     </section>
   );
 }
-
-    
