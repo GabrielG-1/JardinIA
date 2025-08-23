@@ -8,6 +8,7 @@ import {
   query,
   updateDoc,
   type Unsubscribe,
+  getDoc,
 } from "firebase/firestore";
 import type { LucideIcon } from "lucide-react";
 
@@ -75,12 +76,42 @@ export const searchProducts = async (searchTerm: string): Promise<Product[]> => 
 }
 
 
-export const updateCategoryProducts = async (categoryId: string, products: Product[]) => {
+/**
+ * Updates the image URL for a specific product within a category.
+ * @param categoryId The ID of the category containing the product.
+ * @param productName The name of the product to update.
+ * @param newImageUrl The new image URL for the product.
+ */
+export const updateProductImage = async (categoryId: string, productName: string, newImageUrl: string) => {
     try {
         const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
-        await updateDoc(categoryRef, { products });
+        const categorySnap = await getDoc(categoryRef);
+
+        if (!categorySnap.exists()) {
+            throw new Error(`Category with id ${categoryId} not found.`);
+        }
+        
+        const categoryData = categorySnap.data() as Omit<Category, 'id'>;
+        const products = categoryData.products || [];
+
+        const productIndex = products.findIndex(p => p.name === productName);
+
+        if (productIndex === -1) {
+            throw new Error(`Product with name ${productName} not found in category ${categoryId}.`);
+        }
+
+        // Create a new array with the updated product
+        const updatedProducts = [
+            ...products.slice(0, productIndex),
+            { ...products[productIndex], image: newImageUrl },
+            ...products.slice(productIndex + 1),
+        ];
+
+        // Update the 'products' field in the document
+        await updateDoc(categoryRef, { products: updatedProducts });
+
     } catch (error) {
-        console.error("Error updating category products: ", error);
+        console.error("Error updating product image: ", error);
         throw error;
     }
 }

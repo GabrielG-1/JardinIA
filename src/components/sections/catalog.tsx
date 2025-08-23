@@ -9,7 +9,7 @@ import { FlaskConical, Sprout, Package, Wheat, Leaf, type LucideIcon, Upload, Al
 import React, { useRef, useState, useEffect } from "react";
 import { uploadProductImage } from "@/services/storage-service";
 import { useToast } from "@/hooks/use-toast";
-import { getCatalog, updateCategoryProducts, type Category, type Product } from "@/services/catalog-service";
+import { getCatalog, updateProductImage, type Category, type Product } from "@/services/catalog-service";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const icons: { [key: string]: LucideIcon } = {
@@ -29,7 +29,7 @@ const icons: { [key: string]: LucideIcon } = {
 };
 
 const formatPrice = (price: string) => {
-    const number = parseInt(price, 10);
+    const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
     if (isNaN(number)) {
         return price; // Return original if not a number
     }
@@ -39,11 +39,9 @@ const formatPrice = (price: string) => {
 function ProductCard({ 
   product, 
   categoryId,
-  onImageChange 
 }: { 
   product: Product, 
   categoryId: string,
-  onImageChange: (productName: string, newImageUrl: string) => Promise<void> 
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -56,7 +54,9 @@ function ProductCard({
       try {
         const safeProductName = product.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
         const downloadURL = await uploadProductImage(file, safeProductName);
-        await onImageChange(product.name, downloadURL);
+        
+        await updateProductImage(categoryId, product.name, downloadURL);
+
         toast({
           title: "Imagen actualizada",
           description: `La imagen de ${product.name} se ha cambiado correctamente.`,
@@ -149,42 +149,6 @@ export function CatalogSection() {
       setLoading(false);
     }
   }, []);
-
-  const handleImageChange = async (categoryId: string, productName: string, newImageUrl: string) => {
-    const category = catalogData.find(c => c.id === categoryId);
-    if (!category) return;
-
-    const updatedProducts = category.products.map(product => {
-      if (product.name === productName) {
-        return { ...product, image: newImageUrl };
-      }
-      return product;
-    });
-    
-    // Optimistic UI update
-    setCatalogData(prevData =>
-      prevData.map(c => 
-        c.id === categoryId ? { ...c, products: updatedProducts } : c
-      )
-    );
-
-    // Persist to Firestore
-    try {
-      await updateCategoryProducts(categoryId, updatedProducts);
-    } catch (e) {
-        // Revert UI change on error
-        setCatalogData(prevData =>
-            prevData.map(c => 
-                c.id === categoryId ? category : c
-            )
-        );
-        toast({
-            title: "Error al guardar la imagen",
-            description: "No se pudo guardar la imagen en la base de datos.",
-            variant: "destructive"
-        })
-    }
-  };
   
   const { toast } = useToast();
 
@@ -249,7 +213,6 @@ export function CatalogSection() {
                       key={product.name} 
                       product={product} 
                       categoryId={category.id}
-                      onImageChange={(productName, newImageUrl) => handleImageChange(category.id, productName, newImageUrl)}
                     />
                   ))}
                 </div>
