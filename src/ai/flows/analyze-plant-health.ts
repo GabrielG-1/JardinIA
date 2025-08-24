@@ -6,12 +6,12 @@
  *
  * Copy/paste into Firebase/Genkit project. Expects:
  *  - '@/ai/genkit' to export a configured `ai`
- *  - '@/services/catalog-service' to export `searchProducts(query: string): Promise<Product[]>`
+ *  - '@/services/catalog-service' to export `getAllProducts(): Promise<CatalogProduct[]>`
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { searchProducts } from '@/services/catalog-service';
+import { getAllProducts } from '@/services/catalog-service';
 
 /* ----------------------------- Input schema ----------------------------- */
 
@@ -59,101 +59,42 @@ const AnalyzePlantHealthOutputSchema = z.object({
       ),
   }),
   // Siempre presente (array vacío si no hay coincidencias).
-  recommendedProducts: z.array(ProductSchema),
+  recommendedProducts: z.array(ProductSchema).default([]),
 });
 export type AnalyzePlantHealthOutput = z.infer<typeof AnalyzePlantHealthOutputSchema>;
 
-/* ---------------------------- Helper functions -------------------------- */
-
-function normalize(q: string) {
-  return q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-}
-
-function expandQuery(q: string): string[] {
-  const nq = normalize(q);
-  const map: Record<string, string[]> = {
-    oidio: ['oidio', 'hongos', 'fungicida', 'azufre', 'bicarbonato'],
-    pulgones: ['pulgones', 'pulgon', 'insecticida', 'jabon potasico', 'neem'],
-    'arana roja': ['arana roja', 'acaro', 'acaricida', 'mite', 'jabon'],
-    mildiu: ['mildiu', 'fungicida', 'cobre'],
-    cochinilla: ['cochinilla', 'insecticida', 'aceite', 'jabon'],
-    'mosca blanca': ['mosca blanca', 'insecticida', 'neem', 'trampa', 'jabon'],
-    'deficiencia de nitrogeno': ['nitrogeno', 'fertilizante', 'n', 'abono', 'urea'],
-    'deficiencia de fosforo': ['fosforo', 'fertilizante', 'p', 'fosfato'],
-    'deficiencia de potasio': ['potasio', 'fertilizante', 'k', 'salkitre'],
-  };
-  
-  const key = Object.keys(map).find(k => nq.includes(k));
-  if (key) return map[key];
-
-  return [nq, ...nq.split(/\s+/).filter(Boolean)];
-}
-
-/* --------------------------------- Tool --------------------------------- */
-/** The LLM will call this ONCE. Internally we widen recall with synonyms. */
-const productSearchTool = ai.defineTool(
-  {
-    name: 'productSearch',
-    description:
-      'Busca en el catálogo productos relevantes (pesticidas, fungicidas, fertilizantes) basándose en el diagnóstico.',
-    inputSchema: z.object({
-      query: z.string().describe('Usa el diagnóstico como término principal.'),
-    }),
-    outputSchema: z.array(ProductSchema),
-  },
-  async (input) => {
-    const terms = expandQuery(input.query);
-    console.log('productSearch terms =>', terms);
-
-    const seen = new Set<string>();
-    const merged: CatalogProduct[] = [];
-
-    for (const t of terms) {
-      const res = await searchProducts(t); // tu función a Firestore
-      for (const p of res ?? []) {
-        const key = (p as any).id ?? `${(p as any).name}|${(p as any).image ?? ''}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
-
-        merged.push({
-          id: (p as any).id,
-          name: (p as any).name,
-          price: String((p as any).price ?? ''),
-          image: (p as any).image ?? '',
-          aiHint: (p as any).aiHint,
-        });
-      }
-      if (merged.length >= 3) break; // limita a 3
-    }
-
-    return merged.slice(0, 3);
-  }
-);
 
 /* -------------------------------- Prompt -------------------------------- */
 
 const analyzePlantHealthPrompt = ai.definePrompt({
   name: 'analyzePlantHealthPrompt',
   model: 'googleai/gemini-1.5-pro-latest',
-  tools: [productSearchTool],
   output: { schema: AnalyzePlantHealthOutputSchema, format: 'json' },
-  config: { temperature: 0.2 },
-  prompt: `Eres un experto botánico y agrónomo. Tu principal objetivo es ayudar al usuario a tener plantas sanas, ofreciendo diagnósticos precisos y recomendaciones honestas. La venta es secundaria. Tu única tarea es devolver un objeto JSON VÁLIDO que siga el esquema proporcionado. Sigue estos pasos:
+  config: { temperature: 0.1 },
+  prompt: `Eres un experto botánico y agrónomo. Tu objetivo es ayudar a los usuarios a diagnosticar problemas en sus plantas y recomendar soluciones REALES de nuestro catálogo. Tu única tarea es devolver un objeto JSON VÁLIDO que siga el esquema proporcionado.
 
-1) Analiza la entrada:
+Este es el catálogo completo de productos disponibles en la tienda. Úsalo como tu única fuente de verdad para las recomendaciones:
+--- INICIO DEL CATÁLOGO ---
+{{{catalog}}}
+--- FIN DEL CATÁLOGO ---
+
+Sigue estos pasos estrictamente:
+
+1) Analiza la entrada del usuario:
    - Foto: {{#if photoDataUri}}{{media url=photoDataUri}}{{else}}No proporcionada{{/if}}
    - Descripción: {{{description}}}
 
-2) Completa 'identification' y 'healthDiagnosis'.
-   - 'diagnosis' debe ser MUY breve (ej: "Oídio", "Pulgones", "Deficiencia de nitrógeno").
-   - 'recommendations' en HTML simple, explicando la causa y solución. Usa subtítulos en <strong> y un <br> tras cada subtítulo.
+2) Completa los campos 'identification' y 'healthDiagnosis'.
+   - 'diagnosis' debe ser muy breve y directo (ej: "Oídio", "Pulgones", "Falta de nitrógeno").
+   - 'recommendations' debe ser una guía clara y útil en formato HTML simple. Usa <strong> para los subtítulos y un <br> después de cada uno.
 
-3) Búsqueda de productos (SOLO si 'isHealthy' = false):
-   - Usa la herramienta 'productSearch' UNA SOLA VEZ. Para el parámetro 'query', usa tu 'diagnosis' como el valor. Por ejemplo, si el diagnóstico es "Pulgones", llama a la herramienta como productSearch({ query: "Pulgones" }).
-   - El campo 'recommendedProducts' en tu respuesta DEBE contener única y exclusivamente la lista de productos que te devuelve la herramienta. NO PUEDES inventar, añadir o modificar productos.
-   - Si la herramienta no devuelve productos o si la planta está sana, el campo 'recommendedProducts' debe ser un array vacío: [].
+3) Recomienda productos (SOLO si 'isHealthy' es falso).
+   - Examina el catálogo que te proporcioné arriba.
+   - Basándote en tu diagnóstico, selecciona entre 1 y 3 de los productos MÁS RELEVANTES del catálogo.
+   - El campo 'recommendedProducts' de tu respuesta DEBE contener ÚNICA Y EXCLUSIVAMENTE los productos que has seleccionado de la lista. NO PUEDES inventar, añadir, modificar o alucinar ningún producto o detalle del producto. Los datos (nombre, precio, etc.) deben ser idénticos a los del catálogo.
+   - Si NINGÚN producto del catálogo es adecuado para el diagnóstico, o si la planta está sana, el campo 'recommendedProducts' DEBE ser un array vacío: [].
 
-4) Devuelve SOLO el JSON final completo, sin texto adicional.`,
+4. Revisa tu respuesta final. Debe ser únicamente un objeto JSON válido, sin ningún texto, explicación o nota adicional fuera del JSON.`,
 });
 
 /* --------------------------------- Flow --------------------------------- */
@@ -165,16 +106,45 @@ const analyzePlantHealthFlow = ai.defineFlow(
     outputSchema: AnalyzePlantHealthOutputSchema,
   },
   async (input) => {
-    const { output } = await analyzePlantHealthPrompt(input);
-    if (!output) throw new Error('La IA no devolvió salida.');
+    // 1. Cargar el catálogo completo de productos.
+    const allProducts = await getAllProducts();
+    const catalogString = allProducts.map(p => `- ${p.name} (Precio: ${p.price})`).join('\n');
+    
+    // 2. Llamar a la IA con el input del usuario y el catálogo inyectado en el prompt.
+    const { output } = await analyzePlantHealthPrompt({
+      ...input,
+      catalog: catalogString,
+    });
 
-    // Asegura que recommendedProducts exista siempre como un array.
-    if (!output.recommendedProducts || !Array.isArray(output.recommendedProducts)) {
-      output.recommendedProducts = [];
+    if (!output) {
+        throw new Error('La IA no devolvió una respuesta.');
     }
     
-    // Valida y devuelve la salida final.
-    return AnalyzePlantHealthOutputSchema.parse(output);
+    // 3. Limpieza y validación final.
+    // Aunque el prompt es estricto, nos aseguramos que el output cumple el esquema.
+    const finalOutput: AnalyzePlantHealthOutput = {
+      identification: {
+        isPlant: output.identification?.isPlant ?? false,
+        commonName: output.identification?.commonName ?? 'No identificado',
+        latinName: output.identification?.latinName ?? '',
+      },
+      healthDiagnosis: {
+        isHealthy: output.healthDiagnosis?.isHealthy ?? true,
+        diagnosis: output.healthDiagnosis?.diagnosis ?? 'No se pudo determinar',
+        recommendations: output.healthDiagnosis?.recommendations ?? 'No hay recomendaciones.',
+      },
+      recommendedProducts: [], // Empezamos con un array vacío
+    };
+
+    // Si la IA recomendó productos, los buscamos en nuestro catálogo original 
+    // para asegurarnos de que son 100% reales y tienen todos los datos correctos (imagen, id, etc.).
+    if (output.recommendedProducts && output.recommendedProducts.length > 0) {
+        const productNamesFromAI = new Set(output.recommendedProducts.map(p => p.name));
+        const verifiedProducts = allProducts.filter(p => productNamesFromAI.has(p.name));
+        finalOutput.recommendedProducts = verifiedProducts.slice(0, 3);
+    }
+    
+    return AnalyzePlantHealthOutputSchema.parse(finalOutput);
   }
 );
 

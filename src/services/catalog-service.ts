@@ -15,6 +15,7 @@ import type { LucideIcon } from "lucide-react";
 const CATALOG_COLLECTION = "catalog";
 
 export type Product = {
+  id?: string;
   name: string;
   price: string;
   image: string;
@@ -51,31 +52,45 @@ export const getCatalog = (callback: (categories: Category[]) => void): Unsubscr
   return unsubscribe;
 };
 
+
+/**
+ * Retrieves all products from all categories in the catalog.
+ * @returns A promise that resolves to a flat array of all products.
+ */
+export const getAllProducts = async (): Promise<Product[]> => {
+  const q = query(collection(db, CATALOG_COLLECTION));
+  const querySnapshot = await getDocs(q);
+  const allProducts: Product[] = [];
+  
+  querySnapshot.forEach((doc) => {
+      const category = doc.data() as Omit<Category, 'id'>;
+      if (Array.isArray(category.products)) {
+          // Add categoryId to each product for potential future use
+          const productsWithCategory = category.products.map(p => ({ ...p, categoryId: doc.id, id: p.name }));
+          allProducts.push(...productsWithCategory);
+      }
+  });
+
+  return allProducts;
+}
+
 /**
  * Searches for products across all categories whose name includes the query term.
  * @param query - The term to search for in product names.
  * @returns A promise that resolves to an array of matching products.
  */
-export const searchProducts = async (query: string): Promise<Product[]> => {
-    if (!query) return [];
+export const searchProducts = async (queryTerm: string): Promise<Product[]> => {
+    if (!queryTerm) return [];
     
-    const lowercasedQuery = query.toLowerCase();
+    const lowercasedQuery = queryTerm.toLowerCase().trim();
     
-    const q = query(collection(db, CATALOG_COLLECTION));
-    const querySnapshot = await getDocs(q);
-    const allProducts: Product[] = [];
-    
-    querySnapshot.forEach((doc) => {
-        const category = doc.data() as Omit<Category, 'id'>;
-        if (Array.isArray(category.products)) {
-            const matchingProducts = category.products.filter(product => 
-                product.name.toLowerCase().includes(lowercasedQuery)
-            );
-            allProducts.push(...matchingProducts);
-        }
-    });
+    const allProducts = await getAllProducts();
 
-    return allProducts;
+    const matchingProducts = allProducts.filter(product => 
+        product.name.toLowerCase().includes(lowercasedQuery)
+    );
+
+    return matchingProducts;
 }
 
 
