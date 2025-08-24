@@ -74,7 +74,7 @@ function expandQuery(q: string): string[] {
   const map: Record<string, string[]> = {
     oidio: ['oidio', 'hongos', 'fungicida', 'azufre', 'bicarbonato'],
     pulgones: ['pulgones', 'pulgon', 'insecticida', 'jabon potasico', 'neem'],
-    'arana roja': ['arana roja', 'acaro', 'acaricida', 'mite'],
+    'arana roja': ['arana roja', 'acaro', 'acaricida', 'mite', 'insecticida', 'jabon potasico'],
     mildiu: ['mildiu', 'fungicida', 'cobre'],
     cochinilla: ['cochinilla', 'insecticida', 'aceite'],
     'mosca blanca': ['mosca blanca', 'insecticida', 'neem', 'trampa'],
