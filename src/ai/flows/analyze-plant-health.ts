@@ -102,13 +102,14 @@ const analyzePlantHealthFlow = ai.defineFlow(
   },
   async (input) => {
     const response = await analyzePlantHealthPrompt(input);
-    const output = response.output();
+    const output = response.output;
 
     if (!output) {
       throw new Error("La respuesta de la IA no tenía un formato válido.");
     }
     
     try {
+        // La salida ya debería ser un JSON válido gracias a "format: 'json'"
         return AnalyzePlantHealthOutputSchema.parse(output);
     } catch (e) {
         console.error("Error al parsear el JSON de la IA:", e);
