@@ -5,12 +5,12 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAMH8T42vojOtWAuC1MNHiCLds2J9KW0ps",
-  authDomain: "jardnia.firebaseapp.com",
-  projectId: "jardnia",
-  storageBucket: "jardnia.appspot.com",
-  messagingSenderId: "503843993979",
-  appId: "1:503843993979:web:3e217ea66688548147a5de"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
@@ -24,7 +24,7 @@ if (!getApps().length) {
 const db = getFirestore(app);
 // Explicitly pass the bucket URL to ensure it points to the desired one
 // in the free tier region. The URL comes from the Firebase Console Storage section.
-const storage = getStorage(app, "gs://jardnia.firebasestorage.app");
+const storage = getStorage(app, `gs://${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}`);
 const auth = getAuth(app);
 
 
