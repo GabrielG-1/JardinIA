@@ -51,32 +51,64 @@ export const getCatalog = (callback: (categories: Category[]) => void): Unsubscr
   return unsubscribe;
 };
 
+const searchMap: Record<string, string[]> = {
+    pulgones: ['pulgones', 'insecticida', 'tox', 'kil', 'dimetoato', 'jab'],
+    oidio: ['oidio', 'hongo', 'fungicida', 'cobre'],
+    'deficiencia de nitrogeno': ['nitrogeno', 'urea', 'fertilizante', 'abono', '11-30-11'],
+    'arana roja': ['arana roja', 'acaro', 'acaricida', 'mite', 'insecticida', 'jabon potasico'],
+    'cochinilla algodonosa': ['cochinilla', 'insecticida', 'aceite', 'jabon potasico'],
+    'mosca blanca': ['mosca blanca', 'insecticida', 'neem', 'trampa'],
+};
+
 /**
- * Searches for products across all categories.
- * @param searchTerm - The term to search for in product names.
+ * Expands a simple query into a list of search terms based on a predefined map.
+ * @param query The simple query (e.g., 'pulgones').
+ * @returns A list of terms to search for.
+ */
+export const expandQuery = (query: string): string[] => {
+    const lowercasedQuery = query.toLowerCase();
+    
+    // Find the key in the searchMap that the query contains
+    const matchingKey = Object.keys(searchMap).find(key => lowercasedQuery.includes(key));
+
+    if (matchingKey) {
+        return searchMap[matchingKey];
+    }
+    
+    // Fallback to the original query if no match is found
+    return [lowercasedQuery];
+};
+
+
+/**
+ * Searches for products across all categories using a list of search terms.
+ * This is a basic implementation of full-text search.
+ * @param searchTerms - The terms to search for in product names.
  * @returns A promise that resolves to an array of matching products.
  */
-export const searchProducts = async (searchTerm: string): Promise<Product[]> => {
+export const searchProducts = async (searchTerms: string[]): Promise<Product[]> => {
     const q = query(collection(db, CATALOG_COLLECTION));
     const querySnapshot = await getDocs(q);
     const allProducts: Product[] = [];
-    const lowercasedSearchTerm = searchTerm.toLowerCase();
-
-    // Map of diagnostics to more generic search terms
-    const searchMap: { [key: string]: string[] } = {
-        'insecticida': ['tox', 'kil', 'dimetoato', 'jab', 'insecticida'],
-        'fungicida': ['hongos', 'cobre', 'oidio', 'fungicida'],
-        'fertilizante': ['urea', 'mezcla', 'fosfato', 'salkitre', 'abono', 'fertilizante'],
-    };
-
-    const searchTerms = searchMap[lowercasedSearchTerm] || [lowercasedSearchTerm];
+    
+    const uniqueProducts = new Set<string>();
 
     querySnapshot.forEach((doc) => {
         const category = doc.data() as Omit<Category, 'id'>;
         if (Array.isArray(category.products)) {
-            const matchingProducts = category.products.filter(product => 
-                searchTerms.some(term => product.name.toLowerCase().includes(term))
-            );
+            const matchingProducts = category.products.filter(product => {
+                const productNameLower = product.name.toLowerCase();
+                // If product already added, skip it
+                if (uniqueProducts.has(productNameLower)) {
+                    return false;
+                }
+                // Check if product name includes any of the search terms
+                if (searchTerms.some(term => productNameLower.includes(term))) {
+                    uniqueProducts.add(productNameLower);
+                    return true;
+                }
+                return false;
+            });
             allProducts.push(...matchingProducts);
         }
     });

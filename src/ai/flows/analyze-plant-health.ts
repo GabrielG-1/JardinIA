@@ -11,7 +11,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { searchProducts } from '@/services/catalog-service';
+import { searchProducts, expandQuery } from '@/services/catalog-service';
 
 /* ----------------------------- Input schema ----------------------------- */
 
@@ -70,15 +70,20 @@ const productSearchTool = ai.defineTool(
   {
     name: 'productSearch',
     description:
-      'Busca en el catálogo productos relevantes (pesticidas, fungicidas, fertilizantes) basándose en un término de búsqueda como una enfermedad o plaga.',
+      'Busca en el catálogo productos relevantes (pesticidas, fungicidas, fertilizantes) basándose en un diagnóstico de enfermedad o plaga.',
     inputSchema: z.object({
-      query: z.string().describe('El término de búsqueda, por ejemplo: "insecticida", "fungicida", "fertilizante".'),
+      query: z.string().describe('El término de búsqueda, por ejemplo: "pulgones", "oidio", "deficiencia de nitrogeno".'),
     }),
     outputSchema: z.array(ProductSchema),
   },
   async (input) => {
     console.log('Buscando productos para el término:', input.query);
-    const results = await searchProducts(input.query); // This now calls your Firestore full-text search directly
+    // 1. Expand the query to get more search terms
+    const searchTerms = expandQuery(input.query);
+    console.log(`Términos de búsqueda expandidos: ${searchTerms.join(', ')}`);
+
+    // 2. Search for products using all the terms
+    const results = await searchProducts(searchTerms);
     
     // We limit to 3 results to not overwhelm the user or the context window.
     return results.slice(0, 3);
@@ -104,8 +109,7 @@ const analyzePlantHealthPrompt = ai.definePrompt({
    - 'recommendations' en HTML simple, explicando la causa y solución. Usa subtítulos en <strong> y un <br> tras cada subtítulo.
 
 3) Búsqueda de productos (SOLO si 'isHealthy' = false):
-   - Basándote en el 'diagnosis', determina el término de búsqueda más genérico y relevante para encontrar un producto. Por ejemplo, si el diagnóstico es 'Pulgones' o 'Mosca blanca', el término de búsqueda debe ser 'insecticida'. Si es 'Oídio', debe ser 'fungicida'. Si es una deficiencia, 'fertilizante'.
-   - Usa la herramienta 'productSearch' UNA SOLA VEZ con ese término de búsqueda genérico.
+   - Usa la herramienta 'productSearch' UNA SOLA VEZ con tu 'diagnosis' como el 'query'.
    - El campo 'recommendedProducts' en tu respuesta DEBE contener única y exclusivamente la lista de productos que te devuelve la herramienta. NO PUEDES inventar, añadir o modificar productos.
    - Si la herramienta no devuelve productos o si la planta está sana, el campo 'recommendedProducts' debe ser un array vacío: [].
 
