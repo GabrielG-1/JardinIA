@@ -1,0 +1,25 @@
+# Guía de Despliegue
+
+¡Felicidades! Tu aplicación está lista para ser publicada.
+
+Antes de desplegar, es crucial que configures tus "secretos" (claves de API, contraseñas) de forma segura en tu proveedor de hosting. No deben estar en el código.
+
+## Configuración de Variables de Entorno
+
+Tu aplicación necesita las siguientes variables de entorno para funcionar correctamente en producción:
+
+1.  **`GEMINI_API_KEY`**: Tu clave de API para los servicios de Google AI (Gemini).
+2.  **`SMTP_HOST`**: El servidor de tu proveedor de correo (ej: `smtp.gmail.com`).
+3.  **`SMTP_PORT`**: El puerto de tu servidor de correo (ej: `587`).
+4.  **`SMTP_USER`**: Tu nombre de usuario o correo electrónico para enviar emails.
+5.  **`SMTP_PASS`**: La contraseña de tu correo o una "contraseña de aplicación" específica.
+6.  **`CONTACT_FORM_RECIPIENT`**: El correo que recibirá los mensajes del formulario de contacto.
+
+### ¿Cómo configurarlas?
+
+Debes añadir estas variables en la sección de configuración de tu proveedor de hosting. Busca una opción como "Environment Variables" o "Secret Management".
+
+- **Para Firebase App Hosting:** Puedes añadirlas durante el proceso de despliegue o en la configuración de tu backend de App Hosting en la consola de Firebase.
+- **Para otros servicios (Vercel, Netlify, etc.):** Ve a la configuración de tu proyecto en su respectivo dashboard y busca la sección de "Environment Variables".
+
+Una vez que hayas configurado estas variables en tu hosting, ¡puedes desplegar tu aplicación con seguridad!
