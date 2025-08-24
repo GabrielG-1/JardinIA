@@ -28,6 +28,7 @@ const ProductSchema = z.object({
     name: z.string(),
     price: z.string(),
     image: z.string().url().or(z.literal("")),
+    aiHint: z.string().optional(),
 });
 
 const AnalyzePlantHealthOutputSchema = z.object({
@@ -59,7 +60,7 @@ const productSearchTool = ai.defineTool(
     {
         name: 'productSearch',
         description: 'Busca en el catálogo de la tienda productos relevantes para el cuidado de las plantas, como pesticidas, fertilizantes, etc.',
-        inputSchema: z.object({ query: z.string().describe('Términos de búsqueda para encontrar un producto. Por ejemplo: "hongos", "oidio", "insecticida", "fertilizante rico en nitrógeno".') }),
+        inputSchema: z.object({ query: z.string().describe('Términos de búsqueda para encontrar un producto. Por ejemplo: "hongos", "oidio", "insecticida", "pulgones", "fertilizante rico en nitrógeno".') }),
         outputSchema: z.array(ProductSchema),
     },
     async (input) => {
@@ -97,7 +98,7 @@ Pasos a seguir:
 3.  **Genera Recomendaciones Detalladas:** En el campo 'recommendations', proporciona una explicación amigable y útil sobre el problema y cómo solucionarlo. Usa subtítulos como "<strong>Posible diagnóstico:</strong><br>", "<strong>Síntomas:</strong><br>", y "<strong>Tratamiento:</strong><br>".
 4.  **BUSCA Y AÑADE PRODUCTOS (Paso Obligatorio si hay un problema):**
     -   Si la planta tiene una enfermedad (hongos, plagas, etc.) o una deficiencia nutricional, **TIENES QUE usar la herramienta 'productSearch'** para encontrar productos que puedan ayudar.
-    -   **Piensa en los mejores términos de búsqueda.** Por ejemplo, si diagnosticas 'oidio', busca términos como "oidio" o "control hongos".
+    -   **Piensa en los mejores términos de búsqueda basados en TU diagnóstico.** Por ejemplo, si diagnosticas 'Pulgones', busca términos como "insecticida" o "pulgones". Si diagnosticas 'Oídio', busca "oidio" o "control hongos". Si es una deficiencia, busca el fertilizante adecuado.
     -   Si la herramienta encuentra productos, **DEBES** colocar el array de objetos de producto que te devolvió la herramienta **directamente en el campo 'recommendedProducts' del JSON.** No modifiques los datos que te devuelve la herramienta. Si la herramienta no devuelve nada, deja el campo 'recommendedProducts' vacío o no lo incluyas.
 5.  **Genera el JSON:** Rellena toda la estructura JSON solicitada. No añadas comentarios ni texto fuera del JSON.`,
 });
@@ -125,4 +126,3 @@ const analyzePlantHealthFlow = ai.defineFlow(
     }
   }
 );
-
