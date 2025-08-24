@@ -11,7 +11,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { searchProducts, expandQuery } from '@/services/catalog-service';
+import { searchProducts } from '@/services/catalog-service';
 
 /* ----------------------------- Input schema ----------------------------- */
 
@@ -70,21 +70,15 @@ const productSearchTool = ai.defineTool(
   {
     name: 'productSearch',
     description:
-      'Busca en el catálogo productos relevantes (pesticidas, fungicidas, fertilizantes) basándose en un diagnóstico de enfermedad o plaga.',
+      'Busca en el catálogo productos relevantes (pesticidas, fungicidas, fertilizantes) basándose en un diagnóstico de enfermedad o plaga. El término de búsqueda debe ser el diagnóstico exacto.',
     inputSchema: z.object({
-      query: z.string().describe('El término de búsqueda, por ejemplo: "pulgones", "oidio", "deficiencia de nitrogeno".'),
+      query: z.string().describe('El término de búsqueda, que debe ser el diagnóstico. Por ejemplo: "Pulgones", "Oidio", "Deficiencia de nitrógeno", "Mosca blanca".'),
     }),
     outputSchema: z.array(ProductSchema),
   },
   async (input) => {
     console.log('Buscando productos para el término:', input.query);
-    // 1. Expand the query to get more search terms
-    const searchTerms = expandQuery(input.query);
-    console.log(`Términos de búsqueda expandidos: ${searchTerms.join(', ')}`);
-
-    // 2. Search for products using all the terms
-    const results = await searchProducts(searchTerms);
-    
+    const results = await searchProducts(input.query);
     // We limit to 3 results to not overwhelm the user or the context window.
     return results.slice(0, 3);
   }

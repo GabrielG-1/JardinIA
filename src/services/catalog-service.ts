@@ -51,42 +51,42 @@ export const getCatalog = (callback: (categories: Category[]) => void): Unsubscr
   return unsubscribe;
 };
 
-const searchMap: Record<string, string[]> = {
-    pulgones: ['pulgones', 'insecticida', 'tox', 'kil', 'dimetoato', 'jab'],
-    oidio: ['oidio', 'hongo', 'fungicida', 'cobre'],
-    'deficiencia de nitrogeno': ['nitrogeno', 'urea', 'fertilizante', 'abono', '11-30-11'],
-    'arana roja': ['arana roja', 'acaro', 'acaricida', 'mite', 'insecticida', 'jabon potasico'],
-    'cochinilla algodonosa': ['cochinilla', 'insecticida', 'aceite', 'jabon potasico'],
-    'mosca blanca': ['mosca blanca', 'insecticida', 'neem', 'trampa'],
-};
-
 /**
- * Expands a simple query into a list of search terms based on a predefined map.
- * @param query The simple query (e.g., 'pulgones').
- * @returns A list of terms to search for.
- */
-export const expandQuery = (query: string): string[] => {
-    const lowercasedQuery = query.toLowerCase();
-    
-    // Find the key in the searchMap that the query contains
-    const matchingKey = Object.keys(searchMap).find(key => lowercasedQuery.includes(key));
-
-    if (matchingKey) {
-        return searchMap[matchingKey];
-    }
-    
-    // Fallback to the original query if no match is found
-    return [lowercasedQuery];
-};
-
-
-/**
- * Searches for products across all categories using a list of search terms.
- * This is a basic implementation of full-text search.
- * @param searchTerms - The terms to search for in product names.
+ * Searches for products across all categories using a smart query.
+ * It looks for the query term and related generic terms (e.g., 'insecticida').
+ * @param query - The diagnosis term to search for.
  * @returns A promise that resolves to an array of matching products.
  */
-export const searchProducts = async (searchTerms: string[]): Promise<Product[]> => {
+export const searchProducts = async (query: string): Promise<Product[]> => {
+    const lowercasedQuery = query.toLowerCase();
+    
+    // This map connects diagnoses to generic search terms.
+    const genericTermMap: Record<string, string[]> = {
+        'pulgones': ['insecticida', 'jabon'],
+        'oidio': ['fungicida', 'cobre'],
+        'deficiencia de nitrogeno': ['fertilizante', 'abono', 'urea'],
+        'deficiencia de': ['fertilizante', 'abono'],
+        'araña roja': ['acaricida', 'insecticida', 'jabon'],
+        'cochinilla': ['insecticida', 'jabon'],
+        'mosca blanca': ['insecticida', 'jabon'],
+        'hongo': ['fungicida']
+    };
+
+    // Find the key in the map that the query contains.
+    const matchingKey = Object.keys(genericTermMap).find(key => lowercasedQuery.includes(key));
+    
+    // Start with the original query term, split into words.
+    let searchTerms = lowercasedQuery.split(/\s+/);
+
+    // If a matching key is found, add the corresponding generic terms.
+    if (matchingKey) {
+        searchTerms.push(...genericTermMap[matchingKey]);
+    }
+    
+    // Make terms unique to avoid redundant checks
+    const uniqueSearchTerms = [...new Set(searchTerms)];
+    console.log(`Searching with terms: ${uniqueSearchTerms.join(', ')}`);
+    
     const q = query(collection(db, CATALOG_COLLECTION));
     const querySnapshot = await getDocs(q);
     const allProducts: Product[] = [];
@@ -98,13 +98,15 @@ export const searchProducts = async (searchTerms: string[]): Promise<Product[]> 
         if (Array.isArray(category.products)) {
             const matchingProducts = category.products.filter(product => {
                 const productNameLower = product.name.toLowerCase();
+                
                 // If product already added, skip it
-                if (uniqueProducts.has(productNameLower)) {
+                if (uniqueProducts.has(product.name)) {
                     return false;
                 }
+
                 // Check if product name includes any of the search terms
-                if (searchTerms.some(term => productNameLower.includes(term))) {
-                    uniqueProducts.add(productNameLower);
+                if (uniqueSearchTerms.some(term => productNameLower.includes(term))) {
+                    uniqueProducts.add(product.name);
                     return true;
                 }
                 return false;
