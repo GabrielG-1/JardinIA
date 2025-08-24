@@ -43,9 +43,10 @@ export function ContactSection() {
       });
       form.reset();
     } catch (error) {
+        console.error(error);
       toast({
         title: "Error al enviar",
-        description: "No se pudo enviar tu mensaje. Por favor, inténtalo de nuevo.",
+        description: "No se pudo enviar tu mensaje. Por favor, inténtalo de nuevo más tarde.",
         variant: "destructive",
       });
     } finally {
