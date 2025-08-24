@@ -3,10 +3,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { UploadCloud, Bot, CheckCircle, XCircle, Leaf, Dna, Stethoscope, Camera, ShoppingCart } from "lucide-react";
+import { UploadCloud, Bot, CheckCircle, XCircle, Leaf, Dna, Stethoscope, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { analyzePlantHealth, type AnalyzePlantHealthOutput } from "@/ai/flows/analyze-plant-health";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -104,14 +104,13 @@ export function AiAdvisorSection() {
                 <h3 className="font-semibold text-lg flex items-center gap-2"><Stethoscope /> Diagnóstico de Salud</h3>
                 <div className="flex items-center gap-2 mb-2">
                   {result.healthDiagnosis.isHealthy ? <CheckCircle className="text-primary" /> : <XCircle className="text-destructive" />}
-                  <p className="font-bold">{result.healthDiagnosis.isHealthy ? "Planta Saludable" : "Se Detectaron Problemas"}</p>
+                  <p className="font-bold text-lg">{result.healthDiagnosis.isHealthy ? "Planta Saludable" : result.healthDiagnosis.diagnosis || "Se Detectaron Problemas"}</p>
                 </div>
-                <p className="text-muted-foreground">{result.healthDiagnosis.diagnosis}</p>
               </div>
               <div>
                 <h3 className="font-semibold text-lg flex items-center gap-2"><Dna /> Recomendaciones de Cuidado</h3>
                 <div 
-                  className="text-muted-foreground text-left"
+                  className="text-muted-foreground text-left space-y-2"
                   dangerouslySetInnerHTML={{ __html: result.healthDiagnosis.recommendations }}
                 />
               </div>

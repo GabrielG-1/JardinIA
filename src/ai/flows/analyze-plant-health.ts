@@ -33,11 +33,11 @@ const AnalyzePlantHealthOutputSchema = z.object({
   }),
   healthDiagnosis: z.object({
     isHealthy: z.boolean().describe('Indica si la planta está sana o no.'),
-    diagnosis: z.string().describe('El diagnóstico de la salud de la planta.'),
+    diagnosis: z.string().describe('Un diagnóstico muy breve (2-3 palabras) de la salud de la planta. Por ejemplo: "Oídio" o "Deficiencia de nitrógeno".'),
     recommendations: z
       .string()
       .describe(
-        'Recomendaciones para el cuidado de la planta. Usa etiquetas <strong> para resaltar los subtítulos, y añade una etiqueta <br> después de cada subtítulo. Por ejemplo: "<strong>Verificar el pH del suelo:</strong><br>El pH ideal para esta planta es..."'
+        'Recomendaciones detalladas para el cuidado de la planta. Usa etiquetas <strong> para resaltar los subtítulos, y añade una etiqueta <br> después de cada subtítulo. Por ejemplo: "<strong>Verificar el pH del suelo:</strong><br>El pH ideal para esta planta es..."'
       ),
   }),
 });
@@ -86,12 +86,12 @@ Descripción: {{{description}}}
 
 Pasos a seguir:
 1.  **Analiza la Información:** Revisa la imagen y la descripción para identificar la planta y su estado de salud.
-2.  **RECOMIENDA PRODUCTOS (Paso Obligatorio si hay un problema):**
+2.  **Rellena el campo 'diagnosis'** con un resumen muy corto del problema (ej: "Oídio", "Pulgones", "Deficiencia de Nitrógeno").
+3.  **RECOMIENDA PRODUCTOS (Paso Obligatorio si hay un problema):**
     -   Si la planta tiene una enfermedad (hongos, plagas, etc.) o una deficiencia nutricional, **TIENES QUE usar la herramienta 'productSearch'** para encontrar productos que puedan ayudar.
     -   **Piensa en los mejores términos de búsqueda.** Por ejemplo, si diagnosticas 'oidio', busca términos como "oidio" o "control hongos".
-    -   Si la herramienta encuentra productos, **DEBES** añadirlos a tus recomendaciones en el JSON. Crea un subtítulo '<strong>Productos Recomendados de la Tienda:</strong><br>' y luego lista los nombres exactos de los productos que te devolvió la herramienta.
-
-3.  **Genera el JSON:** Rellena la estructura JSON solicitada. No añadas comentarios ni texto fuera del JSON.`,
+    -   Si la herramienta encuentra productos, **DEBES** añadirlos a tus recomendaciones en el JSON. Crea un subtítulo '<strong>Productos Recomendados de la Tienda:</strong><br>' y luego lista los nombres exactos de los productos que te devolvió la herramienta. Si la herramienta no devuelve nada, no incluyas esta sección.
+4.  **Genera el JSON:** Rellena toda la estructura JSON solicitada. No añadas comentarios ni texto fuera del JSON.`,
 });
 
 const analyzePlantHealthFlow = ai.defineFlow(
@@ -113,7 +113,7 @@ const analyzePlantHealthFlow = ai.defineFlow(
         return AnalyzePlantHealthOutputSchema.parse(output);
     } catch (e) {
         console.error("Error al parsear el JSON de la IA:", e);
-        console.error("Respuesta recibida de la IA:", output);
+        console.error("Respuesta recibida de la IA:", JSON.stringify(output, null, 2));
         throw new Error("La respuesta de la IA no tenía un formato JSON válido.");
     }
   }
