@@ -9,7 +9,7 @@ import { getAuth } from "firebase/auth";
 const firebaseConfig = {
   projectId: "jardnia",
   appId: "1:503843993979:web:3e217ea66688548147a5de",
-  storageBucket: "jardnia.appspot.com",
+  storageBucket: "jardnia.firebasestorage.app",
   apiKey: "AIzaSyAMH8T42vojOtWAuC1MNHiCLds2J9KW0ps",
   authDomain: "jardnia.firebaseapp.com",
   messagingSenderId: "503843993979",
