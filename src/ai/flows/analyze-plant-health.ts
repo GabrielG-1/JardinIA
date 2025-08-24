@@ -70,7 +70,7 @@ const productSearchTool = ai.defineTool(
   {
     name: 'productSearch',
     description:
-      'Busca en el catálogo productos relevantes (pesticidas, fungicidas, fertilizantes) basándose en un diagnóstico de enfermedad o plaga. El término de búsqueda debe ser el diagnóstico exacto.',
+      'Busca en el catálogo productos relevantes (pesticidas, fungicidas, fertilizantes) basándose en un diagnóstico de enfermedad, plaga o deficiencia nutricional.',
     inputSchema: z.object({
       query: z.string().describe('El término de búsqueda, que debe ser el diagnóstico. Por ejemplo: "Pulgones", "Oidio", "Deficiencia de nitrógeno", "Mosca blanca".'),
     }),
