@@ -173,33 +173,6 @@ const analyzePlantHealthFlow = ai.defineFlow(
       output.recommendedProducts = [];
     }
     
-    // Fallback server-side: si está enferma y no hay productos, intenta buscar por tu cuenta.
-    try {
-      const unhealthy = output.healthDiagnosis?.isHealthy === false;
-      const dx = String(output.healthDiagnosis?.diagnosis ?? '').trim();
-      const noProducts = !output.recommendedProducts?.length;
-
-      if (unhealthy && dx && noProducts) {
-        console.warn(`Fallback: La IA no encontró productos para '${dx}', buscando por servidor...`)
-        const terms = expandQuery(dx);
-        const seen = new Set<string>();
-        const merged: CatalogProduct[] = [];
-        for (const t of terms) {
-          const res = await searchProducts(t);
-          for (const p of res ?? []) {
-            const key = `${p.name}|${p.image ?? ''}`;
-            if (seen.has(key)) continue;
-            seen.add(key);
-            merged.push(p);
-          }
-          if (merged.length >= 3) break;
-        }
-        output.recommendedProducts = merged.slice(0, 3);
-      }
-    } catch (e) {
-      console.warn('Fallback de búsqueda de productos falló:', e);
-    }
-
     // Valida y devuelve la salida final.
     return AnalyzePlantHealthOutputSchema.parse(output);
   }
