@@ -43,7 +43,7 @@ const AnalyzePlantHealthOutputSchema = z.object({
   identification: z.object({
     isPlant: z.boolean().describe('Indica si la imagen es de una planta o no.'),
     commonName: z.string().describe('El nombre común de la planta identificada.'),
-    latinName: z.string().describe('El nombre en latín de la planta identificada.'),
+    latinName: z.string().default('').describe('El nombre en latín de la planta identificada.'),
   }),
   healthDiagnosis: z.object({
     isHealthy: z.boolean().describe('Indica si la planta está sana o no.'),
