@@ -39,7 +39,7 @@ const AnalyzePlantHealthOutputSchema = z.object({
   }),
   healthDiagnosis: z.object({
     isHealthy: z.boolean().describe('Indica si la planta está sana o no.'),
-    diagnosis: z.string().describe('Un diagnóstico muy breve (2-3 palabras) de la salud de la planta. Por ejemplo: "Oídio" o "Deficiencia de nitrógeno".'),
+    diagnosis: z.string().describe('Un diagnóstico muy breve (2-3 palabras) de la salud de la planta. Por ejemplo: "Oídio" o "Pulgones".'),
     recommendations: z
       .string()
       .describe(
@@ -59,8 +59,8 @@ export async function analyzePlantHealth(input: AnalyzePlantHealthInput): Promis
 const productSearchTool = ai.defineTool(
     {
         name: 'productSearch',
-        description: 'Busca en el catálogo de la tienda productos relevantes para el cuidado de las plantas, como pesticidas, fertilizantes, etc.',
-        inputSchema: z.object({ query: z.string().describe('Términos de búsqueda para encontrar un producto. Por ejemplo: "hongos", "oidio", "insecticida", "pulgones", "fertilizante rico en nitrógeno".') }),
+        description: 'Busca en el catálogo de la tienda productos relevantes para el cuidado de las plantas, como pesticidas, fertilizantes, etc., basándose en un término de búsqueda.',
+        inputSchema: z.object({ query: z.string().describe('El término de búsqueda para encontrar productos, basado en un diagnóstico. Por ejemplo: "hongos", "oidio", "insecticida", "pulgones", "fertilizante", "deficiencia de nitrógeno".') }),
         outputSchema: z.array(ProductSchema),
     },
     async (input) => {
@@ -83,20 +83,25 @@ const analyzePlantHealthPrompt = ai.definePrompt({
   config: {
     temperature: 0.2, 
   },
-  prompt: `Eres un experto botánico y agrónomo. Tu única tarea es devolver un objeto JSON válido basado en la información proporcionada.
+  prompt: `Eres un experto botánico y agrónomo. Tu única tarea es devolver un objeto JSON válido que siga el esquema proporcionado. Sigue estos pasos en orden estricto:
 
-Información de entrada:
-{{#if photoDataUri}}
-Foto: {{media url=photoDataUri}}
-{{/if}}
-Descripción: {{{description}}}
+1.  **Analiza la Entrada:** Revisa la foto y la descripción para identificar la planta y su estado.
+    - Foto: {{#if photoDataUri}}{{media url=photoDataUri}}{{else}}No proporcionada{{/if}}
+    - Descripción: {{{description}}}
 
-Pasos a seguir en este orden estricto:
-1.  **Analiza la Información:** Revisa la imagen y la descripción para identificar la planta y su estado de salud.
-2.  **Rellena los campos 'identification' y 'healthDiagnosis'** con tu análisis. Para 'recommendations', proporciona una explicación amigable y útil sobre el problema y cómo solucionarlo, usando subtítulos como "<strong>Posible diagnóstico:</strong><br>", "<strong>Síntomas:</strong><br>", y "<strong>Tratamiento:</strong><br>".
-3.  **BUSCA PRODUCTOS (Si hay un problema):** Si la planta tiene una enfermedad, plaga o deficiencia, **DEBES usar la herramienta 'productSearch' UNA SOLA VEZ** para encontrar productos relevantes. **Piensa en los mejores términos de búsqueda basados en TU diagnóstico.** Por ejemplo, si diagnosticas 'Pulgones', busca "insecticida pulgones". Si diagnosticas 'Oídio', busca "control hongos".
-4.  **AÑADE PRODUCTOS AL JSON:** Toma el array de objetos de producto que te devolvió la herramienta **y colócalo directamente en el campo 'recommendedProducts' del JSON.** No modifiques los datos. Si la herramienta no devuelve nada o si la planta está sana, deja el campo 'recommendedProducts' como un array vacío [].
-5.  **Genera el JSON final:** Devuelve el objeto JSON completo. No añadas comentarios ni texto fuera del JSON. No llames a la herramienta más de una vez.`,
+2.  **Rellena los Campos del Diagnóstico:** Completa los campos 'identification' y 'healthDiagnosis' con tu análisis profesional.
+    - Para 'diagnosis', sé muy breve y directo (ej: "Pulgones", "Oídio", "Deficiencia de nitrógeno").
+    - Para 'recommendations', da una explicación detallada y amigable sobre cómo solucionar el problema, usando subtítulos como "<strong>Posible diagnóstico:</strong><br>", "<strong>Síntomas:</strong><br>", y "<strong>Tratamiento:</strong><br>".
+
+3.  **Busca Productos (SI ES NECESARIO):**
+    - **Si la planta está enferma o tiene una plaga (si 'isHealthy' es 'false')**, DEBES usar la herramienta 'productSearch'.
+    - **Usa el valor EXACTO que pusiste en el campo 'diagnosis' como el 'query' para la búsqueda.** Por ejemplo, si tu diagnóstico fue "Oídio", el query de búsqueda debe ser "Oídio".
+    - Llama a la herramienta UNA SOLA VEZ.
+
+4.  **Completa el JSON:**
+    - Toma el array de productos que te devolvió la herramienta y colócalo directamente en el campo 'recommendedProducts' del JSON.
+    - Si la planta está sana o la herramienta no devolvió productos, deja 'recommendedProducts' como un array vacío [].
+    - Devuelve el objeto JSON completo y nada más. No añadas comentarios ni texto fuera del JSON. Tu trabajo termina después de generar el JSON.`,
 });
 
 const analyzePlantHealthFlow = ai.defineFlow(
@@ -122,4 +127,3 @@ const analyzePlantHealthFlow = ai.defineFlow(
     }
   }
 );
-
