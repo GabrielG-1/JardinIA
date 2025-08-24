@@ -113,6 +113,7 @@ const analyzePlantHealthFlow = ai.defineFlow(
     }
     
     try {
+        // Validar explícitamente la salida con Zod antes de devolverla.
         return AnalyzePlantHealthOutputSchema.parse(output);
     } catch (e) {
         console.error("Error al parsear el JSON de la IA:", e);
@@ -121,3 +122,4 @@ const analyzePlantHealthFlow = ai.defineFlow(
     }
   }
 );
+
