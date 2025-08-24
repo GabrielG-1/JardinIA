@@ -36,19 +36,28 @@ export function ContactSection() {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsSubmitting(true);
     try {
-      await sendContactEmail(data);
-      toast({
-        title: "Mensaje Enviado",
-        description: "Gracias por contactarnos. Te responderemos pronto.",
-      });
-      form.reset();
+      const result = await sendContactEmail(data);
+      
+      if (result.success) {
+        toast({
+          title: "Mensaje Enviado",
+          description: "Gracias por contactarnos. Te responderemos pronto.",
+        });
+        form.reset();
+      } else {
+         toast({
+          title: "Error al enviar",
+          description: result.error || "No se pudo enviar tu mensaje. Por favor, inténtalo de nuevo más tarde.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
-        console.error(error);
-      toast({
-        title: "Error al enviar",
-        description: "No se pudo enviar tu mensaje. Por favor, inténtalo de nuevo más tarde.",
-        variant: "destructive",
-      });
+        console.error("An unexpected error occurred:", error);
+        toast({
+            title: "Error Inesperado",
+            description: "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.",
+            variant: "destructive",
+        });
     } finally {
       setIsSubmitting(false);
     }

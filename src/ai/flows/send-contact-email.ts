@@ -82,7 +82,7 @@ export async function sendContactEmail(input: SendContactEmailInput): Promise<{ 
       return { success: false, error: 'Datos del formulario no válidos.' };
     }
     
-    // This will be caught by the try-catch block in the component
-    throw new Error('El servidor no pudo procesar la solicitud de envío de correo.');
+    // For other errors (like SMTP issues), return a generic server error message
+    return { success: false, error: 'El servidor no pudo procesar la solicitud de envío de correo.' };
   }
 }
