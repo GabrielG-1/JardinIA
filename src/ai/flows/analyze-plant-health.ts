@@ -144,11 +144,10 @@ const analyzePlantHealthPrompt = ai.definePrompt({
    - 'diagnosis' debe ser MUY breve (ej: "Oídio", "Pulgones", "Deficiencia de nitrógeno").
    - 'recommendations' en HTML simple, explicando la causa y solución. Usa subtítulos en <strong> y un <br> tras cada uno.
 
-3) Búsqueda de productos (SOLO si es genuinamente útil):
-   - Si la planta está enferma ('isHealthy' = false), usa la herramienta 'productSearch' UNA SOLA VEZ.
-   - Pasa como 'query' el valor EXACTO de 'diagnosis'.
-   - Si la herramienta devuelve productos, colócalos en 'recommendedProducts'.
-   - Si no devuelve nada o la planta está sana, usa 'recommendedProducts': [].
+3) Búsqueda de productos (SOLO si 'isHealthy' = false):
+   - Usa la herramienta 'productSearch' UNA SOLA VEZ, pasando como 'query' el valor EXACTO de 'diagnosis'.
+   - El campo 'recommendedProducts' en tu respuesta DEBE contener única y exclusivamente la lista de productos que te devuelve la herramienta. NO PUEDES inventar, añadir o modificar productos.
+   - Si la herramienta no devuelve productos o si la planta está sana, el campo 'recommendedProducts' debe ser un array vacío: [].
 
 4) Devuelve SOLO el JSON final completo, sin texto adicional.`,
 });
