@@ -72,7 +72,7 @@ const productSearchTool = ai.defineTool(
     description:
       'Busca en el catálogo productos relevantes (pesticidas, fungicidas, fertilizantes) basándose en un término de búsqueda como una enfermedad o plaga.',
     inputSchema: z.object({
-      query: z.string().describe('El término de búsqueda, por ejemplo: "pulgones", "oídio", "fertilizante nitrogenado".'),
+      query: z.string().describe('El término de búsqueda, por ejemplo: "insecticida", "fungicida", "fertilizante".'),
     }),
     outputSchema: z.array(ProductSchema),
   },
@@ -104,7 +104,8 @@ const analyzePlantHealthPrompt = ai.definePrompt({
    - 'recommendations' en HTML simple, explicando la causa y solución. Usa subtítulos en <strong> y un <br> tras cada subtítulo.
 
 3) Búsqueda de productos (SOLO si 'isHealthy' = false):
-   - Usa la herramienta 'productSearch' UNA SOLA VEZ, pasando como 'query' el valor EXACTO de 'diagnosis' que determinaste.
+   - Basándote en el 'diagnosis', determina el término de búsqueda más genérico y relevante para encontrar un producto. Por ejemplo, si el diagnóstico es 'Pulgones' o 'Mosca blanca', el término de búsqueda debe ser 'insecticida'. Si es 'Oídio', debe ser 'fungicida'. Si es una deficiencia, 'fertilizante'.
+   - Usa la herramienta 'productSearch' UNA SOLA VEZ con ese término de búsqueda genérico.
    - El campo 'recommendedProducts' en tu respuesta DEBE contener única y exclusivamente la lista de productos que te devuelve la herramienta. NO PUEDES inventar, añadir o modificar productos.
    - Si la herramienta no devuelve productos o si la planta está sana, el campo 'recommendedProducts' debe ser un array vacío: [].
 

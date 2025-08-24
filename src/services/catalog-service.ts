@@ -62,11 +62,20 @@ export const searchProducts = async (searchTerm: string): Promise<Product[]> => 
     const allProducts: Product[] = [];
     const lowercasedSearchTerm = searchTerm.toLowerCase();
 
+    // Map of diagnostics to more generic search terms
+    const searchMap: { [key: string]: string[] } = {
+        'insecticida': ['tox', 'kil', 'dimetoato', 'jab', 'insecticida'],
+        'fungicida': ['hongos', 'cobre', 'oidio', 'fungicida'],
+        'fertilizante': ['urea', 'mezcla', 'fosfato', 'salkitre', 'abono', 'fertilizante'],
+    };
+
+    const searchTerms = searchMap[lowercasedSearchTerm] || [lowercasedSearchTerm];
+
     querySnapshot.forEach((doc) => {
         const category = doc.data() as Omit<Category, 'id'>;
         if (Array.isArray(category.products)) {
             const matchingProducts = category.products.filter(product => 
-                product.name.toLowerCase().includes(lowercasedSearchTerm)
+                searchTerms.some(term => product.name.toLowerCase().includes(term))
             );
             allProducts.push(...matchingProducts);
         }
