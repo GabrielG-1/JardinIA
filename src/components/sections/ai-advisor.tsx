@@ -6,7 +6,7 @@ import Image from "next/image";
 import { UploadCloud, Bot, CheckCircle, XCircle, Leaf, Dna, Stethoscope, Camera, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { analyzePlantHealth, type AnalyzePlantHealthOutput } from "@/ai/flows/analyze-plant-health";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -267,3 +267,5 @@ export function AiAdvisorSection() {
     </section>
   );
 }
+
+    
