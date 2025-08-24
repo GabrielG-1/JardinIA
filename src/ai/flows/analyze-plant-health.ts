@@ -60,7 +60,7 @@ const productSearchTool = ai.defineTool(
     {
         name: 'productSearch',
         description: 'Busca en el catálogo de la tienda productos relevantes para el cuidado de las plantas, como pesticidas, fertilizantes, etc., basándose en un término de búsqueda.',
-        inputSchema: z.object({ query: z.string().describe('El término de búsqueda para encontrar productos, basado en un diagnóstico. Por ejemplo: "hongos", "oidio", "insecticida", "pulgones", "fertilizante", "deficiencia de nitrógeno".') }),
+        inputSchema: z.object({ query: z.string().describe('El término de búsqueda para encontrar productos, basado en el diagnóstico. Por ejemplo: "hongos", "oidio", "insecticida", "pulgones", "fertilizante", "deficiencia de nitrógeno".') }),
         outputSchema: z.array(ProductSchema),
     },
     async (input) => {
