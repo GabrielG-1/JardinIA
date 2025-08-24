@@ -111,7 +111,9 @@ export function AiAdvisorSection() {
   const AnalysisResult = () => {
     if (!result) return null;
 
-    const validProducts = result.recommendedProducts?.filter(p => typeof p === 'object' && p.name) || [];
+    const validProducts = Array.isArray(result.recommendedProducts)
+      ? result.recommendedProducts.filter(p => typeof p === 'object' && p.name)
+      : [];
 
     return (
       <Card className="mt-8 text-left">

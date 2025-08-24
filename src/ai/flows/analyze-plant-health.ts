@@ -73,7 +73,7 @@ const productSearchTool = ai.defineTool(
 
 const analyzePlantHealthPrompt = ai.definePrompt({
   name: 'analyzePlantHealthPrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-1.5-pro-latest',
   tools: [productSearchTool],
   input: {schema: AnalyzePlantHealthInputSchema},
   output: {
@@ -109,8 +109,7 @@ const analyzePlantHealthFlow = ai.defineFlow(
     outputSchema: AnalyzePlantHealthOutputSchema,
   },
   async (input) => {
-    const response = await analyzePlantHealthPrompt(input);
-    const output = response.output;
+    const {output} = await analyzePlantHealthPrompt(input);
 
     if (!output) {
       throw new Error("La respuesta de la IA no tenía un formato válido.");
@@ -126,3 +125,4 @@ const analyzePlantHealthFlow = ai.defineFlow(
     }
   }
 );
+
