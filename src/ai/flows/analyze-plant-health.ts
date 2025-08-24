@@ -76,13 +76,20 @@ function expandQuery(q: string): string[] {
     pulgones: ['pulgones', 'pulgon', 'insecticida', 'jabon potasico', 'neem'],
     'arana roja': ['arana roja', 'acaro', 'acaricida', 'mite', 'insecticida', 'jabon potasico'],
     mildiu: ['mildiu', 'fungicida', 'cobre'],
-    cochinilla: ['cochinilla', 'insecticida', 'aceite'],
+    cochinilla: ['cochinilla', 'insecticida', 'aceite', 'jabon potasico'],
     'mosca blanca': ['mosca blanca', 'insecticida', 'neem', 'trampa'],
     'deficiencia de nitrogeno': ['nitrogeno', 'urea', 'fertilizante', 'abono', '11-30-11'],
     'deficiencia de fosforo': ['fosforo', 'superfosfato', 'fertilizante', 'abono', '11-30-11'],
     'deficiencia de potasio': ['potasio', 'potasico', 'fertilizante', 'abono'],
   };
-  return map[nq] ?? [nq, ...nq.split(/\s+/).filter(Boolean)];
+
+  for (const key in map) {
+    if (nq.includes(key)) {
+      return map[key];
+    }
+  }
+  
+  return [nq, ...nq.split(/\s+/).filter(Boolean)];
 }
 
 /* --------------------------------- Tool --------------------------------- */
