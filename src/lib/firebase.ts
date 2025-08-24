@@ -24,6 +24,7 @@ if (!getApps().length) {
 }
 
 const db = getFirestore(app);
+// Use the storageBucket from the config to initialize storage
 const storage = getStorage(app);
 const auth = getAuth(app);
 
