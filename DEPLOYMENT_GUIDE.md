@@ -14,6 +14,7 @@ Tu aplicación necesita las siguientes variables de entorno para funcionar corre
 4.  **`SMTP_USER`**: Tu nombre de usuario o correo electrónico para enviar emails.
 5.  **`SMTP_PASS`**: La contraseña de tu correo o una "contraseña de aplicación" específica.
 6.  **`CONTACT_FORM_RECIPIENT`**: El correo que recibirá los mensajes del formulario de contacto.
+7.  **`NEXT_PUBLIC_ADMIN_EMAILS`**: Una lista de correos electrónicos, separados por comas, que tendrán acceso al panel de administración (ej: `admin1@example.com,admin2@example.com`).
 
 ### ¿Cómo configurarlas?
 
