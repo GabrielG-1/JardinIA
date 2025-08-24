@@ -63,73 +63,25 @@ const AnalyzePlantHealthOutputSchema = z.object({
 });
 export type AnalyzePlantHealthOutput = z.infer<typeof AnalyzePlantHealthOutputSchema>;
 
-/* ---------------------------- Helper functions -------------------------- */
-
-function normalize(q: string) {
-  return q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-}
-
-function expandQuery(q: string): string[] {
-  const nq = normalize(q);
-  const map: Record<string, string[]> = {
-    oidio: ['oidio', 'hongos', 'fungicida', 'azufre', 'bicarbonato'],
-    pulgones: ['pulgones', 'pulgon', 'insecticida', 'jabon potasico', 'neem'],
-    'arana roja': ['arana roja', 'acaro', 'acaricida', 'mite', 'insecticida', 'jabon potasico'],
-    mildiu: ['mildiu', 'fungicida', 'cobre'],
-    cochinilla: ['cochinilla', 'insecticida', 'aceite', 'jabon potasico'],
-    'mosca blanca': ['mosca blanca', 'insecticida', 'neem', 'trampa'],
-    'deficiencia de nitrogeno': ['nitrogeno', 'urea', 'fertilizante', 'abono', '11-30-11'],
-    'deficiencia de fosforo': ['fosforo', 'superfosfato', 'fertilizante', 'abono', '11-30-11'],
-    'deficiencia de potasio': ['potasio', 'potasico', 'fertilizante', 'abono'],
-  };
-
-  for (const key in map) {
-    if (nq.includes(key)) {
-      return map[key];
-    }
-  }
-  
-  return [nq, ...nq.split(/\s+/).filter(Boolean)];
-}
 
 /* --------------------------------- Tool --------------------------------- */
-/** The LLM will call this ONCE. Internally we widen recall with synonyms. */
+/** The LLM will call this to find relevant products. */
 const productSearchTool = ai.defineTool(
   {
     name: 'productSearch',
     description:
-      'Busca en el catálogo productos relevantes (pesticidas, fungicidas, fertilizantes) basándose en el diagnóstico.',
+      'Busca en el catálogo productos relevantes (pesticidas, fungicidas, fertilizantes) basándose en un término de búsqueda como una enfermedad o plaga.',
     inputSchema: z.object({
-      query: z.string().describe('Usa el diagnóstico como término principal.'),
+      query: z.string().describe('El término de búsqueda, por ejemplo: "pulgones", "oídio", "fertilizante nitrogenado".'),
     }),
     outputSchema: z.array(ProductSchema),
   },
   async (input) => {
-    const terms = expandQuery(input.query);
-    console.log('productSearch terms =>', terms);
-
-    const seen = new Set<string>();
-    const merged: CatalogProduct[] = [];
-
-    for (const t of terms) {
-      const res = await searchProducts(t); // tu función a Firestore
-      for (const p of res ?? []) {
-        const key = (p as any).id ?? `${(p as any).name}|${(p as any).image ?? ''}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
-
-        merged.push({
-          id: (p as any).id,
-          name: (p as any).name,
-          price: String((p as any).price ?? ''),
-          image: (p as any).image ?? '',
-          aiHint: (p as any).aiHint,
-        });
-      }
-      if (merged.length >= 3) break; // limita a 3
-    }
-
-    return merged.slice(0, 3);
+    console.log('Buscando productos para el término:', input.query);
+    const results = await searchProducts(input.query); // This now calls your Firestore full-text search directly
+    
+    // We limit to 3 results to not overwhelm the user or the context window.
+    return results.slice(0, 3);
   }
 );
 
@@ -149,10 +101,10 @@ const analyzePlantHealthPrompt = ai.definePrompt({
 
 2) Completa 'identification' y 'healthDiagnosis'.
    - 'diagnosis' debe ser MUY breve (ej: "Oídio", "Pulgones", "Deficiencia de nitrógeno").
-   - 'recommendations' en HTML simple, explicando la causa y solución. Usa subtítulos en <strong> y un <br> tras cada uno.
+   - 'recommendations' en HTML simple, explicando la causa y solución. Usa subtítulos en <strong> y un <br> tras cada subtítulo.
 
 3) Búsqueda de productos (SOLO si 'isHealthy' = false):
-   - Usa la herramienta 'productSearch' UNA SOLA VEZ, pasando como 'query' el valor EXACTO de 'diagnosis'.
+   - Usa la herramienta 'productSearch' UNA SOLA VEZ, pasando como 'query' el valor EXACTO de 'diagnosis' que determinaste.
    - El campo 'recommendedProducts' en tu respuesta DEBE contener única y exclusivamente la lista de productos que te devuelve la herramienta. NO PUEDES inventar, añadir o modificar productos.
    - Si la herramienta no devuelve productos o si la planta está sana, el campo 'recommendedProducts' debe ser un array vacío: [].
 
@@ -171,44 +123,12 @@ const analyzePlantHealthFlow = ai.defineFlow(
     const { output } = await analyzePlantHealthPrompt(input);
     if (!output) throw new Error('La IA no devolvió salida.');
 
-    // Asegura que recommendedProducts exista siempre.
-    if (!('recommendedProducts' in output) || !Array.isArray((output as any).recommendedProducts)) {
-      (output as any).recommendedProducts = [];
+    // Asegura que recommendedProducts exista siempre como un array.
+    if (!output.recommendedProducts || !Array.isArray(output.recommendedProducts)) {
+      output.recommendedProducts = [];
     }
-
-    // Fallback server-side: si está enferma y no hay productos, intenta buscar por tu cuenta.
-    try {
-      const unhealthy = (output as any).healthDiagnosis?.isHealthy === false;
-      const dx = String((output as any).healthDiagnosis?.diagnosis ?? '').trim();
-      const noProducts = !(output as any).recommendedProducts?.length;
-
-      if (unhealthy && dx && noProducts) {
-        const terms = expandQuery(dx);
-        const seen = new Set<string>();
-        const merged: CatalogProduct[] = [];
-        for (const t of terms) {
-          const res = await searchProducts(t);
-          for (const p of res ?? []) {
-            const key = (p as any).id ?? `${(p as any).name}|${(p as any).image ?? ''}`;
-            if (seen.has(key)) continue;
-            seen.add(key);
-            merged.push({
-              id: (p as any).id,
-              name: (p as any).name,
-              price: String((p as any).price ?? ''),
-              image: (p as any).image ?? '',
-              aiHint: (p as any).aiHint,
-            });
-          }
-          if (merged.length >= 3) break;
-        }
-        (output as any).recommendedProducts = merged.slice(0, 3);
-      }
-    } catch (e) {
-      console.warn('Fallback de búsqueda de productos falló:', e);
-    }
-
-    // Valida y devuelve
+    
+    // Valida y devuelve la salida final.
     return AnalyzePlantHealthOutputSchema.parse(output);
   }
 );
