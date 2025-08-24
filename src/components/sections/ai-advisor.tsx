@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { UploadCloud, Bot, CheckCircle, XCircle, Leaf, Dna, Stethoscope, Camera } from "lucide-react";
+import { UploadCloud, Bot, CheckCircle, XCircle, Leaf, Dna, Stethoscope, Camera, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -12,7 +12,36 @@ import { analyzePlantHealth, type AnalyzePlantHealthOutput } from "@/ai/flows/an
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CameraCapture } from "@/components/camera-capture";
+import type { Product } from "@/services/catalog-service";
 
+const formatPrice = (price: string) => {
+    const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
+    if (isNaN(number)) {
+        return price;
+    }
+    return `$${number.toLocaleString('es-CL')}`;
+};
+
+function ProductRecommendationCard({ product }: { product: Product }) {
+    const imageUrl = product.image && product.image.startsWith('http') 
+        ? product.image 
+        : 'https://placehold.co/200x200.png';
+
+    return (
+        <Card className="flex flex-col">
+        <CardHeader className="p-0">
+            <Image src={imageUrl} alt={product.name} width={150} height={150} className="rounded-t-lg object-cover w-full aspect-square" />
+        </CardHeader>
+        <CardContent className="flex-grow p-3">
+            <h4 className="font-semibold text-sm h-10">{product.name}</h4>
+        </CardContent>
+        <CardFooter className="p-3 pt-0 flex justify-between items-center">
+            <p className="text-base font-bold text-primary">{formatPrice(product.price)}</p>
+            <Button size="sm">Añadir</Button>
+        </CardFooter>
+        </Card>
+    );
+}
 
 export function AiAdvisorSection() {
   const [photoDataUri, setPhotoDataUri] = useState<string | null>(null);
@@ -82,6 +111,8 @@ export function AiAdvisorSection() {
   const AnalysisResult = () => {
     if (!result) return null;
 
+    const validProducts = result.recommendedProducts?.filter(p => typeof p === 'object' && p.name) || [];
+
     return (
       <Card className="mt-8 text-left">
         <CardHeader>
@@ -114,6 +145,17 @@ export function AiAdvisorSection() {
                   dangerouslySetInnerHTML={{ __html: result.healthDiagnosis.recommendations }}
                 />
               </div>
+
+              {validProducts.length > 0 && (
+                  <div>
+                      <h3 className="font-semibold text-lg flex items-center gap-2 mt-6 mb-4"><ShoppingCart /> Productos Recomendados de la Tienda</h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                          {validProducts.map((product, index) => (
+                              <ProductRecommendationCard key={index} product={product} />
+                          ))}
+                      </div>
+                  </div>
+              )}
             </>
           )}
         </CardContent>
