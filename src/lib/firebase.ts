@@ -7,12 +7,12 @@ import { getAuth } from "firebase/auth";
 // These keys are public and safe to be stored here.
 // Security is managed by Firebase Security Rules.
 const firebaseConfig = {
-  projectId: "jardnia",
-  appId: "1:503843993979:web:3e217ea66688548147a5de",
-  storageBucket: "jardnia.firebasestorage.app",
-  apiKey: "AIzaSyAMH8T42vojOtWAuC1MNHiCLds2J9KW0ps",
-  authDomain: "jardnia.firebaseapp.com",
-  messagingSenderId: "503843993979",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
@@ -24,7 +24,6 @@ if (!getApps().length) {
 }
 
 const db = getFirestore(app);
-// Use the storageBucket from the config to initialize storage
 const storage = getStorage(app);
 const auth = getAuth(app);
 
