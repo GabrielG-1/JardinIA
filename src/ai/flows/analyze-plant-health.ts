@@ -103,7 +103,7 @@ const analyzePlantHealthPrompt = ai.definePrompt({
    - 'recommendations' en HTML simple, explicando la causa y solución. Usa subtítulos en <strong> y un <br> tras cada subtítulo.
 
 3) Búsqueda de productos (SOLO si 'isHealthy' = false):
-   - Usa la herramienta 'productSearch' UNA SOLA VEZ con tu 'diagnosis' como el 'query'.
+   - Usa la herramienta 'productSearch' UNA SOLA VEZ. Para el parámetro 'query', usa tu 'diagnosis' como el valor. Por ejemplo, si el diagnóstico es "Pulgones", llama a la herramienta como productSearch({ query: "Pulgones" }).
    - El campo 'recommendedProducts' en tu respuesta DEBE contener única y exclusivamente la lista de productos que te devuelve la herramienta. NO PUEDES inventar, añadir o modificar productos.
    - Si la herramienta no devuelve productos o si la planta está sana, el campo 'recommendedProducts' debe ser un array vacío: [].
 
