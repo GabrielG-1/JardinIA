@@ -2,7 +2,7 @@
 import * as admin from 'firebase-admin';
 import * as fs from 'fs';
 import * as path from 'path';
-import { collection, getDocs, doc, getDoc, writeBatch } from 'firebase/firestore';
+import { getDocs, writeBatch } from 'firebase-admin/firestore';
 
 
 // La configuración del proyecto se obtiene de las variables de entorno de Firebase.
@@ -42,7 +42,7 @@ const seedFirestore = async () => {
     // 1. Borrar todos los documentos existentes en la colección 'catalog'
     console.log('Limpiando la colección "catalog" existente...');
     const existingDocsSnapshot = await getDocs(catalogCollection);
-    const deleteBatch = writeBatch(db);
+    const deleteBatch = db.batch();
     let deletedCount = 0;
     existingDocsSnapshot.forEach((doc) => {
       deleteBatch.delete(doc.ref);
@@ -69,7 +69,7 @@ const seedFirestore = async () => {
     }
     
     console.log('Añadiendo los nuevos documentos...');
-    const addBatch = writeBatch(db);
+    const addBatch = db.batch();
 
     seedData.catalog.forEach(category => {
       const docRef = catalogCollection.doc(category.docId);

@@ -21,22 +21,3 @@ export const uploadProductImage = async (file: File, productName: string): Promi
 
   return downloadURL;
 };
-
-/**
- * Uploads a hero background image to Firebase Storage.
- * @param file The image file to upload.
- * @returns A promise that resolves with the public download URL of the uploaded image.
- */
-export const uploadHeroImage = async (file: File): Promise<string> => {
-  // Create a storage reference
-  const filePath = `hero-images/background-${Date.now()}-${file.name}`;
-  const storageRef = ref(storage, filePath);
-
-  // Upload the file
-  const snapshot = await uploadBytes(storageRef, file);
-
-  // Get the download URL
-  const downloadURL = await getDownloadURL(snapshot.ref);
-
-  return downloadURL;
-};
