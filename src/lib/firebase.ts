@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -24,5 +25,7 @@ const db = getFirestore(app);
 // Explicitly pass the bucket URL to ensure it points to the desired one
 // in the free tier region. The URL comes from the Firebase Console Storage section.
 const storage = getStorage(app, "gs://jardnia.firebasestorage.app");
+const auth = getAuth(app);
 
-export { app, db, storage };
+
+export { app, db, storage, auth };
