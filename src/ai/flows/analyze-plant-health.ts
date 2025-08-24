@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -31,7 +32,7 @@ export type AnalyzePlantHealthInput = z.infer<typeof AnalyzePlantHealthInputSche
 const ProductSchema = z.object({
   id: z.string().optional(),
   name: z.string(),
-  price: z.union([z.number(), z.string()]).transform((v) => String(v)),
+  price: z.string().describe('El precio del producto como una cadena de texto.'),
   image: z.string().optional().default(''),
   aiHint: z.string().optional(),
 });
