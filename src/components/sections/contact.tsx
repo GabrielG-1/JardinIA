@@ -23,6 +23,7 @@ export function ContactSection() {
             <Input type="text" placeholder="Tu Nombre" required />
             <Input type="email" placeholder="Tu Correo Electrónico" required />
           </div>
+          <Input type="tel" placeholder="Tu Número de Teléfono (Opcional)" />
           <Textarea placeholder="Tu Mensaje" rows={6} required />
           <div className="text-center">
             <Button type="submit" size="lg">Enviar Mensaje</Button>
