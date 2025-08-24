@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 // Lee la lista de correos de administradores desde las variables de entorno.
 // Esto es más seguro que tenerlos en el código.
-const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "").split(',');
+const ADMIN_EMAILS = (process.env.next_public_admin_emails || "").split(',');
 
 function NotAuthorized() {
     const router = useRouter();
