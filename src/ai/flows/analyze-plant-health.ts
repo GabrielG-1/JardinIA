@@ -50,7 +50,7 @@ const AnalyzePlantHealthOutputSchema = z.object({
     diagnosis: z
       .string()
       .describe(
-        'Diagnóstico muy breve (2–3 palabras), por ejemplo: "Oídio", "Pulgones", "Deficiencia de nitrógeno".'
+        'Diagnóstico muy breve (2–3 palabras), por ejemplo: "Oídio", "Pulgones", "Deficiencia de nitrógeno". Si el usuario solo pide consejos, usa "Consejos de cultivo".'
       ),
     recommendations: z
       .string()
@@ -71,7 +71,7 @@ const analyzePlantHealthPrompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-pro-latest',
   output: { schema: AnalyzePlantHealthOutputSchema, format: 'json' },
   config: { temperature: 0.1 },
-  prompt: `Eres un experto botánico y agrónomo. Tu objetivo es ayudar a los usuarios a diagnosticar problemas en sus plantas y recomendar soluciones REALES de nuestro catálogo. Tu única tarea es devolver un objeto JSON VÁLIDO que siga el esquema proporcionado.
+  prompt: `Eres un experto botánico y agrónomo. Tu objetivo es ayudar a los usuarios a diagnosticar problemas O a obtener consejos de cultivo, recomendando soluciones y productos REALES de nuestro catálogo. Tu única tarea es devolver un objeto JSON VÁLIDO que siga el esquema proporcionado.
 
 Este es el catálogo completo de productos disponibles en la tienda. Úsalo como tu única fuente de verdad para las recomendaciones:
 --- INICIO DEL CATÁLOGO ---
@@ -84,17 +84,27 @@ Sigue estos pasos estrictamente:
    - Foto: {{#if photoDataUri}}{{media url=photoDataUri}}{{else}}No proporcionada{{/if}}
    - Descripción: {{{description}}}
 
-2) Completa los campos 'identification' y 'healthDiagnosis'.
-   - 'diagnosis' debe ser muy breve y directo (ej: "Oídio", "Pulgones", "Falta de nitrógeno").
-   - 'recommendations' debe ser una guía clara y útil en formato HTML simple. Usa <strong> para los subtítulos y un <br> después de cada uno.
+2) Determina la intención del usuario. Hay dos posibilidades:
+   a) **Diagnóstico de problemas:** El usuario describe síntomas de una planta enferma.
+   b) **Consejos de cultivo:** El usuario pregunta cómo plantar algo, qué necesita para empezar, o pide consejos generales.
 
-3) Recomienda productos (SOLO si 'isHealthy' es falso).
-   - Examina el catálogo que te proporcioné arriba.
-   - Basándote en tu diagnóstico, selecciona entre 1 y 3 de los productos MÁS RELEVANTES del catálogo.
-   - El campo 'recommendedProducts' de tu respuesta DEBE contener ÚNICA Y EXCLUSIVAMENTE los productos que has seleccionado de la lista. NO PUEDES inventar, añadir, modificar o alucinar ningún producto o detalle del producto. Los datos (nombre, precio, etc.) deben ser idénticos a los del catálogo.
-   - Si NINGÚN producto del catálogo es adecuado para el diagnóstico, o si la planta está sana, el campo 'recommendedProducts' DEBE ser un array vacío: [].
+3) Completa los campos 'identification' y 'healthDiagnosis' según la intención:
+   - Para **Diagnóstico**:
+     - 'diagnosis' debe ser breve y directo (ej: "Oídio", "Pulgones").
+     - 'recommendations' debe explicar la causa y la solución.
+     - 'isHealthy' debe ser 'false'.
+   - Para **Consejos de cultivo**:
+     - 'diagnosis' debe ser "Consejos de cultivo".
+     - 'recommendations' debe ser una guía clara y útil sobre cómo realizar la tarea solicitada (ej: cómo sembrar lechugas).
+     - 'isHealthy' debe ser 'true'.
 
-4. Revisa tu respuesta final. Debe ser únicamente un objeto JSON válido, sin ningún texto, explicación o nota adicional fuera del JSON.`,
+4) Recomienda productos relevantes del catálogo:
+   - **Para Diagnóstico:** Si 'isHealthy' es 'false', selecciona 1-3 productos que solucionen el problema (ej: fungicidas, insecticidas, etc.).
+   - **Para Consejos de cultivo:** Incluso si 'isHealthy' es 'true', analiza la descripción del usuario. Si pide plantar algo, recomienda las semillas correspondientes, tierra, fertilizantes iniciales o herramientas.
+   - El campo 'recommendedProducts' de tu respuesta DEBE contener ÚNICA Y EXCLUSIVAMENTE los productos que has seleccionado de la lista. NO PUEDES inventar, añadir, modificar o alucinar ningún producto. Los datos deben ser idénticos a los del catálogo.
+   - Si NINGÚN producto del catálogo es adecuado, el campo 'recommendedProducts' DEBE ser un array vacío: [].
+
+5) Revisa tu respuesta final. Debe ser únicamente un objeto JSON válido, sin ningún texto, explicación o nota adicional fuera del JSON.`,
 });
 
 /* --------------------------------- Flow --------------------------------- */
