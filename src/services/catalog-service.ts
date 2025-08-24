@@ -52,65 +52,25 @@ export const getCatalog = (callback: (categories: Category[]) => void): Unsubscr
 };
 
 /**
- * Searches for products across all categories using a smart query.
- * It looks for the query term and related generic terms (e.g., 'insecticida').
- * @param query - The diagnosis term to search for.
+ * Searches for products across all categories whose name includes the query term.
+ * @param query - The term to search for in product names.
  * @returns A promise that resolves to an array of matching products.
  */
 export const searchProducts = async (query: string): Promise<Product[]> => {
+    if (!query) return [];
+    
     const lowercasedQuery = query.toLowerCase();
-    
-    // This map connects diagnoses to generic search terms.
-    const genericTermMap: Record<string, string[]> = {
-        'pulgones': ['insecticida', 'jabon'],
-        'oidio': ['fungicida', 'cobre'],
-        'deficiencia de nitrogeno': ['fertilizante', 'abono', 'urea'],
-        'deficiencia de': ['fertilizante', 'abono'],
-        'araña roja': ['acaricida', 'insecticida', 'jabon'],
-        'cochinilla': ['insecticida', 'jabon'],
-        'mosca blanca': ['insecticida', 'jabon'],
-        'hongo': ['fungicida']
-    };
-
-    // Find the key in the map that the query contains.
-    const matchingKey = Object.keys(genericTermMap).find(key => lowercasedQuery.includes(key));
-    
-    // Start with the original query term, split into words.
-    let searchTerms = lowercasedQuery.split(/\s+/);
-
-    // If a matching key is found, add the corresponding generic terms.
-    if (matchingKey) {
-        searchTerms.push(...genericTermMap[matchingKey]);
-    }
-    
-    // Make terms unique to avoid redundant checks
-    const uniqueSearchTerms = [...new Set(searchTerms)];
-    console.log(`Searching with terms: ${uniqueSearchTerms.join(', ')}`);
     
     const q = query(collection(db, CATALOG_COLLECTION));
     const querySnapshot = await getDocs(q);
     const allProducts: Product[] = [];
     
-    const uniqueProducts = new Set<string>();
-
     querySnapshot.forEach((doc) => {
         const category = doc.data() as Omit<Category, 'id'>;
         if (Array.isArray(category.products)) {
-            const matchingProducts = category.products.filter(product => {
-                const productNameLower = product.name.toLowerCase();
-                
-                // If product already added, skip it
-                if (uniqueProducts.has(product.name)) {
-                    return false;
-                }
-
-                // Check if product name includes any of the search terms
-                if (uniqueSearchTerms.some(term => productNameLower.includes(term))) {
-                    uniqueProducts.add(product.name);
-                    return true;
-                }
-                return false;
-            });
+            const matchingProducts = category.products.filter(product => 
+                product.name.toLowerCase().includes(lowercasedQuery)
+            );
             allProducts.push(...matchingProducts);
         }
     });
