@@ -11,7 +11,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { searchProducts, type Product } from '@/services/catalog-service';
+import { searchProducts } from '@/services/catalog-service';
 
 /* ----------------------------- Input schema ----------------------------- */
 
@@ -78,9 +78,9 @@ function expandQuery(q: string): string[] {
     mildiu: ['mildiu', 'fungicida', 'cobre'],
     cochinilla: ['cochinilla', 'insecticida', 'aceite'],
     'mosca blanca': ['mosca blanca', 'insecticida', 'neem', 'trampa'],
-    'deficiencia de nitrogeno': ['nitrogeno', 'fertilizante', 'n', 'abono'],
-    'deficiencia de fosforo': ['fosforo', 'fertilizante', 'p'],
-    'deficiencia de potasio': ['potasio', 'fertilizante', 'k'],
+    'deficiencia de nitrogeno': ['nitrogeno', 'urea', 'fertilizante', 'abono', '11-30-11'],
+    'deficiencia de fosforo': ['fosforo', 'superfosfato', 'fertilizante', 'abono', '11-30-11'],
+    'deficiencia de potasio': ['potasio', 'potasico', 'fertilizante', 'abono'],
   };
   return map[nq] ?? [nq, ...nq.split(/\s+/).filter(Boolean)];
 }
