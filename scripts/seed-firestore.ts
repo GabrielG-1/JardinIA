@@ -2,8 +2,6 @@
 import * as admin from 'firebase-admin';
 import * as fs from 'fs';
 import * as path from 'path';
-import { getDocs, writeBatch } from 'firebase-admin/firestore';
-
 
 // La configuración del proyecto se obtiene de las variables de entorno de Firebase.
 // No es necesario definirla aquí cuando se usa el Admin SDK en un entorno de Firebase.
@@ -37,11 +35,11 @@ const seedFirestore = async () => {
     }
     const db = admin.firestore();
 
-    const catalogCollection = admin.firestore().collection('catalog');
+    const catalogCollection = db.collection('catalog');
 
     // 1. Borrar todos los documentos existentes en la colección 'catalog'
     console.log('Limpiando la colección "catalog" existente...');
-    const existingDocsSnapshot = await getDocs(catalogCollection);
+    const existingDocsSnapshot = await catalogCollection.get();
     const deleteBatch = db.batch();
     let deletedCount = 0;
     existingDocsSnapshot.forEach((doc) => {
