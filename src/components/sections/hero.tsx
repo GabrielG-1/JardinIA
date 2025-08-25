@@ -1,16 +1,17 @@
-
 "use client";
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, ShoppingCart, Check } from 'lucide-react';
 import { searchProducts } from '@/services/catalog-service';
 import type { Product } from '@/services/catalog-service';
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Skeleton } from '../ui/skeleton';
 import { useDebounce } from '@/hooks/use-debounce';
+import { useCart } from '@/hooks/use-cart';
+import { useToast } from '@/hooks/use-toast';
 
 const formatPrice = (price: string) => {
     const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
@@ -21,6 +22,22 @@ const formatPrice = (price: string) => {
 };
 
 function SearchResultCard({ product }: { product: Product }) {
+    const { addItem, getItem } = useCart();
+    const [isAdded, setIsAdded] = useState(false);
+    const { toast } = useToast();
+
+    const itemInCart = getItem(product.id || product.name);
+
+    const handleAddToCart = () => {
+        addItem(product);
+        toast({
+            title: "Producto Añadido",
+            description: `${product.name} fue añadido a tu carrito.`,
+        });
+        setIsAdded(true);
+        setTimeout(() => setIsAdded(false), 2000);
+    };
+    
     return (
         <Card className="flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-105 bg-background overflow-hidden">
             <div className="flex items-center p-2 gap-3">
@@ -35,7 +52,9 @@ function SearchResultCard({ product }: { product: Product }) {
                     <p className="text-sm font-semibold truncate text-foreground">{product.name}</p>
                     <p className="text-base font-bold text-primary">{formatPrice(product.price)}</p>
                 </div>
-                 <Button size="sm" className="shrink-0">Añadir</Button>
+                 <Button size="sm" onClick={handleAddToCart} disabled={!!itemInCart || isAdded} className={`shrink-0 ${itemInCart || isAdded ? 'bg-green-500 hover:bg-green-600' : ''}`}>
+                    {itemInCart || isAdded ? <Check /> : <ShoppingCart />}
+                </Button>
             </div>
         </Card>
     );
@@ -114,7 +133,7 @@ export function HeroSection() {
                          ) : results.length > 0 ? (
                             <div className="space-y-2">
                                 {results.map(product => (
-                                    <SearchResultCard key={product.name} product={product} />
+                                    <SearchResultCard key={product.id || product.name} product={product} />
                                 ))}
                             </div>
                          ) : (
@@ -126,4 +145,3 @@ export function HeroSection() {
         </section>
     );
 }
-

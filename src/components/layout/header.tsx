@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { CartSheet } from "@/components/cart/cart-sheet";
 
 export function Header() {
   const navLinks = [
@@ -24,7 +25,7 @@ export function Header() {
             JHL
           </span>
         </Link>
-        <nav className="hidden md:flex items-center space-x-2">
+        <nav className="hidden md:flex items-center space-x-1">
           {navLinks.map((link) => (
             <Button key={link.name} variant="ghost" asChild>
               <a href={link.href}>{link.name}</a>
@@ -34,9 +35,12 @@ export function Header() {
               <a href="#ubicacion">Ubicación</a>
           </Button>
         </nav>
-        <nav className="md:hidden">
-            {/* Mobile menu could be added here */}
-        </nav>
+        <div className="flex items-center gap-2">
+            <CartSheet />
+            <nav className="md:hidden">
+                {/* Mobile menu could be added here */}
+            </nav>
+        </div>
       </div>
     </header>
   );

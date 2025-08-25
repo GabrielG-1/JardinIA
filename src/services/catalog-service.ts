@@ -1,4 +1,3 @@
-
 import { db } from "@/lib/firebase";
 import {
   collection,
@@ -40,7 +39,18 @@ export const getCatalog = (callback: (categories: Category[]) => void): Unsubscr
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const categories: Category[] = [];
     querySnapshot.forEach((doc) => {
-      categories.push({ id: doc.id, ...doc.data() } as Category);
+        const data = doc.data();
+        // Ensure each product has a unique ID, defaulting to its name if not present
+        const productsWithIds = (data.products || []).map((p: Product) => ({
+            ...p,
+            id: p.id || p.name
+        }));
+
+        categories.push({ 
+            id: doc.id, 
+            ...data,
+            products: productsWithIds
+        } as Category);
     });
     callback(categories);
   }, (error) => {
@@ -65,8 +75,12 @@ export const getAllProducts = async (): Promise<Product[]> => {
   querySnapshot.forEach((doc) => {
       const category = doc.data() as Omit<Category, 'id'>;
       if (Array.isArray(category.products)) {
-          // Add categoryId to each product for potential future use
-          const productsWithCategory = category.products.map(p => ({ ...p, categoryId: doc.id, id: p.name }));
+          // Add categoryId and ensure a unique ID for each product
+          const productsWithCategory = category.products.map(p => ({ 
+              ...p, 
+              categoryId: doc.id, 
+              id: p.id || p.name 
+            }));
           allProducts.push(...productsWithCategory);
       }
   });

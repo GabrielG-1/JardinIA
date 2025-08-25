@@ -1,16 +1,16 @@
-
 "use client";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { FlaskConical, Sprout, Package, Wheat, Leaf, type LucideIcon, Upload, AlertTriangle, Wrench, Fence, SprayCan, Flower, Carrot, TestTube, Shirt, Layers } from "lucide-react";
+import { FlaskConical, Sprout, Package, Wheat, Leaf, type LucideIcon, Upload, AlertTriangle, Wrench, Fence, SprayCan, Flower, Carrot, TestTube, Shirt, Layers, ShoppingCart, Check } from "lucide-react";
 import React, { useRef, useState, useEffect } from "react";
 import { uploadProductImage } from "@/services/storage-service";
 import { useToast } from "@/hooks/use-toast";
 import { getCatalog, updateProductImage, type Category, type Product } from "@/services/catalog-service";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCart } from "@/hooks/use-cart";
 
 const icons: { [key: string]: LucideIcon } = {
   FlaskConical,
@@ -46,8 +46,21 @@ function ProductCard({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
-  // Add a local state for the image to force re-render on update
   const [currentImage, setCurrentImage] = useState(product.image);
+  const { addItem, getItem } = useCart();
+  const [isAdded, setIsAdded] = useState(false);
+
+  const itemInCart = getItem(product.id || product.name);
+
+  const handleAddToCart = () => {
+    addItem(product);
+    toast({
+      title: "Producto Añadido",
+      description: `${product.name} fue añadido a tu carrito.`,
+    });
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -59,7 +72,6 @@ function ProductCard({
         
         await updateProductImage(categoryId, product.name, downloadURL);
         
-        // Update the local state to show the new image immediately
         setCurrentImage(downloadURL);
 
         toast({
@@ -113,7 +125,9 @@ function ProductCard({
       </CardContent>
       <CardFooter className="p-2 pt-0 flex justify-between items-center">
         <p className="text-base font-bold text-primary">{formatPrice(product.price)}</p>
-        <Button size="sm">Añadir</Button>
+        <Button size="sm" onClick={handleAddToCart} disabled={!!itemInCart || isAdded} className={itemInCart || isAdded ? 'bg-green-500 hover:bg-green-600' : ''}>
+           {itemInCart || isAdded ? <Check /> : <ShoppingCart />}
+        </Button>
       </CardFooter>
     </Card>
   );
@@ -215,7 +229,7 @@ export function CatalogSection() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-4">
                   {Array.isArray(category.products) && category.products.map((product) => (
                     <ProductCard 
-                      key={product.name} 
+                      key={product.id || product.name}
                       product={product} 
                       categoryId={category.id}
                     />
