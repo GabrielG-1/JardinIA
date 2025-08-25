@@ -15,6 +15,7 @@ Tu aplicación necesita las siguientes variables de entorno para funcionar corre
 5.  **`SMTP_PASS`**: La contraseña de tu correo o una "contraseña de aplicación" específica.
 6.  **`CONTACT_FORM_RECIPIENT`**: El correo que recibirá los mensajes del formulario de contacto.
 7.  **`next_public_admin_emails`**: Una lista de correos electrónicos, separados por comas, que tendrán acceso al panel de administración (ej: `admin1@example.com,admin2@example.com`).
+8.  **`NEXT_PUBLIC_WHATSAPP_NUMBER`**: El número de teléfono de WhatsApp (incluyendo el código de país, sin el "+") al que se enviarán los pedidos. Por ejemplo: `56912345678`.
 
 ### ¿Cómo configurarlas?
 

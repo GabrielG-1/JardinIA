@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCart } from "@/hooks/use-cart";
-import { ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, Send } from "lucide-react";
 import Image from "next/image";
 
 const formatPrice = (price: number) => {
@@ -21,6 +21,29 @@ const formatPrice = (price: number) => {
 
 export function CartSheet() {
   const { items, totalItems, totalPrice, removeItem, updateItemQuantity, clearCart } = useCart();
+
+  const handleWhatsAppOrder = () => {
+    if (items.length === 0) return;
+
+    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+    
+    if (!whatsappNumber) {
+        alert("El número de WhatsApp no está configurado. Por favor, contacte al administrador.");
+        return;
+    }
+
+    let message = '¡Hola! Quisiera hacer el siguiente pedido:\n\n';
+    items.forEach(item => {
+        const itemPrice = parseInt(item.price.replace(/[^0-9]/g, ''));
+        message += `- ${item.quantity}x ${item.name} (${formatPrice(itemPrice)})\n`;
+    });
+    message += `\n*Total: ${formatPrice(totalPrice)}*`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
+  };
 
   return (
     <Sheet>
@@ -93,7 +116,8 @@ export function CartSheet() {
                   <span>Total:</span>
                   <span>{formatPrice(totalPrice)}</span>
                 </div>
-                <Button className="w-full" size="lg">
+                <Button className="w-full bg-green-500 hover:bg-green-600 text-white" size="lg" onClick={handleWhatsAppOrder}>
+                  <Send className="mr-2"/>
                   Enviar Pedido por WhatsApp
                 </Button>
                  <Button variant="outline" className="w-full" onClick={clearCart}>
