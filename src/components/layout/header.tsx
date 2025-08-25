@@ -30,6 +30,9 @@ export function Header() {
               <a href={link.href}>{link.name}</a>
             </Button>
           ))}
+          <Button variant="ghost" asChild>
+              <a href="#ubicacion">Ubicación</a>
+          </Button>
         </nav>
         <nav className="md:hidden">
             {/* Mobile menu could be added here */}
