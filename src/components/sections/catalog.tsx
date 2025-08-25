@@ -46,6 +46,8 @@ function ProductCard({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
+  // Add a local state for the image to force re-render on update
+  const [currentImage, setCurrentImage] = useState(product.image);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -56,6 +58,9 @@ function ProductCard({
         const downloadURL = await uploadProductImage(file, safeProductName);
         
         await updateProductImage(categoryId, product.name, downloadURL);
+        
+        // Update the local state to show the new image immediately
+        setCurrentImage(downloadURL);
 
         toast({
           title: "Imagen actualizada",
@@ -82,7 +87,7 @@ function ProductCard({
     <Card className="flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-105 bg-background group/product">
       <CardHeader className="p-0 relative">
         <Image
-          src={product.image}
+          src={currentImage} // Use state variable here
           alt={product.name}
           width={200}
           height={200}
