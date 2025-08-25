@@ -25,21 +25,25 @@ export function Header() {
             JHL
           </span>
         </Link>
-        <nav className="hidden md:flex items-center space-x-1">
-          {navLinks.map((link) => (
-            <Button key={link.name} variant="ghost" asChild>
-              <a href={link.href}>{link.name}</a>
-            </Button>
-          ))}
-          <Button variant="ghost" asChild>
-              <a href="#ubicacion">Ubicación</a>
-          </Button>
-        </nav>
+
+        {/* Agrupamos la navegación y el carrito para un mejor control del diseño */}
         <div className="flex items-center gap-2">
-            <CartSheet />
-            <nav className="md:hidden">
-                {/* Mobile menu could be added here */}
-            </nav>
+          <nav className="hidden md:flex items-center space-x-1">
+            {navLinks.map((link) => (
+              <Button key={link.name} variant="ghost" asChild>
+                <a href={link.href}>{link.name}</a>
+              </Button>
+            ))}
+            <Button variant="ghost" asChild>
+                <a href="#ubicacion">Ubicación</a>
+            </Button>
+          </nav>
+          
+          <CartSheet />
+
+          <nav className="md:hidden">
+              {/* Mobile menu could be added here */}
+          </nav>
         </div>
       </div>
     </header>
