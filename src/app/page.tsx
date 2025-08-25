@@ -1,10 +1,17 @@
-import { MainLayout } from "@/app/(main)/layout";
-import { HomePageContent } from "@/app/(main)/page";
+import { HeroSection } from '@/components/sections/hero';
+import { CatalogSection } from '@/components/sections/catalog';
+import { AiAdvisorSection } from '@/components/sections/ai-advisor';
+import { CommunitySection } from '@/components/sections/community';
+import { ContactSection } from '@/components/sections/contact';
 
 export default function HomePage() {
   return (
-    <MainLayout>
-      <HomePageContent />
-    </MainLayout>
+    <>
+      <HeroSection />
+      <CatalogSection />
+      <AiAdvisorSection />
+      <CommunitySection />
+      <ContactSection />
+    </>
   );
 }
