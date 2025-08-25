@@ -1,0 +1,26 @@
+[
+  {
+    "origin": [
+      "https://studio--jardnia.us-central1.hosted.app",
+      "https://jardnia.web.app",
+      "https://jardnia.firebaseapp.com",
+      "http://localhost:9003",
+      "http://localhost:9002",
+      "http://localhost:5000",
+      "http://localhost:5173"
+    ],
+    "method": ["GET", "HEAD", "PUT", "POST", "DELETE", "OPTIONS", "PATCH"],
+    "responseHeader": [
+      "Content-Type",
+      "Authorization",
+      "X-Goog-Upload-Command",
+      "X-Goog-Upload-Header-Content-Length",
+      "X-Goog-Upload-Header-Content-Type",
+      "X-Goog-Upload-Protocol",
+      "X-Goog-Upload-Status",
+      "X-Goog-Upload-URL",
+      "x-goog-resumable"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]
