@@ -1,5 +1,5 @@
 export function LocationSection() {
-  const address = "1 norte #10, Labranza, Chile";
+  const address = "1 Norte # 10, local 5, labranza, 4813836 Temuco, Araucanía";
   const embedUrl = `https://www.google.com/maps/embed/v1/place?key=&q=${encodeURIComponent(address)}`;
 
   return (
