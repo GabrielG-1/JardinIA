@@ -83,6 +83,7 @@ export const searchProducts = async (queryTerm: string): Promise<Product[]> => {
     if (!queryTerm) return [];
     
     const lowercasedQuery = queryTerm.toLowerCase().trim();
+    if (lowercasedQuery.length < 3) return [];
     
     const allProducts = await getAllProducts();
 
