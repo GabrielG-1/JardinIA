@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
@@ -9,7 +9,7 @@ import { getAuth } from "firebase/auth";
 const firebaseConfig = {
   "projectId": "jardnia",
   "appId": "1:503843993979:web:3e217ea66688548147a5de",
-  "storageBucket": "jardnia.firebasestorage.app",
+  "storageBucket": "jardnia.appspot.com",
   "apiKey": "AIzaSyAMH8T42vojOtWAuC1MNHiCLds2J9KW0ps",
   "authDomain": "jardnia.firebaseapp.com",
   "measurementId": "",
@@ -17,7 +17,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let app;
+let app: FirebaseApp;
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
 } else {
@@ -25,7 +25,7 @@ if (!getApps().length) {
 }
 
 const db = getFirestore(app);
-const storage = getStorage(app, firebaseConfig.storageBucket);
+const storage = getStorage(app);
 const auth = getAuth(app);
 
 
