@@ -371,7 +371,7 @@
             { "name": "Semillas de Perejil crespo", "price": "$20.630", "image": "https://placehold.co/200x200.png", "aiHint": "parsley seeds" },
             { "name": "Semillas de Puerro de Caretan", "price": "$23.800", "image": "https://placehold.co/200x200.png", "aiHint": "leek seeds" },
             { "name": "Semillas de lechuga Escarola", "price": "$65.970", "image": "https://placehold.co/200x200.png", "aiHint": "escarole seeds" },
-            { "name": "Semillas de Repollo Corazón de Buey", "price": "$56.200", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds" },
+            { "name": "Semillas de Repollo Corazón de Buey (lata)", "price": "$56.200", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds" },
             { "name": "Semillas de Repollo morado", "price": "$52.970", "image": "https://placehold.co/200x200.png", "aiHint": "red cabbage" },
             { "name": "Semillas de Lechuga Escarola 100", "price": "$26.800", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
             { "name": "Semillas de Repollo Corazón de Buey 100", "price": "$20.500", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds" },
@@ -399,7 +399,7 @@
             { "name": "Semillas de Lechuga Romana larga", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "romaine lettuce" },
             { "name": "Semillas de Lechuga Kagraner somer", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds" },
             { "name": "Semillas de Lechuga Maravilla 4 est.", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce four seasons" },
-            { "name": "Semillas de Repollo Corazón de Buey", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds" },
+            { "name": "Semillas de Repollo Corazón de Buey (sobre)", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds" },
             { "name": "Semillas de Lechuga Grand rapid", "price": "$67.100", "image": "https://placehold.co/200x200.png", "aiHint": "grand rapids lettuce" },
             { "name": "Semillas de Lechuga Blanca de París", "price": "$67.200", "image": "https://placehold.co/200x200.png", "aiHint": "white paris lettuce" },
             { "name": "Semillas de Lechuga Lollo rosa", "price": "$74.500", "image": "https://placehold.co/200x200.png", "aiHint": "lollo rosso lettuce" },
@@ -460,3 +460,4 @@
     ]
   }
   
+    
