@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { UploadCloud, Bot, CheckCircle, XCircle, Leaf, Dna, Stethoscope, Camera, ShoppingCart } from "lucide-react";
+import { UploadCloud, Bot, CheckCircle, XCircle, Leaf, Dna, Stethoscope, Camera, ShoppingCart, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CameraCapture } from "@/components/camera-capture";
 import type { Product } from "@/services/catalog-service";
+import { useCart } from "@/hooks/use-cart";
 
 const formatPrice = (price: string) => {
     const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
@@ -26,19 +27,39 @@ function ProductRecommendationCard({ product }: { product: Product }) {
     const imageUrl = product.image && product.image.startsWith('http') 
         ? product.image 
         : 'https://placehold.co/200x200.png';
+    
+    const { addItem, getItem } = useCart();
+    const { toast } = useToast();
+    const [isAdded, setIsAdded] = useState(false);
+    
+    // Use product.id first, but fallback to product.name for uniqueness if id is missing
+    const productId = product.id || product.name;
+    const itemInCart = getItem(productId);
+
+    const handleAddToCart = () => {
+        addItem(product);
+        toast({
+          title: "Producto Añadido",
+          description: `${product.name} fue añadido a tu carrito.`,
+        });
+        setIsAdded(true);
+        setTimeout(() => setIsAdded(false), 2000);
+    };
 
     return (
         <Card className="flex flex-col">
-        <CardHeader className="p-0">
-            <Image src={imageUrl} alt={product.name} width={150} height={150} className="rounded-t-lg object-cover w-full aspect-square" />
-        </CardHeader>
-        <CardContent className="flex-grow p-3">
-            <h4 className="font-semibold text-sm h-10">{product.name}</h4>
-        </CardContent>
-        <CardFooter className="p-3 pt-0 flex justify-between items-center">
-            <p className="text-base font-bold text-primary">{formatPrice(product.price)}</p>
-            <Button size="sm">Añadir</Button>
-        </CardFooter>
+            <CardHeader className="p-0">
+                <Image src={imageUrl} alt={product.name} width={150} height={150} className="rounded-t-lg object-cover w-full aspect-square" />
+            </CardHeader>
+            <CardContent className="flex-grow p-3">
+                <h4 className="font-semibold text-sm h-10">{product.name}</h4>
+            </CardContent>
+            <CardFooter className="p-3 pt-0 flex justify-between items-center">
+                <p className="text-base font-bold text-primary">{formatPrice(product.price)}</p>
+                <Button size="sm" onClick={handleAddToCart} disabled={!!itemInCart || isAdded} className={itemInCart || isAdded ? 'bg-green-500 hover:bg-green-600' : ''}>
+                    {itemInCart || isAdded ? <Check /> : <ShoppingCart />}
+                </Button>
+            </CardFooter>
         </Card>
     );
 }
@@ -153,7 +174,7 @@ export function AiAdvisorSection() {
                       <h3 className="font-semibold text-lg flex items-center gap-2 mt-6 mb-4"><ShoppingCart /> Productos Recomendados de la Tienda</h3>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                           {validProducts.map((product, index) => (
-                              <ProductRecommendationCard key={index} product={product} />
+                              <ProductRecommendationCard key={product.id || index} product={product} />
                           ))}
                       </div>
                   </div>
@@ -269,5 +290,3 @@ export function AiAdvisorSection() {
     </section>
   );
 }
-
-    
