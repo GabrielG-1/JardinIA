@@ -16,7 +16,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const checkIsAdmin = (user: User | null): boolean => {
     if (!user || !user.email) return false;
-    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "").split(',');
+    // Trim each email to remove leading/trailing whitespace
+    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
+        .split(',')
+        .map(email => email.trim());
     return adminEmails.includes(user.email);
 };
 
