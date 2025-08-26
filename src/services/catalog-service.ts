@@ -21,6 +21,7 @@ export type Product = {
   price: string;
   image: string;
   aiHint?: string;
+  inStock?: boolean;
 };
 
 export type Category = {
@@ -49,6 +50,7 @@ export const getCatalog = (
         // Ensure each product has a unique ID, defaulting to its name if not present
         const productsWithIds = (data.products || []).map((p: Product, index: number) => ({
             ...p,
+            inStock: p.inStock !== false, // Default to true if undefined
             // Use a combination of name and index for a more stable key if id is missing
             id: p.id || `${doc.id}-${index}-${p.name.replace(/\s+/g, '-')}`
         }));
@@ -86,6 +88,7 @@ export const getAllProducts = async (): Promise<Product[]> => {
           // Add categoryId and ensure a unique ID for each product
           const productsWithCategory = category.products.map((p, index) => ({ 
               ...p, 
+              inStock: p.inStock !== false, // Default to true
               categoryId: doc.id, 
               id: p.id || `${doc.id}-${index}-${p.name.replace(/\s+/g, '-')}`
             }));
@@ -116,6 +119,34 @@ export const searchProducts = async (queryTerm: string): Promise<Product[]> => {
     return matchingProducts;
 }
 
+const updateProductField = async (categoryId: string, productId: string, field: string, value: any) => {
+    const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
+    const categorySnap = await getDoc(categoryRef);
+
+    if (!categorySnap.exists()) {
+        throw new Error(`Category with id ${categoryId} not found.`);
+    }
+    
+    const categoryData = categorySnap.data() as Omit<Category, 'id'>;
+    const products = categoryData.products || [];
+    
+    let productFound = false;
+    const updatedProducts = products.map(p => {
+        const currentProductId = p.id || p.name;
+        if (currentProductId === productId) {
+            productFound = true;
+            return { ...p, [field]: value };
+        }
+        return p;
+    });
+
+    if (!productFound) {
+        throw new Error(`Product with id or name ${productId} not found in category ${categoryId}.`);
+    }
+
+    await updateDoc(categoryRef, { products: updatedProducts });
+};
+
 
 /**
  * Updates the image URL for a specific product within a category.
@@ -125,40 +156,7 @@ export const searchProducts = async (queryTerm: string): Promise<Product[]> => {
  */
 export const updateProductImage = async (categoryId: string, productId: string, newImageUrl: string) => {
     try {
-        const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
-        const categorySnap = await getDoc(categoryRef);
-
-        if (!categorySnap.exists()) {
-            throw new Error(`Category with id ${categoryId} not found.`);
-        }
-        
-        const categoryData = categorySnap.data() as Omit<Category, 'id'>;
-        const products = categoryData.products || [];
-        
-        let productFound = false;
-        const updatedProducts = products.map(p => {
-            // Heuristic to match product by id, or by name if id is missing
-            const currentProductId = p.id || p.name;
-            if (currentProductId === productId) {
-                productFound = true;
-                return { ...p, image: newImageUrl };
-            }
-            return p;
-        });
-
-        if (!productFound) {
-            // Fallback for old data: search by name if ID fails
-            const productIndex = products.findIndex(p => p.name === productId);
-            if (productIndex !== -1) {
-                 updatedProducts[productIndex] = { ...products[productIndex], image: newImageUrl };
-                 productFound = true;
-            } else {
-                 throw new Error(`Product with id or name ${productId} not found in category ${categoryId}.`);
-            }
-        }
-
-        await updateDoc(categoryRef, { products: updatedProducts });
-
+        await updateProductField(categoryId, productId, 'image', newImageUrl);
     } catch (error) {
         console.error("Error updating product image: ", error);
         throw error;
@@ -211,6 +209,21 @@ export const updateProduct = async (
 };
 
 /**
+ * Updates the stock status for a specific product.
+ * @param categoryId The ID of the category containing the product.
+ * @param productId The ID of the product to update.
+ * @param inStock The new stock status (boolean).
+ */
+export const updateProductStockStatus = async (categoryId: string, productId: string, inStock: boolean) => {
+    try {
+        await updateProductField(categoryId, productId, 'inStock', inStock);
+    } catch (error) {
+        console.error("Error updating product stock status: ", error);
+        throw error;
+    }
+};
+
+/**
  * Adds a new product to a specific category.
  * @param categoryId The ID of the category to add the product to.
  * @param newProduct The product object to add. Note: it should not have an id, one will be generated.
@@ -222,12 +235,9 @@ export const addProductToCategory = async (categoryId: string, newProductData: O
     try {
         const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
         
-        // Firestore's arrayUnion is perfect for adding to an array without reading it first.
-        // We construct the new product object to be added.
-        // The ID will be generated client-side by getCatalog listener for consistency.
         const productToAdd = {
             ...newProductData,
-            // A temporary ID can be added here if needed, but the listener will assign the final one.
+            inStock: true, // New products are in stock by default
         };
 
         await updateDoc(categoryRef, {
@@ -241,3 +251,5 @@ export const addProductToCategory = async (categoryId: string, newProductData: O
         throw error; // Re-throw to be caught by the caller
     }
 };
+
+    

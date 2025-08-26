@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { getCatalog, updateProductImage, type Category, type Product } from "@/services/catalog-service";
+import { getCatalog, updateProductImage, updateProductStockStatus, type Category, type Product } from "@/services/catalog-service";
 import { uploadProductImage } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,8 @@ import Image from "next/image";
 import { AlertTriangle, Pencil, Upload } from "lucide-react";
 import { EditProductDialog } from "@/components/admin/edit-product-dialog";
 import { CreateProductDialog } from "@/components/admin/create-product-dialog";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const formatPrice = (price: string) => {
     const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
@@ -28,10 +30,10 @@ function AdminProductList() {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingProductId, setUploadingProductId] = useState<string | null>(null);
+  const [stockChangeProductId, setStockChangeProductId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleProductUpdate = () => {
-    // La lista se refresca automáticamente gracias al listener de onSnapshot
     console.log("Producto actualizado o creado, la lista se refrescará.");
   };
 
@@ -80,6 +82,27 @@ function AdminProductList() {
     }
   };
 
+  const handleStockChange = async (product: Product, categoryId: string, newStockStatus: boolean) => {
+      const productId = product.id || product.name;
+      setStockChangeProductId(productId);
+      try {
+          await updateProductStockStatus(categoryId, productId, newStockStatus);
+          toast({
+              title: "Stock actualizado",
+              description: `El stock de ${product.name} ha sido actualizado.`
+          });
+      } catch (error) {
+          toast({
+              title: "Error al actualizar el stock",
+              description: "No se pudo cambiar el estado del stock. Inténtalo de nuevo.",
+              variant: "destructive",
+          });
+          console.error("Error updating stock: ", error);
+      } finally {
+          setStockChangeProductId(null);
+      }
+  }
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -119,10 +142,14 @@ function AdminProductList() {
             <AccordionContent className="px-6">
               <div className="divide-y divide-border">
                 {category.products.map((product) => {
-                  const isUploading = uploadingProductId === (product.id || product.name);
+                  const productId = product.id || product.name;
+                  const isUploading = uploadingProductId === productId;
+                  const isChangingStock = stockChangeProductId === productId;
+                  const switchId = `stock-switch-${productId}`;
+
                   return (
-                    <div key={product.id || product.name} className="flex flex-wrap items-center justify-between py-4 gap-4">
-                      <div className="flex items-center gap-4 flex-1 min-w-[250px]">
+                    <div key={productId} className="grid grid-cols-1 md:grid-cols-3 items-center py-4 gap-4">
+                      <div className="flex items-center gap-4 col-span-1">
                         <Image
                           src={product.image}
                           alt={product.name}
@@ -135,10 +162,23 @@ function AdminProductList() {
                           <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 justify-start md:justify-center col-span-1">
+                          <Switch
+                            id={switchId}
+                            checked={product.inStock}
+                            onCheckedChange={(checked) => handleStockChange(product, category.id, checked)}
+                            disabled={isChangingStock}
+                          />
+                          <Label htmlFor={switchId} className="cursor-pointer">{product.inStock ? "Con Stock" : "Sin Stock"}</Label>
+                      </div>
+                      <div className="flex items-center gap-2 justify-start md:justify-end col-span-1">
                          <input
                             type="file"
-                            ref={fileInputRef}
+                            ref={(el) => {
+                                if (el && fileInputRef.current !== el) {
+                                    fileInputRef.current = el;
+                                }
+                            }}
                             className="hidden"
                             accept="image/png, image/jpeg, image/webp"
                             onChange={(e) => handleImageUpload(e, product, category.id)}
@@ -150,7 +190,7 @@ function AdminProductList() {
                           disabled={isUploading}
                         >
                           <Upload className="mr-2 h-4 w-4" />
-                          {isUploading ? "Subiendo..." : "Cambiar Imagen"}
+                          {isUploading ? "Subiendo..." : "Imagen"}
                         </Button>
                         <EditProductDialog 
                           product={product} 
@@ -196,3 +236,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+    

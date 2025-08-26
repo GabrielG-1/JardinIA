@@ -5,12 +5,13 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { FlaskConical, Sprout, Package, Wheat, Leaf, type LucideIcon, AlertTriangle, Wrench, Fence, SprayCan, Flower, Carrot, TestTube, Shirt, Layers, ShoppingCart, Check } from "lucide-react";
+import { FlaskConical, Sprout, Package, Wheat, Leaf, type LucideIcon, AlertTriangle, Wrench, Fence, SprayCan, Flower, Carrot, TestTube, Shirt, Layers, ShoppingCart, Check, PackageX } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getCatalog, type Category, type Product } from "@/services/catalog-service";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/hooks/use-cart";
+import { Badge } from "@/components/ui/badge";
 
 const icons: { [key: string]: LucideIcon } = {
   FlaskConical,
@@ -46,6 +47,7 @@ function ProductCard({
   const [isAdded, setIsAdded] = useState(false);
 
   const itemInCart = getItem(product.id || product.name);
+  const isOutOfStock = product.inStock === false;
 
   const handleAddToCart = () => {
     addItem(product);
@@ -58,23 +60,28 @@ function ProductCard({
   };
 
   return (
-    <Card className="flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-105 bg-background">
+    <Card className="flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-105 bg-background overflow-hidden">
       <CardHeader className="p-0 relative">
         <Image
           src={product.image}
           alt={product.name}
           width={200}
           height={200}
-          className="rounded-t-lg object-cover w-full aspect-square"
+          className={`rounded-t-lg object-cover w-full aspect-square ${isOutOfStock ? "grayscale" : ""}`}
           {...(product.aiHint && { "data-ai-hint": product.aiHint })}
         />
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <Badge variant="destructive" className="text-sm"><PackageX className="mr-1" /> Sin Stock</Badge>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="flex-grow p-2">
         <CardTitle className="text-sm font-semibold h-10 overflow-hidden leading-tight">{product.name}</CardTitle>
       </CardContent>
       <CardFooter className="p-2 pt-0 flex justify-between items-center">
         <p className="text-base font-bold text-primary">{formatPrice(product.price)}</p>
-        <Button size="sm" onClick={handleAddToCart} disabled={!!itemInCart || isAdded} className={itemInCart || isAdded ? 'bg-green-500 hover:bg-green-600' : ''}>
+        <Button size="sm" onClick={handleAddToCart} disabled={isOutOfStock || !!itemInCart || isAdded} className={itemInCart || isAdded ? 'bg-green-500 hover:bg-green-600' : ''}>
            {itemInCart || isAdded ? <Check /> : <ShoppingCart />}
         </Button>
       </CardFooter>

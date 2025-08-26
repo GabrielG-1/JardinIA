@@ -73,7 +73,8 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
         name: data.name,
         price: priceToSave,
         image: imageUrl,
-        aiHint: "" // Default AI hint
+        aiHint: "", // Default AI hint
+        inStock: true // New products are in stock by default
       });
 
       toast({
@@ -200,3 +201,5 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
     </Dialog>
   );
 }
+
+    
