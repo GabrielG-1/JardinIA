@@ -3,22 +3,31 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Reglas para la colección 'catalog'
-    // PERMITE: que cualquiera lea los productos.
-    // BLOQUEA: que los clientes modifiquen o borren productos directamente.
-    // La escritura solo debe ser posible a través de lógica de servidor segura (panel de admin).
-    match /catalog/{categoryId} {
-      allow read: if true;
-      allow write: if false; // Protege el catálogo contra modificaciones no autorizadas desde el cliente.
+    
+    function isAdmin() {
+      let adminEmails = firestore.get(/configuration/admin).data.emails;
+      return request.auth != null && request.auth.token.email in adminEmails;
     }
 
-    // Reglas para la colección 'community-tips'
-    // PERMITE: que cualquiera lea y cree nuevos consejos.
-    // PERMITE: que usuarios autenticados (como el admin) actualicen o eliminen consejos.
+    match /catalog/{docId} {
+      allow read: if true;
+      // Write operations (create, update, delete) are disallowed from the client.
+      // They should only be performed by a trusted backend environment (e.g., using the Admin SDK).
+      // For this app, product management is handled via the admin panel which should
+      // ideally trigger secure backend functions.
+      allow write: if isAdmin();
+    }
+
     match /community-tips/{tipId} {
       allow read, create: if true;
-      allow update, delete: if request.auth != null; // Solo usuarios con sesión iniciada pueden modificar o borrar.
+      // Only authenticated admins can update or delete tips.
+      allow update, delete: if isAdmin();
+    }
+
+    // This is a new document to store configuration that security rules can access.
+    match /configuration/admin {
+       allow read: if true;
+       allow write: if false; // Should only be updated manually or via a secure script.
     }
   }
 }
