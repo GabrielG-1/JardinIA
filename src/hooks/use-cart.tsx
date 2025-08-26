@@ -1,3 +1,4 @@
+
 "use client";
 
 import { createContext, useContext, useState, useMemo, useEffect } from 'react';
@@ -46,15 +47,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, [items]);
 
   const addItem = (product: Product) => {
-    const productId = product.id || product.name;
     setItems(prevItems => {
-      const existingItem = prevItems.find(item => item.id === productId);
+      const existingItem = prevItems.find(item => item.id === product.id);
       if (existingItem) {
         return prevItems.map(item =>
-          item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prevItems, { ...product, id: productId, quantity: 1 }];
+      return [...prevItems, { ...product, quantity: 1 }];
     });
   };
 

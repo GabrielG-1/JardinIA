@@ -5,7 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { FlaskConical, Sprout, Package, Wheat, Leaf, type LucideIcon, AlertTriangle, Wrench, Fence, SprayCan, Flower, Carrot, TestTube, Shirt, Layers, ShoppingCart, Check, PackageX } from "lucide-react";
+import { FlaskConical, Sprout, Package, Wheat, Leaf, type LucideIcon, AlertTriangle, Wrench, Fence, SprayCan, Flower, Carrot, TestTube, Shirt, Layers, ShoppingCart, Check } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getCatalog, type Category, type Product } from "@/services/catalog-service";
@@ -46,7 +46,7 @@ function ProductCard({
   const { addItem, getItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
 
-  const itemInCart = getItem(product.id || product.name);
+  const itemInCart = getItem(product.id);
   const isOutOfStock = product.inStock === false;
 
   const handleAddToCart = () => {
@@ -60,8 +60,8 @@ function ProductCard({
   };
 
   return (
-    <Card className="flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-105 bg-background overflow-hidden">
-      <CardHeader className="p-0 relative">
+    <Card className="flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-105 bg-background overflow-hidden relative">
+      <CardHeader className="p-0">
         <Image
           src={product.image}
           alt={product.name}
@@ -71,9 +71,9 @@ function ProductCard({
           {...(product.aiHint && { "data-ai-hint": product.aiHint })}
         />
         {isOutOfStock && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <Badge variant="destructive" className="text-sm"><PackageX className="mr-1" /> Sin Stock</Badge>
-          </div>
+            <Badge variant="destructive" className="absolute top-2 left-2 text-sm px-3 py-1 bg-red-600/90 text-white border-red-700">
+             Agotado
+            </Badge>
         )}
       </CardHeader>
       <CardContent className="flex-grow p-2">
@@ -183,7 +183,7 @@ export function CatalogSection() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-4">
                   {Array.isArray(category.products) && category.products.map((product) => (
                     <ProductCard 
-                      key={product.id || product.name}
+                      key={product.id}
                       product={product} 
                     />
                   ))}
@@ -196,5 +196,3 @@ export function CatalogSection() {
     </section>
   );
 }
-
-    

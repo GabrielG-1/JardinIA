@@ -54,7 +54,7 @@ export function EditProductDialog({ product, categoryId, onProductUpdated }: Edi
       const cleanPrice = data.price.replace(/[^0-9]/g, '');
       const priceToSave = data.price.startsWith('$') ? data.price : `$${parseInt(cleanPrice, 10).toLocaleString('es-CL')}`;
 
-      await updateProduct(categoryId, product.id || product.name, { ...data, price: priceToSave });
+      await updateProduct(categoryId, product.id, { ...data, price: priceToSave });
       toast({
         title: "Producto Actualizado",
         description: `"${data.name}" se ha guardado correctamente.`,

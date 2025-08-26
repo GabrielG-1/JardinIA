@@ -55,13 +55,12 @@ function AdminProductList() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const productId = product.id || product.name;
-    setUploadingProductId(productId);
+    setUploadingProductId(product.id);
 
     try {
       const safeProductName = product.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
       const downloadURL = await uploadProductImage(file, safeProductName);
-      await updateProductImage(categoryId, productId, downloadURL);
+      await updateProductImage(categoryId, product.id, downloadURL);
       toast({
         title: "Imagen actualizada",
         description: `La imagen de ${product.name} se ha cambiado correctamente.`,
@@ -83,10 +82,9 @@ function AdminProductList() {
   };
 
   const handleStockChange = async (product: Product, categoryId: string, newStockStatus: boolean) => {
-      const productId = product.id || product.name;
-      setStockChangeProductId(productId);
+      setStockChangeProductId(product.id);
       try {
-          await updateProductStockStatus(categoryId, productId, newStockStatus);
+          await updateProductStockStatus(categoryId, product.id, newStockStatus);
           toast({
               title: "Stock actualizado",
               description: `El stock de ${product.name} ha sido actualizado.`
@@ -142,14 +140,13 @@ function AdminProductList() {
             <AccordionContent className="px-6">
               <div className="divide-y divide-border">
                 {category.products.map((product) => {
-                  const productId = product.id || product.name;
-                  const isUploading = uploadingProductId === productId;
-                  const isChangingStock = stockChangeProductId === productId;
-                  const switchId = `stock-switch-${productId}`;
-                  const fileInputId = `file-input-${productId}`;
+                  const isUploading = uploadingProductId === product.id;
+                  const isChangingStock = stockChangeProductId === product.id;
+                  const switchId = `stock-switch-${product.id}`;
+                  const fileInputId = `file-input-${product.id}`;
 
                   return (
-                    <div key={productId} className="grid grid-cols-1 md:grid-cols-3 items-center py-4 gap-4">
+                    <div key={product.id} className="grid grid-cols-1 md:grid-cols-3 items-center py-4 gap-4">
                       <div className="flex items-center gap-4 col-span-1">
                         <Image
                           src={product.image}

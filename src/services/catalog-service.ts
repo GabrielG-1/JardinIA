@@ -11,12 +11,11 @@ import {
   getDoc,
   arrayUnion,
 } from "firebase/firestore";
-import type { LucideIcon } from "lucide-react";
 
 const CATALOG_COLLECTION = "catalog";
 
 export type Product = {
-  id?: string;
+  id: string; // ID is now mandatory
   name: string;
   price: string;
   image: string;
@@ -30,6 +29,19 @@ export type Category = {
   icon: string;
   products: Product[];
 };
+
+/**
+ * Creates a stable, unique ID for a product based on its category and name.
+ * This is used to ensure consistency if products in Firestore don't have a persistent ID.
+ * @param categoryId The ID of the category.
+ * @param productName The name of the product.
+ * @returns A unique identifier string.
+ */
+const generateStableProductId = (categoryId: string, productName: string): string => {
+    const safeName = productName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    return `${categoryId}-${safeName}`;
+}
+
 
 /**
  * Listens for real-time updates to the catalog collection.
@@ -47,12 +59,11 @@ export const getCatalog = (
     const categories: Category[] = [];
     querySnapshot.forEach((doc) => {
         const data = doc.data();
-        // Ensure each product has a unique ID, defaulting to its name if not present
-        const productsWithIds = (data.products || []).map((p: Product, index: number) => ({
+        // Ensure each product has a unique ID, defaulting to a generated one if not present
+        const productsWithIds = (data.products || []).map((p: Product) => ({
             ...p,
             inStock: p.inStock !== false, // Default to true if undefined
-            // Use a combination of name and index for a more stable key if id is missing
-            id: p.id || `${doc.id}-${index}-${p.name.replace(/\s+/g, '-')}`
+            id: p.id || generateStableProductId(doc.id, p.name)
         }));
 
         categories.push({ 
@@ -86,11 +97,10 @@ export const getAllProducts = async (): Promise<Product[]> => {
       const category = doc.data() as Omit<Category, 'id'>;
       if (Array.isArray(category.products)) {
           // Add categoryId and ensure a unique ID for each product
-          const productsWithCategory = category.products.map((p, index) => ({ 
+          const productsWithCategory = category.products.map((p) => ({ 
               ...p, 
               inStock: p.inStock !== false, // Default to true
-              categoryId: doc.id, 
-              id: p.id || `${doc.id}-${index}-${p.name.replace(/\s+/g, '-')}`
+              id: p.id || generateStableProductId(doc.id, p.name)
             }));
           allProducts.push(...productsWithCategory);
       }
@@ -132,16 +142,17 @@ const updateProductField = async (categoryId: string, productId: string, field: 
     
     let productFound = false;
     const updatedProducts = products.map(p => {
-        const currentProductId = p.id || p.name;
+        // Ensure every product being iterated has an ID for comparison
+        const currentProductId = p.id || generateStableProductId(categoryId, p.name);
         if (currentProductId === productId) {
             productFound = true;
-            return { ...p, [field]: value };
+            return { ...p, id: currentProductId, [field]: value };
         }
-        return p;
+        return { ...p, id: currentProductId };
     });
 
     if (!productFound) {
-        throw new Error(`Product with id or name ${productId} not found in category ${categoryId}.`);
+        throw new Error(`Product with id ${productId} not found in category ${categoryId}.`);
     }
 
     await updateDoc(categoryRef, { products: updatedProducts });
@@ -187,13 +198,12 @@ export const updateProduct = async (
         
         let productFound = false;
         const updatedProducts = products.map(p => {
-            const currentProductId = p.id || p.name;
+            const currentProductId = p.id || generateStableProductId(categoryId, p.name);
             if (currentProductId === productId) {
                 productFound = true;
-                // Preserve existing `id` if it exists, otherwise this update would remove it
-                return { ...p, ...updatedData };
+                return { ...p, ...updatedData, id: currentProductId };
             }
-            return p;
+            return { ...p, id: currentProductId };
         });
         
         if (!productFound) {
@@ -226,7 +236,7 @@ export const updateProductStockStatus = async (categoryId: string, productId: st
 /**
  * Adds a new product to a specific category.
  * @param categoryId The ID of the category to add the product to.
- * @param newProduct The product object to add. Note: it should not have an id, one will be generated.
+ * @param newProductData The product object to add. Note: it should not have an id, one will be generated.
  */
 export const addProductToCategory = async (categoryId: string, newProductData: Omit<Product, 'id'>) => {
     if (!categoryId) {
@@ -235,8 +245,9 @@ export const addProductToCategory = async (categoryId: string, newProductData: O
     try {
         const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
         
-        const productToAdd = {
+        const productToAdd: Product = {
             ...newProductData,
+            id: generateStableProductId(categoryId, newProductData.name),
             inStock: true, // New products are in stock by default
         };
 
@@ -251,5 +262,3 @@ export const addProductToCategory = async (categoryId: string, newProductData: O
         throw error; // Re-throw to be caught by the caller
     }
 };
-
-    
