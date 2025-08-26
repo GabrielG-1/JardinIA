@@ -1,14 +1,14 @@
+
 "use client";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { FlaskConical, Sprout, Package, Wheat, Leaf, type LucideIcon, Upload, AlertTriangle, Wrench, Fence, SprayCan, Flower, Carrot, TestTube, Shirt, Layers, ShoppingCart, Check } from "lucide-react";
-import React, { useRef, useState, useEffect } from "react";
-import { uploadProductImage } from "@/services/storage-service";
+import { FlaskConical, Sprout, Package, Wheat, Leaf, type LucideIcon, AlertTriangle, Wrench, Fence, SprayCan, Flower, Carrot, TestTube, Shirt, Layers, ShoppingCart, Check } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { getCatalog, updateProductImage, type Category, type Product } from "@/services/catalog-service";
+import { getCatalog, type Category, type Product } from "@/services/catalog-service";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/hooks/use-cart";
 
@@ -38,15 +38,10 @@ const formatPrice = (price: string) => {
 
 function ProductCard({ 
   product, 
-  categoryId,
 }: { 
   product: Product, 
-  categoryId: string,
 }) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const [isUploading, setIsUploading] = useState(false);
-  const [currentImage, setCurrentImage] = useState(product.image);
   const { addItem, getItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
 
@@ -62,63 +57,17 @@ function ProductCard({
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setIsUploading(true);
-      try {
-        const safeProductName = product.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-        const downloadURL = await uploadProductImage(file, safeProductName);
-        
-        await updateProductImage(categoryId, product.name, downloadURL);
-        
-        setCurrentImage(downloadURL);
-
-        toast({
-          title: "Imagen actualizada",
-          description: `La imagen de ${product.name} se ha cambiado correctamente.`,
-        });
-      } catch (error) {
-        toast({
-          title: "Error al subir la imagen",
-          description: "No se pudo subir la imagen. Inténtalo de nuevo.",
-          variant: "destructive",
-        });
-        console.error("Error uploading image: ", error);
-      } finally {
-        setIsUploading(false);
-      }
-    }
-  };
-
-  const handleButtonClick = () => {
-    fileInputRef.current?.click();
-  };
-
   return (
-    <Card className="flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-105 bg-background group/product">
+    <Card className="flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-105 bg-background">
       <CardHeader className="p-0 relative">
         <Image
-          src={currentImage} // Use state variable here
+          src={product.image}
           alt={product.name}
           width={200}
           height={200}
           className="rounded-t-lg object-cover w-full aspect-square"
           {...(product.aiHint && { "data-ai-hint": product.aiHint })}
         />
-        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/product:opacity-100 transition-opacity flex items-center justify-center">
-            <Button onClick={handleButtonClick} disabled={isUploading} size="sm">
-                <Upload className="mr-2 h-4 w-4" />
-                {isUploading ? "Subiendo..." : "Cambiar"}
-            </Button>
-            <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/png, image/jpeg, image/webp"
-                onChange={handleImageUpload}
-            />
-        </div>
       </CardHeader>
       <CardContent className="flex-grow p-2">
         <CardTitle className="text-sm font-semibold h-10 overflow-hidden leading-tight">{product.name}</CardTitle>
@@ -169,8 +118,6 @@ export function CatalogSection() {
     }
   }, []);
   
-  const { toast } = useToast();
-
   if (loading) {
     return (
         <section id="catalogo" className="py-20" style={{ backgroundColor: 'hsl(var(--card))' }}>
@@ -231,7 +178,6 @@ export function CatalogSection() {
                     <ProductCard 
                       key={product.id || product.name}
                       product={product} 
-                      categoryId={category.id}
                     />
                   ))}
                 </div>
@@ -243,3 +189,5 @@ export function CatalogSection() {
     </section>
   );
 }
+
+    
