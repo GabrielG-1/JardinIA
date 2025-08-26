@@ -31,9 +31,13 @@ export type Category = {
 /**
  * Listens for real-time updates to the catalog collection.
  * @param callback - A function to be called with the updated list of categories.
+ * @param onError - An optional function to handle errors.
  * @returns An unsubscribe function to detach the listener.
  */
-export const getCatalog = (callback: (categories: Category[]) => void): Unsubscribe => {
+export const getCatalog = (
+    onSuccess: (categories: Category[]) => void, 
+    onError?: (error: Error) => void
+): Unsubscribe => {
   const q = query(collection(db, CATALOG_COLLECTION));
 
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -52,11 +56,12 @@ export const getCatalog = (callback: (categories: Category[]) => void): Unsubscr
             products: productsWithIds
         } as Category);
     });
-    callback(categories);
+    onSuccess(categories);
   }, (error) => {
     console.error("Error fetching catalog: ", error);
-    // You could pass the error to the callback to display a more specific message
-    callback([]);
+    if (onError) {
+        onError(error);
+    }
   });
 
   return unsubscribe;
