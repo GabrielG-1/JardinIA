@@ -15,6 +15,7 @@ import Image from "next/image";
 import { AlertTriangle, Upload } from "lucide-react";
 import { EditProductDialog } from "@/components/admin/edit-product-dialog";
 import { CreateProductDialog } from "@/components/admin/create-product-dialog";
+import { DeleteProductDialog } from "@/components/admin/delete-product-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
@@ -33,7 +34,7 @@ function AdminProductList() {
   const { toast } = useToast();
 
   const handleProductUpdate = () => {
-    console.log("Producto actualizado o creado, la lista se refrescará.");
+    console.log("Producto actualizado, creado o eliminado. La lista se refrescará.");
   };
 
   useEffect(() => {
@@ -191,6 +192,11 @@ function AdminProductList() {
                           product={product} 
                           categoryId={category.id}
                           onProductUpdated={handleProductUpdate}
+                        />
+                        <DeleteProductDialog
+                          product={product}
+                          categoryId={category.id}
+                          onProductDeleted={handleProductUpdate}
                         />
                       </div>
                     </div>

@@ -10,6 +10,7 @@ import {
   type Unsubscribe,
   getDoc,
   arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 
 const CATALOG_COLLECTION = "catalog";
@@ -262,3 +263,35 @@ export const addProductToCategory = async (categoryId: string, newProductData: O
         throw error; // Re-throw to be caught by the caller
     }
 };
+
+/**
+ * Deletes a product from a category.
+ * @param categoryId The ID of the category containing the product.
+ * @param productId The ID of the product to delete.
+ */
+export const deleteProduct = async (categoryId: string, productId: string) => {
+    try {
+        const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
+        const categorySnap = await getDoc(categoryRef);
+
+        if (!categorySnap.exists()) {
+            throw new Error(`Category with id ${categoryId} not found.`);
+        }
+        
+        const categoryData = categorySnap.data() as Omit<Category, 'id'>;
+        const products = categoryData.products || [];
+        
+        const productToDelete = products.find(p => (p.id || generateStableProductId(categoryId, p.name)) === productId);
+
+        if (!productToDelete) {
+             throw new Error(`Product with id ${productId} not found in category ${categoryId} for deletion.`);
+        }
+
+        await updateDoc(categoryRef, {
+            products: arrayRemove(productToDelete)
+        });
+    } catch (error) {
+        console.error("Error deleting product: ", error);
+        throw error;
+    }
+}
