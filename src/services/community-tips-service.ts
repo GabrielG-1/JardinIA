@@ -11,6 +11,8 @@ import {
   doc,
   updateDoc,
   arrayUnion,
+  deleteDoc,
+  arrayRemove,
 } from "firebase/firestore";
 import { type Tip, type Reply } from "@/types/tip";
 import { analyzeTip } from "@/ai/flows/analyze-tip";
@@ -59,7 +61,7 @@ export const addReplyToTip = async (tipId: string, reply: { name: string; advice
         const tipRef = doc(db, TIPS_COLLECTION, tipId);
         const replyWithTimestamp: Reply = {
             ...reply,
-            createdAt: new Date() as any, // Firestore will convert this to a Timestamp
+            createdAt: new Date(), // Firestore will convert this to a Timestamp
         };
         await updateDoc(tipRef, {
             replies: arrayUnion(replyWithTimestamp)
@@ -109,4 +111,35 @@ export const getCommunityTips = (callback: (tips: Tip[]) => void): Unsubscribe =
   });
 
   return unsubscribe;
+};
+
+/**
+ * Deletes an entire community tip document from Firestore.
+ * @param tipId The ID of the tip to delete.
+ */
+export const deleteCommunityTip = async (tipId: string) => {
+    try {
+        const tipRef = doc(db, TIPS_COLLECTION, tipId);
+        await deleteDoc(tipRef);
+    } catch (error) {
+        console.error("Error deleting tip:", error);
+        throw error;
+    }
+};
+
+/**
+ * Deletes a specific reply from a community tip.
+ * @param tipId The ID of the tip containing the reply.
+ * @param replyToDelete The full reply object to remove.
+ */
+export const deleteReplyFromTip = async (tipId: string, replyToDelete: Reply) => {
+    try {
+        const tipRef = doc(db, TIPS_COLLECTION, tipId);
+        await updateDoc(tipRef, {
+            replies: arrayRemove(replyToDelete)
+        });
+    } catch (error) {
+        console.error("Error deleting reply:", error);
+        throw error;
+    }
 };

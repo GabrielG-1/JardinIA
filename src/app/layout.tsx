@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Alegreya } from 'next/font/google';
 import { CartProvider } from '@/hooks/use-cart';
+import { AuthProvider } from '@/hooks/use-auth';
 
 const alegreya = Alegreya({
   subsets: ['latin'],
@@ -25,16 +26,18 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${alegreya.variable} antialiased`} suppressHydrationWarning>
       <body className="font-body">
-        <CartProvider>
-          <div className="flex flex-col min-h-screen bg-background">
-            <Header />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-          </div>
-          <Toaster />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <div className="flex flex-col min-h-screen bg-background">
+              <Header />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+            </div>
+            <Toaster />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

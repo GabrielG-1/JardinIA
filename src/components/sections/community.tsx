@@ -1,17 +1,20 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
-import { addCommunityTip, addReplyToTip, getCommunityTips } from "@/services/community-tips-service";
+import { addCommunityTip, addReplyToTip, getCommunityTips, deleteCommunityTip, deleteReplyFromTip } from "@/services/community-tips-service";
 import { type Tip, type Reply } from "@/types/tip";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "../ui/skeleton";
-import { Users, Send, MessageSquare, CornerDownRight } from "lucide-react";
+import { Users, Send, MessageSquare, CornerDownRight, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useAuth } from "@/hooks/use-auth";
+import { ConfirmDeleteDialog } from "../admin/confirm-delete-dialog";
 
 function ReplyForm({ tipId, onReplyAdded }: { tipId: string; onReplyAdded: () => void }) {
     const [name, setName] = useState("");
@@ -62,17 +65,30 @@ function ReplyForm({ tipId, onReplyAdded }: { tipId: string; onReplyAdded: () =>
 }
 
 
-function TipCard({ tip }: { tip: Tip }) {
+function TipCard({ tip, isAdmin }: { tip: Tip, isAdmin: boolean }) {
     const [isReplyOpen, setIsReplyOpen] = useState(false);
+
     return (
       <Card key={tip.id} className="p-6 shadow-md bg-background">
         <div className="flex items-start gap-4">
           <div className="w-1.5 h-12 bg-primary rounded-full mt-1 shrink-0" />
           <div className="flex-grow">
-            <div className="break-words">
-              <p className="text-foreground/90 text-lg mb-2">{tip.advice}</p>
-              <p className="text-right text-muted-foreground font-semibold">- {tip.name}</p>
+            <div className="flex justify-between items-start">
+                <p className="text-foreground/90 text-lg mb-2 break-words flex-grow pr-4">{tip.advice}</p>
+                {isAdmin && (
+                    <ConfirmDeleteDialog
+                        triggerButton={
+                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 shrink-0">
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        }
+                        onConfirm={() => deleteCommunityTip(tip.id)}
+                        dialogTitle="¿Eliminar este consejo?"
+                        dialogDescription="Esta acción no se puede deshacer. El consejo y todas sus respuestas se eliminarán permanentemente."
+                    />
+                )}
             </div>
+            <p className="text-right text-muted-foreground font-semibold">- {tip.name}</p>
             
             {tip.replies && tip.replies.length > 0 && (
                 <div className="mt-4 space-y-3">
@@ -80,7 +96,21 @@ function TipCard({ tip }: { tip: Tip }) {
                         <div key={index} className="flex items-start gap-3 pl-4 border-l-2 border-accent ml-4">
                            <CornerDownRight className="w-4 h-4 text-accent mt-1 shrink-0"/>
                            <div className="flex-grow">
-                             <p className="text-foreground/80 text-base">{reply.advice}</p>
+                             <div className="flex justify-between items-start">
+                                <p className="text-foreground/80 text-base break-words flex-grow pr-2">{reply.advice}</p>
+                                {isAdmin && (
+                                    <ConfirmDeleteDialog
+                                        triggerButton={
+                                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 shrink-0 h-8 w-8">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        }
+                                        onConfirm={() => deleteReplyFromTip(tip.id, reply)}
+                                        dialogTitle="¿Eliminar esta respuesta?"
+                                        dialogDescription="Esta acción no se puede deshacer y eliminará la respuesta de forma permanente."
+                                    />
+                                )}
+                             </div>
                              <p className="text-right text-muted-foreground/80 text-sm font-semibold">- {reply.name}</p>
                            </div>
                         </div>
@@ -112,6 +142,7 @@ export function CommunitySection() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     const unsubscribe = getCommunityTips((tipsData) => {
@@ -178,7 +209,7 @@ export function CommunitySection() {
                             </Card>
                         ))}
                         {!loading && tips.map((tip) => (
-                           <TipCard key={tip.id} tip={tip} />
+                           <TipCard key={tip.id} tip={tip} isAdmin={isAdmin} />
                         ))}
                     </div>
 
