@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface ConfirmDeleteDialogProps {
   triggerButton: React.ReactNode;
-  onConfirm: () => Promise<void>;
+  onConfirm: () => void | Promise<void>;
   dialogTitle: string;
   dialogDescription: string;
 }
