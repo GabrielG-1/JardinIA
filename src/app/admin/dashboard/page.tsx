@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { AlertTriangle, Pencil, Upload } from "lucide-react";
 import { EditProductDialog } from "@/components/admin/edit-product-dialog";
+import { CreateProductDialog } from "@/components/admin/create-product-dialog";
 
 const formatPrice = (price: string) => {
     const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
@@ -30,7 +31,8 @@ function AdminProductList() {
   const { toast } = useToast();
 
   const handleProductUpdate = () => {
-    console.log("Producto actualizado, la lista se refrescará automáticamente.");
+    // La lista se refresca automáticamente gracias al listener de onSnapshot
+    console.log("Producto actualizado o creado, la lista se refrescará.");
   };
 
   useEffect(() => {
@@ -104,62 +106,67 @@ function AdminProductList() {
   }
 
   return (
-    <Accordion type="multiple" className="w-full space-y-4">
-      {catalogData.map((category) => (
-        <AccordionItem key={category.id} value={category.id} className="border rounded-lg bg-card">
-          <AccordionTrigger className="text-lg font-semibold hover:no-underline px-6">
-            {category.name}
-          </AccordionTrigger>
-          <AccordionContent className="px-6">
-            <div className="divide-y divide-border">
-              {category.products.map((product) => {
-                const isUploading = uploadingProductId === (product.id || product.name);
-                return (
-                  <div key={product.id || product.name} className="flex flex-wrap items-center justify-between py-4 gap-4">
-                    <div className="flex items-center gap-4 flex-1 min-w-[250px]">
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        width={60}
-                        height={60}
-                        className="rounded-md object-cover"
-                      />
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p>
+    <>
+      <div className="mb-6 flex justify-end">
+        <CreateProductDialog categories={catalogData} onProductCreated={handleProductUpdate} />
+      </div>
+      <Accordion type="multiple" className="w-full space-y-4">
+        {catalogData.map((category) => (
+          <AccordionItem key={category.id} value={category.id} className="border rounded-lg bg-card">
+            <AccordionTrigger className="text-lg font-semibold hover:no-underline px-6">
+              {category.name}
+            </AccordionTrigger>
+            <AccordionContent className="px-6">
+              <div className="divide-y divide-border">
+                {category.products.map((product) => {
+                  const isUploading = uploadingProductId === (product.id || product.name);
+                  return (
+                    <div key={product.id || product.name} className="flex flex-wrap items-center justify-between py-4 gap-4">
+                      <div className="flex items-center gap-4 flex-1 min-w-[250px]">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          width={60}
+                          height={60}
+                          className="rounded-md object-cover"
+                        />
+                        <div>
+                          <p className="font-medium">{product.name}</p>
+                          <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                         <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept="image/png, image/jpeg, image/webp"
+                            onChange={(e) => handleImageUpload(e, product, category.id)}
+                          />
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                        >
+                          <Upload className="mr-2 h-4 w-4" />
+                          {isUploading ? "Subiendo..." : "Cambiar Imagen"}
+                        </Button>
+                        <EditProductDialog 
+                          product={product} 
+                          categoryId={category.id}
+                          onProductUpdated={handleProductUpdate}
+                        />
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                       <input
-                          type="file"
-                          ref={fileInputRef}
-                          className="hidden"
-                          accept="image/png, image/jpeg, image/webp"
-                          onChange={(e) => handleImageUpload(e, product, category.id)}
-                        />
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                      >
-                        <Upload className="mr-2 h-4 w-4" />
-                        {isUploading ? "Subiendo..." : "Cambiar Imagen"}
-                      </Button>
-                      <EditProductDialog 
-                        product={product} 
-                        categoryId={category.id}
-                        onProductUpdated={handleProductUpdate}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      ))}
-    </Accordion>
+                  );
+                })}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </>
   );
 }
 
@@ -184,15 +191,8 @@ export default function AdminDashboardPage() {
         </Button>
       </header>
       <main>
-        <div className="mb-6">
-            <p className="text-muted-foreground">
-                Bienvenido al panel de control. Aquí puedes ver y editar los productos de tu tienda.
-            </p>
-        </div>
         <AdminProductList />
       </main>
     </div>
   );
 }
-
-    

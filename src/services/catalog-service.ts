@@ -9,6 +9,7 @@ import {
   updateDoc,
   type Unsubscribe,
   getDoc,
+  arrayUnion,
 } from "firebase/firestore";
 import type { LucideIcon } from "lucide-react";
 
@@ -191,6 +192,7 @@ export const updateProduct = async (
             const currentProductId = p.id || p.name;
             if (currentProductId === productId) {
                 productFound = true;
+                // Preserve existing `id` if it exists, otherwise this update would remove it
                 return { ...p, ...updatedData };
             }
             return p;
@@ -205,5 +207,37 @@ export const updateProduct = async (
     } catch (error) {
         console.error("Error al actualizar el producto: ", error);
         throw error;
+    }
+};
+
+/**
+ * Adds a new product to a specific category.
+ * @param categoryId The ID of the category to add the product to.
+ * @param newProduct The product object to add. Note: it should not have an id, one will be generated.
+ */
+export const addProductToCategory = async (categoryId: string, newProductData: Omit<Product, 'id'>) => {
+    if (!categoryId) {
+        throw new Error("El ID de la categoría es requerido.");
+    }
+    try {
+        const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
+        
+        // Firestore's arrayUnion is perfect for adding to an array without reading it first.
+        // We construct the new product object to be added.
+        // The ID will be generated client-side by getCatalog listener for consistency.
+        const productToAdd = {
+            ...newProductData,
+            // A temporary ID can be added here if needed, but the listener will assign the final one.
+        };
+
+        await updateDoc(categoryRef, {
+            products: arrayUnion(productToAdd)
+        });
+        
+        console.log(`Producto "${newProductData.name}" añadido a la categoría "${categoryId}".`);
+
+    } catch (error) {
+        console.error("Error al añadir el producto:", error);
+        throw error; // Re-throw to be caught by the caller
     }
 };
