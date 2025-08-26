@@ -32,8 +32,7 @@ function ProductRecommendationCard({ product }: { product: Product }) {
     const { toast } = useToast();
     const [isAdded, setIsAdded] = useState(false);
     
-    // Use product.id first, but fallback to product.name for uniqueness if id is missing
-    const productId = product.id || product.name;
+    const productId = product.id;
     const itemInCart = getItem(productId);
 
     const handleAddToCart = () => {
@@ -133,7 +132,7 @@ export function AiAdvisorSection() {
     if (!result) return null;
 
     const validProducts = Array.isArray(result.recommendedProducts)
-      ? result.recommendedProducts.filter(p => typeof p === 'object' && p.name)
+      ? result.recommendedProducts.filter((p): p is Product => typeof p === 'object' && !!p.id)
       : [];
 
     return (
@@ -173,8 +172,8 @@ export function AiAdvisorSection() {
                   <div>
                       <h3 className="font-semibold text-lg flex items-center gap-2 mt-6 mb-4"><ShoppingCart /> Productos Recomendados de la Tienda</h3>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                          {validProducts.map((product, index) => (
-                              <ProductRecommendationCard key={product.id || index} product={product} />
+                          {validProducts.map((product) => (
+                              <ProductRecommendationCard key={product.id} product={product} />
                           ))}
                       </div>
                   </div>
@@ -290,3 +289,5 @@ export function AiAdvisorSection() {
     </section>
   );
 }
+
+    
