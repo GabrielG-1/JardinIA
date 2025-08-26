@@ -59,12 +59,16 @@ export const addReplyToTip = async (tipId: string, reply: { name: string; advice
     }
     try {
         const tipRef = doc(db, TIPS_COLLECTION, tipId);
-        const replyWithTimestamp: Reply = {
+        // Firestore is smart enough to handle a standard Date object and convert it.
+        // The type issue arose from pre-defining the object with the wrong type.
+        // We will construct the object to add directly inside arrayUnion.
+        const replyToAdd = {
             ...reply,
-            createdAt: new Date(), // Firestore will convert this to a Timestamp
+            createdAt: new Date(),
         };
+
         await updateDoc(tipRef, {
-            replies: arrayUnion(replyWithTimestamp)
+            replies: arrayUnion(replyToAdd)
         });
     } catch (error) {
         console.error("Error adding reply:", error);
