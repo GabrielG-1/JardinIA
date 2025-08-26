@@ -3,29 +3,22 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // El catálogo de productos debe ser de lectura pública
-    // Se permite la actualización para poder cambiar las imágenes de los productos
+
+    // Reglas para la colección 'catalog'
+    // PERMITE: que cualquiera lea los productos.
+    // BLOQUEA: que los clientes modifiquen o borren productos directamente.
+    // La escritura solo debe ser posible a través de lógica de servidor segura (panel de admin).
     match /catalog/{categoryId} {
       allow read: if true;
-      allow update: if true; 
+      allow write: if false; // Protege el catálogo contra modificaciones no autorizadas desde el cliente.
     }
 
-    // Los consejos de la comunidad pueden ser leídos por todos,
-    // y cualquiera puede crear nuevos consejos o añadir respuestas (actualizar)
+    // Reglas para la colección 'community-tips'
+    // PERMITE: que cualquiera lea y cree nuevos consejos.
+    // PERMITE: que usuarios autenticados (como el admin) actualicen o eliminen consejos.
     match /community-tips/{tipId} {
-      allow read, create, update: if true;
-    }
-
-    // La configuración del Hero debe ser de lectura pública para mostrar la imagen
-    match /settings/hero {
-      allow read: if true;
-      allow update: if true;
-    }
-
-    // Por defecto, denegar el acceso a cualquier otra colección no especificada
-    match /{document=**} {
-      allow read, write: if false;
+      allow read, create: if true;
+      allow update, delete: if request.auth != null; // Solo usuarios con sesión iniciada pueden modificar o borrar.
     }
   }
 }
