@@ -2,22 +2,22 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
+    
+    // Read-only access to the catalog for all users.
+    // Writes should only be done via the admin panel (server-side).
     match /catalog/{categoryId} {
       allow read: if true;
-      // Write access should be restricted. 
-      // It's managed by server-side logic (e.g., Admin SDK) or secured functions.
-      allow write: if false; 
+      allow write: if false; // Disallow client-side writes completely
     }
 
+    // Community tips can be read by anyone.
+    // New tips can be created by anyone.
+    // Updates (like adding a reply) require authentication.
+    // Deletion is NOT allowed from the client. It must go through the secure server action.
     match /community-tips/{tipId} {
       allow read, create: if true;
-      
-      // Allow updates (like adding replies) and deletes only if the user is authenticated.
-      // The application's UI is responsible for showing the delete button ONLY to admins,
-      // providing the primary layer of authorization control. This rule serves as a
-      // backend safeguard ensuring no anonymous user can perform these actions.
-      allow update, delete: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if false; // Explicitly deny client-side deletion
     }
   }
 }

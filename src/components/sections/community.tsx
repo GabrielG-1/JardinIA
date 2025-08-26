@@ -2,7 +2,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { addCommunityTip, addReplyToTip, getCommunityTips, deleteCommunityTip, deleteReplyFromTip } from "@/services/community-tips-service";
+import { addCommunityTip, addReplyToTip, getCommunityTips, deleteReplyFromTip } from "@/services/community-tips-service";
+import { deleteTipAsAdmin } from "@/actions/delete-tip-action";
 import { type Tip, type Reply } from "@/types/tip";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -67,6 +68,38 @@ function ReplyForm({ tipId, onReplyAdded }: { tipId: string; onReplyAdded: () =>
 
 function TipCard({ tip, isAdmin }: { tip: Tip, isAdmin: boolean }) {
     const [isReplyOpen, setIsReplyOpen] = useState(false);
+    const { toast } = useToast();
+
+    const handleTipDelete = async () => {
+        try {
+            const result = await deleteTipAsAdmin(tip.id);
+            if (result.success) {
+                toast({ title: "Consejo Eliminado", description: "El consejo se ha eliminado correctamente." });
+            } else {
+                throw new Error(result.error || "No se pudo eliminar el consejo.");
+            }
+        } catch (error) {
+            console.error("Error deleting tip:", error);
+            toast({
+                title: "Error al eliminar",
+                description: "No se pudo eliminar el consejo. Revisa los permisos o inténtalo de nuevo.",
+                variant: "destructive",
+            });
+        }
+    };
+
+    const handleReplyDelete = async (reply: Reply) => {
+         try {
+            await deleteReplyFromTip(tip.id, reply);
+            toast({ title: "Respuesta eliminada" });
+        } catch (error) {
+             console.error("Error deleting reply:", error);
+            toast({
+                title: "Error al eliminar respuesta",
+                variant: "destructive",
+            });
+        }
+    }
 
     return (
       <Card key={tip.id} className="p-6 shadow-md bg-background">
@@ -82,7 +115,7 @@ function TipCard({ tip, isAdmin }: { tip: Tip, isAdmin: boolean }) {
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         }
-                        onConfirm={() => deleteCommunityTip(tip.id)}
+                        onConfirm={handleTipDelete}
                         dialogTitle="¿Eliminar este consejo?"
                         dialogDescription="Esta acción no se puede deshacer. El consejo y todas sus respuestas se eliminarán permanentemente."
                     />
@@ -105,7 +138,7 @@ function TipCard({ tip, isAdmin }: { tip: Tip, isAdmin: boolean }) {
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         }
-                                        onConfirm={() => deleteReplyFromTip(tip.id, reply)}
+                                        onConfirm={() => handleReplyDelete(reply)}
                                         dialogTitle="¿Eliminar esta respuesta?"
                                         dialogDescription="Esta acción no se puede deshacer y eliminará la respuesta de forma permanente."
                                     />
@@ -258,4 +291,3 @@ export function CommunitySection() {
     </section>
   );
 }
-

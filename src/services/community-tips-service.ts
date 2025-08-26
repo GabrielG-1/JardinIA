@@ -59,9 +59,7 @@ export const addReplyToTip = async (tipId: string, reply: { name: string; advice
     }
     try {
         const tipRef = doc(db, TIPS_COLLECTION, tipId);
-        // Firestore is smart enough to handle a standard Date object and convert it.
-        // The type issue arose from pre-defining the object with the wrong type.
-        // We will construct the object to add directly inside arrayUnion.
+        // The reply object now includes a client-side generated timestamp
         const replyToAdd = {
             ...reply,
             createdAt: new Date(),
@@ -85,27 +83,26 @@ export const addReplyToTip = async (tipId: string, reply: { name: string; advice
 export const getCommunityTips = (callback: (tips: Tip[]) => void): Unsubscribe => {
   const q = query(
     collection(db, TIPS_COLLECTION), 
-    where("isApproved", "==", true) // Only get approved tips
-    // The orderBy clause was removed to avoid needing a composite index.
-    // We will sort the results on the client-side.
+    where("isApproved", "==", true),
+    orderBy("createdAt", "desc")
   );
   
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const tips: Tip[] = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      // Ensure replies is always an array
+      // Ensure replies is always an array and sort them by date
       if (!data.replies) {
         data.replies = [];
+      } else {
+        // Sort replies by createdAt date, oldest first
+        data.replies.sort((a: Reply, b: Reply) => {
+            const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+            const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+            return dateA - dateB;
+        });
       }
       tips.push({ id: doc.id, ...data } as Tip);
-    });
-
-    // Sort tips by creation date, newest first.
-    tips.sort((a, b) => {
-      const dateA = a.createdAt?.toDate()?.getTime() || 0;
-      const dateB = b.createdAt?.toDate()?.getTime() || 0;
-      return dateB - dateA;
     });
 
     callback(tips);
@@ -118,27 +115,16 @@ export const getCommunityTips = (callback: (tips: Tip[]) => void): Unsubscribe =
 };
 
 /**
- * Deletes an entire community tip document from Firestore.
- * @param tipId The ID of the tip to delete.
- */
-export const deleteCommunityTip = async (tipId: string) => {
-    try {
-        const tipRef = doc(db, TIPS_COLLECTION, tipId);
-        await deleteDoc(tipRef);
-    } catch (error) {
-        console.error("Error deleting tip:", error);
-        throw error;
-    }
-};
-
-/**
- * Deletes a specific reply from a community tip.
+ * Deletes a specific reply from a community tip. This is a client-side operation.
  * @param tipId The ID of the tip containing the reply.
  * @param replyToDelete The full reply object to remove.
  */
 export const deleteReplyFromTip = async (tipId: string, replyToDelete: Reply) => {
     try {
         const tipRef = doc(db, TIPS_COLLECTION, tipId);
+        // Important: To remove an object from an array, you must provide an object
+        // with the exact same field values. We convert the client-side date back to
+        // the format that Firestore expects for the comparison.
         await updateDoc(tipRef, {
             replies: arrayRemove(replyToDelete)
         });
