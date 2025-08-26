@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -12,7 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { AlertTriangle, Pencil, Upload } from "lucide-react";
+import { AlertTriangle, Upload } from "lucide-react";
 import { EditProductDialog } from "@/components/admin/edit-product-dialog";
 import { CreateProductDialog } from "@/components/admin/create-product-dialog";
 import { Switch } from "@/components/ui/switch";
@@ -28,7 +28,6 @@ function AdminProductList() {
   const [catalogData, setCatalogData] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingProductId, setUploadingProductId] = useState<string | null>(null);
   const [stockChangeProductId, setStockChangeProductId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -76,8 +75,9 @@ function AdminProductList() {
       console.error("Error uploading image: ", error);
     } finally {
       setUploadingProductId(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      // Reset file input value
+      if (event.target) {
+        event.target.value = "";
       }
     }
   };
@@ -146,6 +146,7 @@ function AdminProductList() {
                   const isUploading = uploadingProductId === productId;
                   const isChangingStock = stockChangeProductId === productId;
                   const switchId = `stock-switch-${productId}`;
+                  const fileInputId = `file-input-${productId}`;
 
                   return (
                     <div key={productId} className="grid grid-cols-1 md:grid-cols-3 items-center py-4 gap-4">
@@ -174,19 +175,16 @@ function AdminProductList() {
                       <div className="flex items-center gap-2 justify-start md:justify-end col-span-1">
                          <input
                             type="file"
-                            ref={(el) => {
-                                if (el && fileInputRef.current !== el) {
-                                    fileInputRef.current = el;
-                                }
-                            }}
+                            id={fileInputId}
                             className="hidden"
                             accept="image/png, image/jpeg, image/webp"
                             onChange={(e) => handleImageUpload(e, product, category.id)}
+                            disabled={isUploading}
                           />
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          onClick={() => fileInputRef.current?.click()}
+                          onClick={() => document.getElementById(fileInputId)?.click()}
                           disabled={isUploading}
                         >
                           <Upload className="mr-2 h-4 w-4" />
@@ -236,5 +234,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    
