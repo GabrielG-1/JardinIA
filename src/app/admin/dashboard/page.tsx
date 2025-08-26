@@ -96,7 +96,7 @@ function AdminProductList() {
               description: "No se pudo cambiar el estado del stock. Inténtalo de nuevo.",
               variant: "destructive",
           });
-          console.error("Error updating stock: ", error);
+          console.error("Error updating stock status: ", error);
       } finally {
           setStockChangeProductId(null);
       }
@@ -223,11 +223,11 @@ export default function AdminDashboardPage() {
   return (
     <div className="container mx-auto p-4 md:p-8 bg-muted/20 min-h-screen pt-28">
       <header className="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <h1 className="text-3xl font-bold font-headline">Bienvenido a la sección secreta:</h1>
-          {user && <p className="text-muted-foreground truncate">Sesión iniciada como {user.email}</p>}
+          {user && <p className="text-muted-foreground break-words">Sesión iniciada como {user.email}</p>}
         </div>
-        <Button onClick={handleSignOut} variant="outline">
+        <Button onClick={handleSignOut} variant="outline" className="shrink-0">
           Cerrar Sesión
         </Button>
       </header>

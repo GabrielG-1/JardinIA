@@ -1,33 +1,30 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    function isAdmin() {
-      let adminEmails = firestore.get(/configuration/admin).data.emails;
-      return request.auth != null && request.auth.token.email in adminEmails;
-    }
 
-    match /catalog/{docId} {
+    // Reglas para la colección 'catalog'
+    // Cualquiera puede leer el catálogo (necesario para la tienda).
+    // Nadie puede escribir directamente desde el cliente (solo desde el panel de admin).
+    match /catalog/{categoryId} {
       allow read: if true;
-      // Write operations (create, update, delete) are disallowed from the client.
-      // They should only be performed by a trusted backend environment (e.g., using the Admin SDK).
-      // For this app, product management is handled via the admin panel which should
-      // ideally trigger secure backend functions.
-      allow write: if isAdmin();
+      allow write: if false;
     }
 
+    // Reglas para la colección 'community-tips'
+    // - Cualquiera puede leer los consejos aprobados.
+    // - Cualquiera puede crear un nuevo consejo (la moderación se hace con la IA).
+    // - SOLO los administradores pueden actualizar o eliminar consejos y sus respuestas.
     match /community-tips/{tipId} {
-      allow read, create: if true;
-      // Only authenticated admins can update or delete tips.
-      allow update, delete: if isAdmin();
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if request.auth != null && request.auth.token.email in get(/databases/$(database)/documents/configuration/admin).data.emails;
     }
 
-    // This is a new document to store configuration that security rules can access.
+    // Regla de solo lectura para el documento de configuración de administradores.
     match /configuration/admin {
-       allow read: if true;
-       allow write: if false; // Should only be updated manually or via a secure script.
+        allow read: if true;
+        allow write: if false;
     }
   }
 }
