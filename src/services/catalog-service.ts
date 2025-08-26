@@ -1,3 +1,4 @@
+
 import { db } from "@/lib/firebase";
 import {
   collection,
@@ -45,9 +46,10 @@ export const getCatalog = (
     querySnapshot.forEach((doc) => {
         const data = doc.data();
         // Ensure each product has a unique ID, defaulting to its name if not present
-        const productsWithIds = (data.products || []).map((p: Product) => ({
+        const productsWithIds = (data.products || []).map((p: Product, index: number) => ({
             ...p,
-            id: p.id || p.name
+            // Use a combination of name and index for a more stable key if id is missing
+            id: p.id || `${doc.id}-${index}-${p.name.replace(/\s+/g, '-')}`
         }));
 
         categories.push({ 
@@ -81,10 +83,10 @@ export const getAllProducts = async (): Promise<Product[]> => {
       const category = doc.data() as Omit<Category, 'id'>;
       if (Array.isArray(category.products)) {
           // Add categoryId and ensure a unique ID for each product
-          const productsWithCategory = category.products.map(p => ({ 
+          const productsWithCategory = category.products.map((p, index) => ({ 
               ...p, 
               categoryId: doc.id, 
-              id: p.id || p.name 
+              id: p.id || `${doc.id}-${index}-${p.name.replace(/\s+/g, '-')}`
             }));
           allProducts.push(...productsWithCategory);
       }
@@ -117,10 +119,10 @@ export const searchProducts = async (queryTerm: string): Promise<Product[]> => {
 /**
  * Updates the image URL for a specific product within a category.
  * @param categoryId The ID of the category containing the product.
- * @param productName The name of the product to update.
+ * @param productId The ID of the product to update.
  * @param newImageUrl The new image URL for the product.
  */
-export const updateProductImage = async (categoryId: string, productName: string, newImageUrl: string) => {
+export const updateProductImage = async (categoryId: string, productId: string, newImageUrl: string) => {
     try {
         const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
         const categorySnap = await getDoc(categoryRef);
@@ -131,21 +133,29 @@ export const updateProductImage = async (categoryId: string, productName: string
         
         const categoryData = categorySnap.data() as Omit<Category, 'id'>;
         const products = categoryData.products || [];
+        
+        let productFound = false;
+        const updatedProducts = products.map(p => {
+            // Heuristic to match product by id, or by name if id is missing
+            const currentProductId = p.id || p.name;
+            if (currentProductId === productId) {
+                productFound = true;
+                return { ...p, image: newImageUrl };
+            }
+            return p;
+        });
 
-        const productIndex = products.findIndex(p => p.name === productName);
-
-        if (productIndex === -1) {
-            throw new Error(`Product with name ${productName} not found in category ${categoryId}.`);
+        if (!productFound) {
+            // Fallback for old data: search by name if ID fails
+            const productIndex = products.findIndex(p => p.name === productId);
+            if (productIndex !== -1) {
+                 updatedProducts[productIndex] = { ...products[productIndex], image: newImageUrl };
+                 productFound = true;
+            } else {
+                 throw new Error(`Product with id or name ${productId} not found in category ${categoryId}.`);
+            }
         }
 
-        // Create a new array with the updated product
-        const updatedProducts = [
-            ...products.slice(0, productIndex),
-            { ...products[productIndex], image: newImageUrl },
-            ...products.slice(productIndex + 1),
-        ];
-
-        // Update the 'products' field in the document
         await updateDoc(categoryRef, { products: updatedProducts });
 
     } catch (error) {
@@ -153,3 +163,47 @@ export const updateProductImage = async (categoryId: string, productName: string
         throw error;
     }
 }
+
+/**
+ * Updates a specific product's data (name and price).
+ * @param categoryId The ID of the category containing the product.
+ * @param productId The original ID of the product to update.
+ * @param updatedData An object with the new name and price.
+ */
+export const updateProduct = async (
+    categoryId: string, 
+    productId: string, 
+    updatedData: { name: string; price: string }
+) => {
+    try {
+        const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
+        const categorySnap = await getDoc(categoryRef);
+
+        if (!categorySnap.exists()) {
+            throw new Error(`Categoría con id ${categoryId} no encontrada.`);
+        }
+
+        const categoryData = categorySnap.data() as Omit<Category, 'id'>;
+        const products = categoryData.products || [];
+        
+        let productFound = false;
+        const updatedProducts = products.map(p => {
+            const currentProductId = p.id || p.name;
+            if (currentProductId === productId) {
+                productFound = true;
+                return { ...p, ...updatedData };
+            }
+            return p;
+        });
+        
+        if (!productFound) {
+             throw new Error(`Producto con id ${productId} no encontrado en la categoría ${categoryId}.`);
+        }
+
+        await updateDoc(categoryRef, { products: updatedProducts });
+
+    } catch (error) {
+        console.error("Error al actualizar el producto: ", error);
+        throw error;
+    }
+};

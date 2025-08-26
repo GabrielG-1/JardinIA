@@ -11,8 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { AlertTriangle, Pencil } from "lucide-react";
+import { EditProductDialog } from "@/components/admin/edit-product-dialog";
 
 const formatPrice = (price: string) => {
+    // Intenta convertir a número y formatear, si falla, devuelve el string original.
     const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
     if (isNaN(number)) return price;
     return `$${number.toLocaleString('es-CL')}`;
@@ -22,6 +24,13 @@ function AdminProductList() {
   const [catalogData, setCatalogData] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Función para forzar la recarga de datos. Por ahora, no es necesaria,
+  // ya que Firestore nos da actualizaciones en tiempo real.
+  const handleProductUpdate = () => {
+    // En el futuro, podríamos querer forzar una recarga aquí si no usáramos onSnapshot.
+    console.log("Producto actualizado, la lista se refrescará automáticamente.");
+  };
 
   useEffect(() => {
     const unsubscribe = getCatalog(
@@ -87,10 +96,11 @@ function AdminProductList() {
                       <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground">
-                    <Pencil className="h-5 w-5" />
-                    <span className="sr-only">Editar producto</span>
-                  </Button>
+                  <EditProductDialog 
+                    product={product} 
+                    categoryId={category.id}
+                    onProductUpdated={handleProductUpdate}
+                  />
                 </div>
               ))}
             </div>
@@ -124,8 +134,7 @@ export default function AdminDashboardPage() {
       <main>
         <div className="mb-6">
             <p className="text-muted-foreground">
-                Bienvenido al panel de control. Aquí puedes ver todos los productos de tu tienda.
-                La funcionalidad para editar, cambiar precios e imágenes se añadirá en la siguiente fase.
+                Bienvenido al panel de control. Aquí puedes ver y editar los productos de tu tienda.
             </p>
         </div>
         <AdminProductList />
