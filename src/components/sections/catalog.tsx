@@ -110,24 +110,19 @@ export function CatalogSection() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const unsubscribe = getCatalog((data) => {
+    // try/catch is not very effective here for async onSnapshot
+    const unsubscribe = getCatalog(
+      (data) => {
         setCatalogData(data);
         setLoading(false);
-        if(data.length === 0){
-          setError("No se encontraron productos. Agregue la colección 'catalog' a su base de datos de Firestore para comenzar.");
-        }
-      }, (err) => { // Passing an error handler to getCatalog
+      }, 
+      (err) => { 
         console.error(err);
         setError("No se pudieron cargar los productos. Verifique la configuración de Firebase y las reglas de seguridad.");
         setLoading(false);
-      });
-      return () => unsubscribe();
-    } catch (err) {
-      console.error(err);
-      setError("No se pudieron cargar los productos. Verifique la configuración de Firebase y las reglas de seguridad.");
-      setLoading(false);
-    }
+      }
+    );
+    return () => unsubscribe();
   }, []);
   
   if (loading) {
@@ -144,35 +139,38 @@ export function CatalogSection() {
     )
   }
 
-  if (error) {
-    return (
-        <section id="catalogo" className="py-20" style={{ backgroundColor: 'hsl(var(--card))' }}>
-            <div className="container mx-auto px-4 text-center">
-                 <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold font-headline">Nuestro Catálogo</h2>
-                 </div>
-                <Card className="max-w-md mx-auto bg-destructive/10 border-destructive/50">
-                    <CardHeader>
-                        <CardTitle className="flex items-center justify-center gap-2 text-destructive">
-                            <AlertTriangle /> Error al Cargar
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-destructive/80">{error}</p>
-                    </CardContent>
-                </Card>
-            </div>
-        </section>
-    )
-  }
+  const renderContent = () => {
+    if (error) {
+        return (
+            <Card className="max-w-md mx-auto bg-destructive/10 border-destructive/50">
+                <CardHeader>
+                    <CardTitle className="flex items-center justify-center gap-2 text-destructive">
+                        <AlertTriangle /> Error al Cargar
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-destructive/80">{error}</p>
+                </CardContent>
+            </Card>
+        );
+    }
+    
+    if (catalogData.length === 0) {
+        return (
+             <Card className="max-w-md mx-auto bg-yellow-50 border-yellow-300">
+                <CardHeader>
+                    <CardTitle className="flex items-center justify-center gap-2 text-yellow-800">
+                        <AlertTriangle /> Catálogo Vacío
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-yellow-700">No se encontraron productos. Agregue la colección 'catalog' a su base de datos de Firestore para comenzar.</p>
+                </CardContent>
+            </Card>
+        );
+    }
 
-  return (
-    <section id="catalogo" className="py-20" style={{ backgroundColor: 'hsl(var(--card))' }}>
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold font-headline">Nuestro Catálogo</h2>
-          <p className="text-muted-foreground mt-2">Explora nuestra selección de productos de alta calidad.</p>
-        </div>
+    return (
         <Accordion type="multiple" className="w-full max-w-7xl mx-auto">
           {catalogData.map((category) => {
             const Icon = icons[category.icon] || FlaskConical;
@@ -197,11 +195,18 @@ export function CatalogSection() {
             </AccordionItem>
           )})}
         </Accordion>
+    );
+  }
+
+  return (
+    <section id="catalogo" className="py-20" style={{ backgroundColor: 'hsl(var(--card))' }}>
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold font-headline">Nuestro Catálogo</h2>
+          <p className="text-muted-foreground mt-2">Explora nuestra selección de productos de alta calidad.</p>
+        </div>
+        {renderContent()}
       </div>
     </section>
   );
 }
-
-    
-
-    
