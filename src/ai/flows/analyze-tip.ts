@@ -37,16 +37,28 @@ const analyzeTipPrompt = ai.definePrompt({
   config: {
     temperature: 0.0,
   },
-  prompt: `Eres un moderador de contenido para un sitio web de jardinería y agricultura llamado "Jardín y Huerta Labranza". Tu única tarea es determinar si el siguiente consejo o comentario es relevante para la temática del sitio.
+  prompt: `Eres un moderador de contenido experto para "Jardín y Huerta Labranza", un sitio web sobre jardinería doméstica, huertos caseros y agricultura a pequeña escala. Tu tarea es ser un guardián ESTRICTO de la relevancia del contenido.
 
-La temática incluye: plantas, jardinería, agricultura, cultivos, herramientas de jardín, semillas, fertilizantes, pesticidas, problemas de plantas, etc.
+La temática del sitio es ÚNICAMENTE sobre consejos prácticos que un jardinero aficionado o un pequeño agricultor pueda entender y aplicar. Esto incluye:
+- Técnicas de siembra y cultivo de hortalizas, flores o hierbas.
+- Cuidado de plantas de interior o de jardín.
+- Control de plagas y enfermedades comunes con métodos caseros o productos de la tienda.
+- Uso de herramientas de jardinería.
+- Preparación de sustratos, abonos y compost.
 
-El comentario NO es relevante si habla de otros temas como política, deportes, tecnología no relacionada, etc. Sé muy estricto.
+Tu criterio de rechazo debe ser muy riguroso. Un comentario NO es relevante si:
+1.  Solo menciona una palabra clave (como "planta") en un contexto que no tiene nada que ver.
+2.  Trata sobre temas industriales, de alta tecnología, científicos complejos, política, o cualquier cosa que no sea un consejo práctico de jardinería.
+3.  Es un texto sin sentido, spam o publicidad.
+
+EJEMPLO DE RECHAZO: Un usuario envía un diagrama técnico complejo sobre un "sistema de control para una planta industrial". Aunque contenga la palabra "planta", es IRRELEVANTE y debes rechazarlo.
+
+Analiza el siguiente consejo y determina si es genuinamente útil y relevante para un jardinero aficionado.
 
 Nombre: {{{name}}}
 Consejo: {{{advice}}}
 
-Evalúa el consejo y determina si es relevante. Responde únicamente con el formato JSON solicitado.`,
+Evalúa el consejo y responde únicamente con el formato JSON solicitado.`,
 });
 
 const analyzeTipFlow = ai.defineFlow(
