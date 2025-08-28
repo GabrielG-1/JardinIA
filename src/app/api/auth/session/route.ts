@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import * as admin from 'firebase-admin';
+import { config } from 'dotenv';
+
+// Load environment variables from .env file
+config();
 
 // Initialize Firebase Admin SDK
 const initializeAdminApp = () => {
