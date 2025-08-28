@@ -11,8 +11,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "db:seed": "tsx scripts/seed-firestore.ts",
-    "postinstall": "patch-package"
+    "db:seed": "tsx scripts/seed-firestore.ts"
   },
   "dependencies": {
     "@genkit-ai/googleai": "1.16.1",
@@ -42,15 +41,12 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
-    "dotenv": "^16.5.0",
     "embla-carousel-react": "^8.6.0",
     "firebase": "10.14.1",
-    "firebase-admin": "^12.2.0",
     "genkit": "1.16.1",
     "lucide-react": "^0.475.0",
     "next": "15.0.0",
     "nodemailer": "^6.9.14",
-    "patch-package": "^8.0.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
