@@ -155,7 +155,7 @@ export function CommunitySection() {
                             </div>
                              <div className="pl-4 mt-4 space-y-3">
                                 {tip.replies?.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds).map(reply => (
-                                    <div key={reply.id} className="flex items-start gap-3 text-sm">
+                                    <div key={`${tip.id}-${reply.id}`} className="flex items-start gap-3 text-sm">
                                         <CornerDownRight className="w-4 h-4 mt-1 text-muted-foreground shrink-0"/>
                                         <div className="flex-grow bg-muted/50 p-3 rounded-md">
                                             <p className="text-foreground">{reply.text}</p>
