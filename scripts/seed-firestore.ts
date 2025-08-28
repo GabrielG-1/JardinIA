@@ -24,12 +24,34 @@ interface SeedData {
   }>;
 }
 
+/**
+ * Genera un ID estable y único para un producto.
+ * @param categoryId El ID de la categoría.
+ * @param productName El nombre del producto.
+ * @returns Un identificador único.
+ */
+const generateStableProductId = (categoryId: string, productName: string): string => {
+    const safeName = productName
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+
+    let hash = 0;
+    for (let i = 0; i < productName.length; i++) {
+        const char = productName.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    const shortHash = Math.abs(hash).toString(36).substring(0, 5);
+
+    return `${categoryId}-${safeName}-${shortHash}`;
+}
+
 const seedFirestore = async () => {
   try {
     console.log('Iniciando la carga de datos a Firestore con Admin SDK...');
 
     // Inicializar Firebase Admin SDK
-    // El SDK buscará automáticamente las credenciales en el entorno.
     if (admin.apps.length === 0) {
         admin.initializeApp();
     }
@@ -66,12 +88,25 @@ const seedFirestore = async () => {
       process.exit(0);
     }
     
-    console.log('Añadiendo los nuevos documentos...');
+    console.log('Añadiendo los nuevos documentos con IDs de producto estables...');
     const addBatch = db.batch();
 
     seedData.catalog.forEach(category => {
       const docRef = catalogCollection.doc(category.docId);
-      addBatch.set(docRef, category.data);
+      
+      // *** CAMBIO CLAVE: Generar y añadir el ID a cada producto ANTES de subirlo ***
+      const productsWithIds = category.data.products.map(product => ({
+        ...product,
+        id: generateStableProductId(category.docId, product.name),
+        inStock: true // Aseguramos que los productos nuevos tengan stock por defecto
+      }));
+
+      const categoryDataWithProductIds = {
+        ...category.data,
+        products: productsWithIds,
+      };
+
+      addBatch.set(docRef, categoryDataWithProductIds);
       console.log(`Añadiendo el documento '${category.docId}' al batch.`);
     });
 

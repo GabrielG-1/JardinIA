@@ -39,7 +39,6 @@ export type Category = {
  * @returns A unique identifier string.
  */
 const generateStableProductId = (categoryId: string, productName: string): string => {
-    // Sanitize the product name to be URL-friendly but keep it distinguishable
     const safeName = productName
         .toLowerCase()
         .replace(/\s+/g, '-') // Replace spaces with -
@@ -74,17 +73,17 @@ export const getCatalog = (
     const categories: Category[] = [];
     querySnapshot.forEach((doc) => {
         const data = doc.data();
-        // Ensure each product has a unique ID, defaulting to a generated one if not present
-        const productsWithIds = (data.products || []).map((p: Product) => ({
+        // *** CAMBIO CLAVE: Confiar en el ID que viene de la base de datos ***
+        // El script de seed ahora se encarga de que cada producto tenga un `id`.
+        const productsWithDefaults = (data.products || []).map((p: Product) => ({
             ...p,
             inStock: p.inStock !== false, // Default to true if undefined
-            id: p.id || generateStableProductId(doc.id, p.name)
         }));
 
         categories.push({ 
             id: doc.id, 
             ...data,
-            products: productsWithIds
+            products: productsWithDefaults
         } as Category);
     });
     onSuccess(categories);
@@ -111,13 +110,12 @@ export const getAllProducts = async (): Promise<Product[]> => {
   querySnapshot.forEach((doc) => {
       const category = doc.data() as Omit<Category, 'id'>;
       if (Array.isArray(category.products)) {
-          // Add categoryId and ensure a unique ID for each product
-          const productsWithCategory = category.products.map((p) => ({ 
+          // *** CAMBIO CLAVE: Asegurar que los productos leídos tengan los valores por defecto correctos. ***
+          const productsWithDefaults = category.products.map((p) => ({ 
               ...p, 
               inStock: p.inStock !== false, // Default to true
-              id: p.id || generateStableProductId(doc.id, p.name)
             }));
-          allProducts.push(...productsWithCategory);
+          allProducts.push(...productsWithDefaults);
       }
   });
 
@@ -157,13 +155,12 @@ const updateProductField = async (categoryId: string, productId: string, field: 
     
     let productFound = false;
     const updatedProducts = products.map(p => {
-        // Ensure every product being iterated has an ID for comparison
-        const currentProductId = p.id || generateStableProductId(categoryId, p.name);
-        if (currentProductId === productId) {
+        // Se asume que todos los productos tienen un `id` desde la DB
+        if (p.id === productId) {
             productFound = true;
-            return { ...p, id: currentProductId, [field]: value };
+            return { ...p, [field]: value };
         }
-        return { ...p, id: currentProductId };
+        return p;
     });
 
     if (!productFound) {
@@ -213,12 +210,11 @@ export const updateProduct = async (
         
         let productFound = false;
         const updatedProducts = products.map(p => {
-            const currentProductId = p.id || generateStableProductId(categoryId, p.name);
-            if (currentProductId === productId) {
+            if (p.id === productId) {
                 productFound = true;
-                return { ...p, ...updatedData, id: currentProductId };
+                return { ...p, ...updatedData };
             }
-            return { ...p, id: currentProductId };
+            return p;
         });
         
         if (!productFound) {
@@ -295,7 +291,7 @@ export const deleteProduct = async (categoryId: string, productId: string) => {
         const categoryData = categorySnap.data() as Omit<Category, 'id'>;
         const products = categoryData.products || [];
         
-        const productToDelete = products.find(p => (p.id || generateStableProductId(categoryId, p.name)) === productId);
+        const productToDelete = products.find(p => p.id === productId);
 
         if (!productToDelete) {
              throw new Error(`Product with id ${productId} not found in category ${categoryId} for deletion.`);
@@ -309,5 +305,3 @@ export const deleteProduct = async (categoryId: string, productId: string) => {
         throw error;
     }
 }
-
-    
