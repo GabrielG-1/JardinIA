@@ -25,7 +25,7 @@ export type Product = {
 };
 
 export type Category = {
-  id: string;
+  id:string;
   name: string;
   icon: string;
   products: Product[];
@@ -33,14 +33,28 @@ export type Category = {
 
 /**
  * Creates a stable, unique ID for a product based on its category and name.
- * This is used to ensure consistency if products in Firestore don't have a persistent ID.
+ * A simple hash is added to ensure uniqueness even with similar names.
  * @param categoryId The ID of the category.
  * @param productName The name of the product.
  * @returns A unique identifier string.
  */
 const generateStableProductId = (categoryId: string, productName: string): string => {
-    const safeName = productName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-    return `${categoryId}-${safeName}`;
+    // Sanitize the product name to be URL-friendly but keep it distinguishable
+    const safeName = productName
+        .toLowerCase()
+        .replace(/\s+/g, '-') // Replace spaces with -
+        .replace(/[^a-z0-9-]/g, ''); // Remove special characters except letters, numbers, and dashes
+
+    // Basic hash function to add more uniqueness
+    let hash = 0;
+    for (let i = 0; i < productName.length; i++) {
+        const char = productName.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    const shortHash = Math.abs(hash).toString(36).substring(0, 5);
+
+    return `${categoryId}-${safeName}-${shortHash}`;
 }
 
 
@@ -295,3 +309,5 @@ export const deleteProduct = async (categoryId: string, productId: string) => {
         throw error;
     }
 }
+
+    
