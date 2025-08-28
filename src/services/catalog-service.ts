@@ -59,6 +59,7 @@ const generateStableProductId = (categoryId: string, productName: string): strin
 
 /**
  * Listens for real-time updates to the catalog collection.
+ * It ensures every category and product has a stable ID.
  * @param callback - A function to be called with the updated list of categories.
  * @param onError - An optional function to handle errors.
  * @returns An unsubscribe function to detach the listener.
@@ -73,17 +74,21 @@ export const getCatalog = (
     const categories: Category[] = [];
     querySnapshot.forEach((doc) => {
         const data = doc.data();
-        // *** CAMBIO CLAVE: Confiar en el ID que viene de la base de datos ***
-        // El script de seed ahora se encarga de que cada producto tenga un `id`.
-        const productsWithDefaults = (data.products || []).map((p: Product) => ({
-            ...p,
-            inStock: p.inStock !== false, // Default to true if undefined
-        }));
+        const catId = doc.id; // ID de la categoría del documento
+
+        // Asegurar que cada producto tenga un ID único y estable.
+        const products = Array.isArray(data.products)
+            ? data.products.map((p: any, idx: number) => ({
+                ...p,
+                id: p.id || `${catId}-p-${idx}`, // Fallback por si el ID no existe
+                inStock: p.inStock !== false, // Por defecto es true
+            }))
+            : [];
 
         categories.push({ 
-            id: doc.id, 
+            id: catId, 
             ...data,
-            products: productsWithDefaults
+            products: products
         } as Category);
     });
     onSuccess(categories);
@@ -99,7 +104,7 @@ export const getCatalog = (
 
 
 /**
- * Retrieves all products from all categories in the catalog.
+ * Retrieves all products from all categories in the catalog, ensuring each product has a stable ID.
  * @returns A promise that resolves to a flat array of all products.
  */
 export const getAllProducts = async (): Promise<Product[]> => {
@@ -109,13 +114,14 @@ export const getAllProducts = async (): Promise<Product[]> => {
   
   querySnapshot.forEach((doc) => {
       const category = doc.data() as Omit<Category, 'id'>;
+      const catId = doc.id;
       if (Array.isArray(category.products)) {
-          // *** CAMBIO CLAVE: Asegurar que los productos leídos tengan los valores por defecto correctos. ***
-          const productsWithDefaults = category.products.map((p) => ({ 
+          const productsWithIds = category.products.map((p: any, idx: number) => ({ 
               ...p, 
-              inStock: p.inStock !== false, // Default to true
-            }));
-          allProducts.push(...productsWithDefaults);
+              id: p.id || `${catId}-p-${idx}`, // Fallback ID
+              inStock: p.inStock !== false,
+          }));
+          allProducts.push(...productsWithIds);
       }
   });
 
@@ -155,7 +161,6 @@ const updateProductField = async (categoryId: string, productId: string, field: 
     
     let productFound = false;
     const updatedProducts = products.map(p => {
-        // Se asume que todos los productos tienen un `id` desde la DB
         if (p.id === productId) {
             productFound = true;
             return { ...p, [field]: value };
