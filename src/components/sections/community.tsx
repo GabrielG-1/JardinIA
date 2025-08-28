@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "../ui/skeleton";
-import { Users, Send, CornerDownRight } from "lucide-react";
+import { Users, Send, CornerDownRight, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -166,6 +166,7 @@ export function CommunitySection() {
                             </div>
                             <div className="flex justify-end mt-2">
                                 <Button variant="ghost" size="sm" onClick={() => setOpenReplyForm(openReplyForm === tip.id ? null : tip.id)}>
+                                    <MessageSquare />
                                     Responder
                                 </Button>
                             </div>
