@@ -110,7 +110,6 @@ export function CatalogSection() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // try/catch is not very effective here for async onSnapshot
     const unsubscribe = getCatalog(
       (data) => {
         setCatalogData(data);
@@ -125,21 +124,11 @@ export function CatalogSection() {
     return () => unsubscribe();
   }, []);
   
-  if (loading) {
-    return (
-        <section id="catalogo" className="py-20" style={{ backgroundColor: 'hsl(var(--card))' }}>
-            <div className="container mx-auto px-4">
-                <div className="text-center mb-12">
-                <h2 className="text-4xl font-bold font-headline">Nuestro Catálogo</h2>
-                <p className="text-muted-foreground mt-2">Explora nuestra selección de alta calidad.</p>
-                </div>
-                <LoadingSkeleton />
-            </div>
-        </section>
-    )
-  }
-
   const renderContent = () => {
+    if (loading) {
+        return <LoadingSkeleton />;
+    }
+
     if (error) {
         return (
             <Card className="max-w-md mx-auto bg-destructive/10 border-destructive/50">
