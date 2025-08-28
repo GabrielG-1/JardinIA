@@ -8,13 +8,8 @@ import {
   serverTimestamp,
   type Unsubscribe,
   where,
-  doc,
-  updateDoc,
-  arrayUnion,
-  deleteDoc,
-  arrayRemove,
 } from "firebase/firestore";
-import { type Tip, type Reply } from "@/types/tip";
+import { type Tip } from "@/types/tip";
 import { analyzeTip } from "@/ai/flows/analyze-tip";
 
 const TIPS_COLLECTION = "community-tips";
@@ -35,7 +30,6 @@ export const addCommunityTip = async (tip: { name: string; advice: string }): Pr
       ...tip,
       createdAt: serverTimestamp(),
       isApproved: isApproved,
-      replies: [],
     });
 
     return isApproved;
@@ -46,34 +40,6 @@ export const addCommunityTip = async (tip: { name: string; advice: string }): Pr
     return false;
   }
 };
-
-/**
- * Adds a reply to a specific community tip.
- * @param tipId - The ID of the tip to reply to.
- * @param reply - The reply object.
- */
-export const addReplyToTip = async (tipId: string, reply: { name: string; advice: string }) => {
-    if (!tipId) {
-        console.error("Missing tipId");
-        return;
-    }
-    try {
-        const tipRef = doc(db, TIPS_COLLECTION, tipId);
-        // The reply object now includes a client-side generated timestamp
-        const replyToAdd = {
-            ...reply,
-            createdAt: new Date(),
-        };
-
-        await updateDoc(tipRef, {
-            replies: arrayUnion(replyToAdd)
-        });
-    } catch (error) {
-        console.error("Error adding reply:", error);
-        throw error;
-    }
-}
-
 
 /**
  * Listens for real-time updates to the community tips collection.
@@ -90,21 +56,8 @@ export const getCommunityTips = (callback: (tips: Tip[]) => void): Unsubscribe =
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const tips: Tip[] = [];
     querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      // Ensure replies is always an array and sort them by date
-      if (!data.replies) {
-        data.replies = [];
-      } else {
-        // Sort replies by createdAt date, oldest first
-        data.replies.sort((a: Reply, b: Reply) => {
-            const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
-            const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
-            return dateA - dateB;
-        });
-      }
-      tips.push({ id: doc.id, ...data } as Tip);
+      tips.push({ id: doc.id, ...doc.data() } as Tip);
     });
-
     callback(tips);
   }, (error) => {
     console.error("Error fetching community tips:", error);
@@ -112,24 +65,4 @@ export const getCommunityTips = (callback: (tips: Tip[]) => void): Unsubscribe =
   });
 
   return unsubscribe;
-};
-
-/**
- * Deletes a specific reply from a community tip. This is a client-side operation.
- * @param tipId The ID of the tip containing the reply.
- * @param replyToDelete The full reply object to remove.
- */
-export const deleteReplyFromTip = async (tipId: string, replyToDelete: Reply) => {
-    try {
-        const tipRef = doc(db, TIPS_COLLECTION, tipId);
-        // Important: To remove an object from an array, you must provide an object
-        // with the exact same field values. We convert the client-side date back to
-        // the format that Firestore expects for the comparison.
-        await updateDoc(tipRef, {
-            replies: arrayRemove(replyToDelete)
-        });
-    } catch (error) {
-        console.error("Error deleting reply:", error);
-        throw error;
-    }
 };

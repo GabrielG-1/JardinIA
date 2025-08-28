@@ -2,171 +2,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { addCommunityTip, addReplyToTip, getCommunityTips, deleteReplyFromTip } from "@/services/community-tips-service";
-import { deleteTipAsAdmin } from "@/actions/delete-tip-action";
-import { type Tip, type Reply } from "@/types/tip";
+import { addCommunityTip, getCommunityTips } from "@/services/community-tips-service";
+import { type Tip } from "@/types/tip";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "../ui/skeleton";
-import { Users, Send, MessageSquare, CornerDownRight, Trash2 } from "lucide-react";
+import { Users, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useAuth } from "@/hooks/use-auth";
-import { ConfirmDeleteDialog } from "../admin/confirm-delete-dialog";
-
-function ReplyForm({ tipId, onReplyAdded }: { tipId: string; onReplyAdded: () => void }) {
-    const [name, setName] = useState("");
-    const [advice, setAdvice] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const { toast } = useToast();
-
-    const handleReplySubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!name.trim() || !advice.trim()) {
-            toast({ title: "Por favor, completa todos los campos.", variant: "destructive" });
-            return;
-        }
-        setIsSubmitting(true);
-        try {
-            await addReplyToTip(tipId, { name, advice });
-            toast({ title: "Respuesta enviada", description: "Gracias por tu contribución." });
-            setName("");
-            setAdvice("");
-            onReplyAdded();
-        } catch (error) {
-            toast({ title: "Error al enviar la respuesta", variant: "destructive" });
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    return (
-        <form onSubmit={handleReplySubmit} className="space-y-3 mt-4">
-            <Input
-                placeholder="Tu nombre"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-            />
-            <Textarea
-                placeholder="Escribe tu respuesta aquí..."
-                value={advice}
-                onChange={(e) => setAdvice(e.target.value)}
-                required
-                rows={3}
-            />
-            <Button type="submit" size="sm" disabled={isSubmitting}>
-                {isSubmitting ? "Enviando..." : "Enviar Respuesta"}
-            </Button>
-        </form>
-    );
-}
-
-
-function TipCard({ tip, isAdmin }: { tip: Tip, isAdmin: boolean }) {
-    const [isReplyOpen, setIsReplyOpen] = useState(false);
-    const { toast } = useToast();
-
-    const handleTipDelete = async () => {
-        try {
-            const result = await deleteTipAsAdmin(tip.id);
-            if (result.success) {
-                toast({ title: "Consejo Eliminado", description: "El consejo se ha eliminado correctamente." });
-            } else {
-                throw new Error(result.error || "No se pudo eliminar el consejo.");
-            }
-        } catch (error) {
-            console.error("Error deleting tip:", error);
-            toast({
-                title: "Error al eliminar",
-                description: "No se pudo eliminar el consejo. Revisa los permisos o inténtalo de nuevo.",
-                variant: "destructive",
-            });
-        }
-    };
-
-    const handleReplyDelete = async (reply: Reply) => {
-         try {
-            await deleteReplyFromTip(tip.id, reply);
-            toast({ title: "Respuesta eliminada" });
-        } catch (error) {
-             console.error("Error deleting reply:", error);
-            toast({
-                title: "Error al eliminar respuesta",
-                variant: "destructive",
-            });
-        }
-    }
-
-    return (
-      <Card key={tip.id} className="p-6 shadow-md bg-background">
-        <div className="flex items-start gap-4">
-          <div className="w-1.5 h-12 bg-primary rounded-full mt-1 shrink-0" />
-          <div className="flex-grow">
-            <div className="flex justify-between items-start">
-                <p className="text-foreground/90 text-lg mb-2 break-words flex-grow pr-4">{tip.advice}</p>
-                {isAdmin && (
-                    <ConfirmDeleteDialog
-                        triggerButton={
-                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 shrink-0">
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        }
-                        onConfirm={handleTipDelete}
-                        dialogTitle="¿Eliminar este consejo?"
-                        dialogDescription="Esta acción no se puede deshacer. El consejo y todas sus respuestas se eliminarán permanentemente."
-                    />
-                )}
-            </div>
-            <p className="text-right text-muted-foreground font-semibold">- {tip.name}</p>
-            
-            {tip.replies && tip.replies.length > 0 && (
-                <div className="mt-4 space-y-3">
-                    {tip.replies.map((reply, index) => (
-                        <div key={index} className="flex items-start gap-3 pl-4 border-l-2 border-accent ml-4">
-                           <CornerDownRight className="w-4 h-4 text-accent mt-1 shrink-0"/>
-                           <div className="flex-grow">
-                             <div className="flex justify-between items-start">
-                                <p className="text-foreground/80 text-base break-words flex-grow pr-2">{reply.advice}</p>
-                                {isAdmin && (
-                                    <ConfirmDeleteDialog
-                                        triggerButton={
-                                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 shrink-0 h-8 w-8">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        }
-                                        onConfirm={() => handleReplyDelete(reply)}
-                                        dialogTitle="¿Eliminar esta respuesta?"
-                                        dialogDescription="Esta acción no se puede deshacer y eliminará la respuesta de forma permanente."
-                                    />
-                                )}
-                             </div>
-                             <p className="text-right text-muted-foreground/80 text-sm font-semibold">- {reply.name}</p>
-                           </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            <Collapsible open={isReplyOpen} onOpenChange={setIsReplyOpen}>
-                <CollapsibleTrigger asChild>
-                     <Button variant="ghost" size="sm" className="mt-4">
-                        <MessageSquare className="w-4 h-4 mr-2" />
-                        Responder
-                    </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                    <ReplyForm tipId={tip.id} onReplyAdded={() => setIsReplyOpen(false)} />
-                </CollapsibleContent>
-            </Collapsible>
-          </div>
-        </div>
-      </Card>
-    );
-}
 
 export function CommunitySection() {
   const [tips, setTips] = useState<Tip[]>([]);
@@ -175,7 +20,6 @@ export function CommunitySection() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
 
   useEffect(() => {
     const unsubscribe = getCommunityTips((tipsData) => {
@@ -242,7 +86,15 @@ export function CommunitySection() {
                             </Card>
                         ))}
                         {!loading && tips.map((tip) => (
-                           <TipCard key={tip.id} tip={tip} isAdmin={isAdmin} />
+                        <Card key={tip.id} className="p-6 shadow-md bg-background">
+                            <div className="flex items-start gap-4">
+                            <div className="w-1.5 h-12 bg-primary rounded-full mt-1 shrink-0" />
+                            <div className="flex-grow">
+                                <p className="text-foreground/90 text-lg mb-2">{tip.advice}</p>
+                                <p className="text-right text-muted-foreground font-semibold">- {tip.name}</p>
+                            </div>
+                            </div>
+                        </Card>
                         ))}
                     </div>
 
