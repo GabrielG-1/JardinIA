@@ -50,6 +50,7 @@ function ProductCard({
   const isOutOfStock = product.inStock === false;
 
   const handleAddToCart = () => {
+    if (!product.id) return; // Evita añadir productos sin ID
     addItem(product);
     toast({
       title: "Producto Añadido",
@@ -116,6 +117,10 @@ export function CatalogSection() {
         if(data.length === 0){
           setError("No se encontraron productos. Agregue la colección 'catalog' a su base de datos de Firestore para comenzar.");
         }
+      }, (err) => { // Passing an error handler to getCatalog
+        console.error(err);
+        setError("No se pudieron cargar los productos. Verifique la configuración de Firebase y las reglas de seguridad.");
+        setLoading(false);
       });
       return () => unsubscribe();
     } catch (err) {

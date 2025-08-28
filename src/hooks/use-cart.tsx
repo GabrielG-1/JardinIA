@@ -20,6 +20,10 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 // Helper to safely get from localStorage
 const getInitialState = (): CartItem[] => {
+    // Prevent localStorage access on server
+    if (typeof window === 'undefined') {
+        return [];
+    }
     try {
         const item = window.localStorage.getItem('cart');
         return item ? JSON.parse(item) : [];
@@ -30,23 +34,21 @@ const getInitialState = (): CartItem[] => {
 };
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(getInitialState);
 
-  // Load cart from localStorage only once on the client side
+  // Persist cart to localStorage whenever it changes, only on client
   useEffect(() => {
-    setItems(getInitialState());
-  }, []);
-
-  // Persist cart to localStorage whenever it changes
-  useEffect(() => {
-    try {
-        window.localStorage.setItem('cart', JSON.stringify(items));
-    } catch (error) {
-        console.error("Could not save cart to localStorage", error);
+    if (typeof window !== 'undefined') {
+        try {
+            window.localStorage.setItem('cart', JSON.stringify(items));
+        } catch (error) {
+            console.error("Could not save cart to localStorage", error);
+        }
     }
   }, [items]);
 
   const addItem = (product: Product) => {
+    if (!product.id) return; // Safety check
     setItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
       if (existingItem) {
@@ -54,7 +56,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prevItems, { ...product, quantity: 1 }];
+      return [...prevItems, { ...product, id: product.id!, quantity: 1 }];
     });
   };
 
