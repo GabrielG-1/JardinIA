@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -14,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCart } from "@/hooks/use-cart";
 import { ShoppingCart, Trash2, Plus, Minus, Send } from "lucide-react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 const formatPrice = (price: number) => {
     return `$${price.toLocaleString('es-CL')}`;
@@ -21,6 +23,12 @@ const formatPrice = (price: number) => {
 
 export function CartSheet() {
   const { items, totalItems, totalPrice, removeItem, updateItemQuantity, clearCart } = useCart();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
   const handleWhatsAppOrder = () => {
     if (items.length === 0) return;
@@ -50,7 +58,7 @@ export function CartSheet() {
       <SheetTrigger asChild>
         <Button variant="outline" size="icon" className="relative">
           <ShoppingCart className="h-5 w-5" />
-          {totalItems > 0 && (
+          {isClient && totalItems > 0 && (
             <Badge className="absolute -right-2 -top-2 h-6 w-6 rounded-full flex items-center justify-center p-0">
               {totalItems}
             </Badge>
@@ -60,9 +68,9 @@ export function CartSheet() {
       </SheetTrigger>
       <SheetContent className="flex flex-col">
         <SheetHeader>
-          <SheetTitle>Carrito de Compras ({totalItems})</SheetTitle>
+          <SheetTitle>Carrito de Compras ({isClient ? totalItems : 0})</SheetTitle>
         </SheetHeader>
-        {items.length > 0 ? (
+        {isClient && items.length > 0 ? (
           <>
             <ScrollArea className="flex-grow pr-4 -mr-6">
               <div className="space-y-4 py-4">
