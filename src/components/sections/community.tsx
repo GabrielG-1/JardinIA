@@ -2,16 +2,74 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { addCommunityTip, getCommunityTips } from "@/services/community-tips-service";
+import { addCommunityTip, getCommunityTips, addReplyToTip } from "@/services/community-tips-service";
 import { type Tip } from "@/types/tip";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "../ui/skeleton";
-import { Users, Send } from "lucide-react";
+import { Users, Send, CornerDownRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+function ReplyForm({ tipId, onReplyAdded }: { tipId: string, onReplyAdded: () => void }) {
+  const [replyName, setReplyName] = useState("");
+  const [replyText, setReplyText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleReplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (replyName.trim() && replyText.trim()) {
+      setIsSubmitting(true);
+      try {
+        await addReplyToTip(tipId, { name: replyName, text: replyText });
+        toast({
+          title: "Respuesta enviada",
+          description: "Gracias por tu contribución.",
+        });
+        setReplyName("");
+        setReplyText("");
+        onReplyAdded();
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No se pudo enviar la respuesta.",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
+
+  return (
+    <form onSubmit={handleReplySubmit} className="mt-4 ml-8 pl-4 border-l-2 space-y-2">
+       <Input
+        placeholder="Tu nombre"
+        value={replyName}
+        onChange={(e) => setReplyName(e.target.value)}
+        required
+        className="h-9"
+      />
+      <Textarea
+        placeholder="Escribe una respuesta..."
+        value={replyText}
+        onChange={(e) => setReplyText(e.target.value)}
+        required
+        rows={2}
+      />
+      <div className="flex justify-end">
+        <Button size="sm" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Enviando..." : "Responder"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 
 export function CommunitySection() {
   const [tips, setTips] = useState<Tip[]>([]);
@@ -19,6 +77,7 @@ export function CommunitySection() {
   const [newAdvice, setNewAdvice] = useState("");
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openReplyForm, setOpenReplyForm] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -86,14 +145,31 @@ export function CommunitySection() {
                             </Card>
                         ))}
                         {!loading && tips.map((tip) => (
-                        <Card key={tip.id} className="p-6 shadow-md bg-background">
+                        <Card key={tip.id} className="p-6 shadow-md bg-background overflow-hidden">
                             <div className="flex items-start gap-4">
-                            <div className="w-1.5 h-12 bg-primary rounded-full mt-1 shrink-0" />
-                            <div className="flex-grow">
-                                <p className="text-foreground/90 text-lg mb-2">{tip.advice}</p>
-                                <p className="text-right text-muted-foreground font-semibold">- {tip.name}</p>
+                                <div className="w-1.5 h-12 bg-primary rounded-full mt-1 shrink-0" />
+                                <div className="flex-grow">
+                                    <p className="text-foreground/90 text-lg mb-2">{tip.advice}</p>
+                                    <p className="text-right text-muted-foreground font-semibold">- {tip.name}</p>
+                                </div>
                             </div>
+                             <div className="pl-4 mt-4 space-y-3">
+                                {tip.replies?.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds).map(reply => (
+                                    <div key={reply.id} className="flex items-start gap-3 text-sm">
+                                        <CornerDownRight className="w-4 h-4 mt-1 text-muted-foreground shrink-0"/>
+                                        <div className="flex-grow bg-muted/50 p-3 rounded-md">
+                                            <p className="text-foreground">{reply.text}</p>
+                                            <p className="text-xs text-muted-foreground font-semibold mt-1">- {reply.name}</p>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
+                            <div className="flex justify-end mt-2">
+                                <Button variant="ghost" size="sm" onClick={() => setOpenReplyForm(openReplyForm === tip.id ? null : tip.id)}>
+                                    Responder
+                                </Button>
+                            </div>
+                            {openReplyForm === tip.id && <ReplyForm tipId={tip.id} onReplyAdded={() => setOpenReplyForm(null)} />}
                         </Card>
                         ))}
                     </div>

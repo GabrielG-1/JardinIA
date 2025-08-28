@@ -8,8 +8,12 @@ import {
   serverTimestamp,
   type Unsubscribe,
   where,
+  doc,
+  updateDoc,
+  arrayUnion,
+  Timestamp,
 } from "firebase/firestore";
-import { type Tip } from "@/types/tip";
+import { type Tip, type Reply } from "@/types/tip";
 import { analyzeTip } from "@/ai/flows/analyze-tip";
 
 const TIPS_COLLECTION = "community-tips";
@@ -30,6 +34,7 @@ export const addCommunityTip = async (tip: { name: string; advice: string }): Pr
       ...tip,
       createdAt: serverTimestamp(),
       isApproved: isApproved,
+      replies: [], // Initialize with an empty array for replies
     });
 
     return isApproved;
@@ -65,4 +70,32 @@ export const getCommunityTips = (callback: (tips: Tip[]) => void): Unsubscribe =
   });
 
   return unsubscribe;
+};
+
+
+/**
+ * Adds a reply to a specific community tip.
+ * @param tipId The ID of the tip to reply to.
+ * @param replyData The reply object containing name and text.
+ * @returns A promise that resolves when the reply is added.
+ */
+export const addReplyToTip = async (tipId: string, replyData: { name: string; text: string }) => {
+    try {
+        const tipRef = doc(db, TIPS_COLLECTION, tipId);
+        
+        const newReply: Omit<Reply, 'createdAt'> & { createdAt: any } = {
+            id: doc(collection(db, 'dummy')).id, // Generate a unique ID for the reply
+            name: replyData.name,
+            text: replyData.text,
+            createdAt: serverTimestamp(),
+        };
+
+        await updateDoc(tipRef, {
+            replies: arrayUnion(newReply)
+        });
+        
+    } catch (error) {
+        console.error("Error adding reply:", error);
+        throw error;
+    }
 };
