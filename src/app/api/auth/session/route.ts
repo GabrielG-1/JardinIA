@@ -18,22 +18,19 @@ export async function POST(request: NextRequest) {
     if (authorization?.startsWith('Bearer ')) {
       const idToken = authorization.split('Bearer ')[1];
       
-      // In a real app, you'd verify the ID token with Firebase Admin SDK
-      // and create a session cookie.
-      // For this example, we'll just simulate a success response.
-      
       const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
       
-      // IMPORTANT: The following line is commented out because it requires
+      // IMPORTANT: The following lines are commented out because they require
       // the Admin SDK to be initialized with service account credentials.
       // const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn });
       
-      // We will set a dummy cookie for demonstration purposes.
       const sessionCookie = "dummy-session-cookie-for-testing";
 
-      cookies().set('session', sessionCookie, { maxAge: expiresIn, httpOnly: true, secure: true, path: '/' });
+      // The correct way to set a cookie is on the response object.
+      const response = NextResponse.json({ status: 'success' });
+      response.cookies.set('session', sessionCookie, { maxAge: expiresIn, httpOnly: true, secure: true, path: '/' });
       
-      return NextResponse.json({ status: 'success' });
+      return response;
     }
     return NextResponse.json({ status: 'error', message: 'Unauthorized' }, { status: 401 });
   } catch (error) {
@@ -47,8 +44,10 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE() {
   try {
-    cookies().delete('session');
-    return NextResponse.json({ status: 'success' });
+    // The correct way to delete a cookie is on the response object.
+    const response = NextResponse.json({ status: 'success' });
+    response.cookies.delete('session');
+    return response;
   } catch (error) {
     console.error('Session Logout Error:', error);
     return NextResponse.json({ status: 'error', message: 'Internal Server Error' }, { status: 500 });
