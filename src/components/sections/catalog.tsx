@@ -177,7 +177,7 @@ export function CatalogSection() {
           {catalogData.map((category) => {
             const Icon = icons[category.icon] || FlaskConical;
             return (
-            <AccordionItem value={category.id} className="border-border bg-background rounded-lg mb-4 shadow-sm">
+            <AccordionItem key={category.id} value={category.id} className="border-border bg-background rounded-lg mb-4 shadow-sm">
               <AccordionTrigger className="text-2xl font-headline hover:no-underline px-6 py-4">
                 <div className="flex items-center gap-3">
                   <Icon className="h-8 w-8 text-primary" />
@@ -201,3 +201,5 @@ export function CatalogSection() {
     </section>
   );
 }
+
+    
