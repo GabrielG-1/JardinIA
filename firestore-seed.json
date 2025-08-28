@@ -1,3 +1,4 @@
+
 {
     "catalog": [
       {
@@ -423,27 +424,26 @@
             { "name": "Semillas de Perejil crespo", "price": "$20.630", "image": "https://placehold.co/200x200.png", "aiHint": "parsley seeds", "inStock": true },
             { "name": "Semillas de Puerro de Caretan", "price": "$23.800", "image": "https://placehold.co/200x200.png", "aiHint": "leek seeds", "inStock": true },
             { "name": "Semillas de lechuga Escarola", "price": "$65.970", "image": "https://placehold.co/200x200.png", "aiHint": "escarole seeds", "inStock": true },
-            { "name": "Semillas de Repollo Corazón de Buey (lata)", "price": "$56.200", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds", "inStock": true },
+            { "name": "Semillas de Repollo Corazón de Buey", "price": "$56.200", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds", "inStock": true },
             { "name": "Semillas de Repollo morado", "price": "$52.970", "image": "https://placehold.co/200x200.png", "aiHint": "red cabbage", "inStock": true },
-            { "name": "Semillas de Lechuga Escarola 100", "price": "$26.800", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds", "inStock": true },
-            { "name": "Semillas de Repollo Corazón de Buey 100", "price": "$20.500", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds", "inStock": true },
-            { "name": "Semillas de Repollo morado 100", "price": "$18.700", "image": "https://placehold.co/200x200.png", "aiHint": "purple cabbage", "inStock": true },
+            { "name": "Semillas de Lechuga Escarola (100 gr)", "price": "$26.800", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds", "inStock": true },
+            { "name": "Semillas de Repollo morado (100 gr)", "price": "$18.700", "image": "https://placehold.co/200x200.png", "aiHint": "purple cabbage", "inStock": true },
             { "name": "Semillas de Tomate cal Ace", "price": "$56.000", "image": "https://placehold.co/200x200.png", "aiHint": "tomato seeds", "inStock": true },
             { "name": "Semillas de Albahaca de hoja ancha", "price": "$95.200", "image": "https://placehold.co/200x200.png", "aiHint": "basil seeds", "inStock": true },
-            { "name": "Semillas de Beterraga detroit 400 grs", "price": "$34.000", "image": "https://placehold.co/200x200.png", "aiHint": "beet seeds", "inStock": true },
+            { "name": "Semillas de Beterraga detroit (400 gr)", "price": "$34.000", "image": "https://placehold.co/200x200.png", "aiHint": "beet seeds", "inStock": true },
             { "name": "Semillas de Apio Tall Utah", "price": "$41.800", "image": "https://placehold.co/200x200.png", "aiHint": "celery seeds", "inStock": true },
-            { "name": "Semillas de Arveja Tama x kilo", "price": "$7.200", "image": "https://placehold.co/200x200.png", "aiHint": "pea seeds", "inStock": true },
+            { "name": "Semillas de Arveja Tama (por kilo)", "price": "$7.200", "image": "https://placehold.co/200x200.png", "aiHint": "pea seeds", "inStock": true },
             { "name": "Semillas de Haba Agua dulce", "price": "$7.700", "image": "https://placehold.co/200x200.png", "aiHint": "fava beans", "inStock": true },
             { "name": "Semillas de Beterraga Híbrida boro", "price": "$98.000", "image": "https://placehold.co/200x200.png", "aiHint": "hybrid beet", "inStock": true },
             { "name": "Semillas de Lechuga Isabela", "price": "$53.200", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds", "inStock": true },
             { "name": "Semillas de Cebollín Tokio", "price": "$98.000", "image": "https://placehold.co/200x200.png", "aiHint": "scallion seeds", "inStock": true },
             { "name": "Semillas de Morrón Verde", "price": "$61.600", "image": "https://placehold.co/200x200.png", "aiHint": "green pepper", "inStock": true },
-            { "name": "Semillas de Pepino Market more Lata", "price": "$55.750", "image": "https://placehold.co/200x200.png", "aiHint": "cucumber seeds", "inStock": true },
+            { "name": "Semillas de Pepino Market more", "price": "$55.750", "image": "https://placehold.co/200x200.png", "aiHint": "cucumber seeds", "inStock": true },
             { "name": "Semillas de Espinaca Seminis", "price": "$80.300", "image": "https://placehold.co/200x200.png", "aiHint": "spinach seeds", "inStock": true },
             { "name": "Semillas de Beterraga detroit dark", "price": "$34.000", "image": "https://placehold.co/200x200.png", "aiHint": "dark beet", "inStock": true },
             { "name": "Semillas de Lechuga 4 estaciones", "price": "$25.000", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce variety", "inStock": true },
-            { "name": "Semillas de Acelga 5 grs", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "chard seeds", "inStock": true },
-            { "name": "Semillas de Puerro verde 1 grs", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "leek seeds", "inStock": true },
+            { "name": "Semillas de Acelga (5 gr)", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "chard seeds", "inStock": true },
+            { "name": "Semillas de Puerro verde (1 gr)", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "leek seeds", "inStock": true },
             { "name": "Semillas de Perejil liso", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "parsley seeds", "inStock": true },
             { "name": "Semillas de Coliflor Bola de nieve", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "cauliflower seeds", "inStock": true },
             { "name": "Semillas de Remolacha Beterraga", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "beet seeds", "inStock": true },
@@ -451,13 +451,12 @@
             { "name": "Semillas de Lechuga Romana larga", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "romaine lettuce", "inStock": true },
             { "name": "Semillas de Lechuga Kagraner somer", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce seeds", "inStock": true },
             { "name": "Semillas de Lechuga Maravilla 4 est.", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "lettuce four seasons", "inStock": true },
-            { "name": "Semillas de Repollo Corazón de Buey (sobre)", "price": "$2.500", "image": "https://placehold.co/200x200.png", "aiHint": "cabbage seeds", "inStock": true },
             { "name": "Semillas de Lechuga Grand rapid", "price": "$67.100", "image": "https://placehold.co/200x200.png", "aiHint": "grand rapids lettuce", "inStock": true },
             { "name": "Semillas de Lechuga Blanca de París", "price": "$67.200", "image": "https://placehold.co/200x200.png", "aiHint": "white paris lettuce", "inStock": true },
             { "name": "Semillas de Lechuga Lollo rosa", "price": "$74.500", "image": "https://placehold.co/200x200.png", "aiHint": "lollo rosso lettuce", "inStock": true },
             { "name": "Semillas de Lechuga Gallega invierno", "price": "$78.370", "image": "https://placehold.co/200x200.png", "aiHint": "winter lettuce", "inStock": true },
             { "name": "Semillas de Puerro largo caretan", "price": "$62.500", "image": "https://placehold.co/200x200.png", "aiHint": "long leek", "inStock": true },
-            { "name": "Semillas de Coliflor Bola de Nieve", "price": "$69.660", "image": "https://placehold.co/200x200.png", "aiHint": "snowball cauliflower", "inStock": true }
+            { "name": "Semillas de Coliflor Bola de Nieve (lata)", "price": "$69.660", "image": "https://placehold.co/200x200.png", "aiHint": "snowball cauliflower", "inStock": true }
           ]
         }
       },
@@ -518,4 +517,6 @@
   }
   
     
+    
+
     
