@@ -1,7 +1,8 @@
 
 {
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "firestore.rules",
+    "indexes": "{\n  \"indexes\": [\n    {\n      \"collectionGroup\": \"community-tips\",\n      \"queryScope\": \"COLLECTION\",\n      \"fields\": [\n        {\n          \"fieldPath\": \"isApproved\",\n          \"order\": \"ASCENDING\"\n        },\n        {\n          \"fieldPath\": \"createdAt\",\n          \"order\": \"DESCENDING\"\n        }\n      ]\n    }\n  ]\n}"
   },
   "storage": {
     "rules": "storage.rules"
