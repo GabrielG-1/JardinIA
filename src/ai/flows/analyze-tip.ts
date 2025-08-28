@@ -20,7 +20,7 @@ const AnalyzeTipOutputSchema = z.object({
   isRelevant: z
     .boolean()
     .describe(
-      'Indica si el consejo está relacionado con jardinería, agricultura, plantas, cultivos o temas afines. Debe ser estrictamente sobre la temática.'
+      'Indica si el consejo está relacionado con jardinería, agricultura, plantas, o con una opinión sobre la tienda. Debe ser estrictamente sobre la temática.'
     ),
 });
 export type AnalyzeTipOutput = z.infer<typeof AnalyzeTipOutputSchema>;
@@ -37,23 +37,22 @@ const analyzeTipPrompt = ai.definePrompt({
   config: {
     temperature: 0.0,
   },
-  prompt: `Eres un moderador de contenido experto para "Jardín y Huerta Labranza", un sitio web sobre jardinería doméstica, huertos caseros y agricultura a pequeña escala. Tu tarea es ser un guardián ESTRICTO de la relevancia del contenido.
+  prompt: `Eres un moderador de contenido experto para "Jardín y Huerta Labranza", un sitio web sobre jardinería y una tienda de productos agrícolas. Tu tarea es ser un guardián ESTRICTO de la relevancia del contenido.
 
-La temática del sitio es ÚNICAMENTE sobre consejos prácticos que un jardinero aficionado o un pequeño agricultor pueda entender y aplicar. Esto incluye:
-- Técnicas de siembra y cultivo de hortalizas, flores o hierbas.
-- Cuidado de plantas de interior o de jardín.
-- Control de plagas y enfermedades comunes con métodos caseros o productos de la tienda.
-- Uso de herramientas de jardinería.
-- Preparación de sustratos, abonos y compost.
+Un comentario es RELEVANTE si pertenece a una de estas dos categorías:
+1.  **Consejos de Jardinería:** Consejos prácticos que un jardinero aficionado o un pequeño agricultor pueda entender y aplicar (siembra, cuidado de plantas, control de plagas, herramientas, abonos, etc.).
+2.  **Opiniones sobre la Tienda:** Comentarios sobre la experiencia del cliente en la tienda física "Jardín y Huerta Labranza". Esto incluye la calidad de la atención, la variedad de productos, los precios o la amabilidad del personal.
 
 Tu criterio de rechazo debe ser muy riguroso. Un comentario NO es relevante si:
-1.  Solo menciona una palabra clave (como "planta") en un contexto que no tiene nada que ver.
-2.  Trata sobre temas industriales, de alta tecnología, científicos complejos, política, o cualquier cosa que no sea un consejo práctico de jardinería.
-3.  Es un texto sin sentido, spam o publicidad.
+- Solo menciona una palabra clave (como "planta") en un contexto que no tiene nada que ver.
+- Trata sobre temas industriales, de alta tecnología, científicos complejos, política, o cualquier cosa que no sea un consejo práctico de jardinería o una opinión sobre la tienda.
+- Es un texto sin sentido, spam o publicidad no solicitada.
 
 EJEMPLO DE RECHAZO: Un usuario envía un diagrama técnico complejo sobre un "sistema de control para una planta industrial". Aunque contenga la palabra "planta", es IRRELEVANTE y debes rechazarlo.
+EJEMPLO DE ACEPTACIÓN 1: "Mi truco para los pulgones es rociar con agua jabonosa". -> Es un consejo de jardinería. ACEPTAR.
+EJEMPLO DE ACEPTACIÓN 2: "Fui a la tienda y la atención fue excelente, ¡el dueño sabe mucho!". -> Es una opinión sobre la tienda. ACEPTAR.
 
-Analiza el siguiente consejo y determina si es genuinamente útil y relevante para un jardinero aficionado.
+Analiza el siguiente comentario y determina si es genuinamente útil y relevante para la comunidad.
 
 Nombre: {{{name}}}
 Consejo: {{{advice}}}
