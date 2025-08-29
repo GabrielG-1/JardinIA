@@ -1,43 +1,37 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function to check if the user is an admin
+
+    // Helper function to check if the requesting user is an admin.
+    // IMPORTANT: Replace the placeholder emails below with your actual admin emails before deploying.
     function isAdmin() {
-      // Get the list of admin emails from environment variables, split into an array.
-      // Assumes NEXT_PUBLIC_ADMIN_EMAILS is a comma-separated string e.g., "admin1@example.com,admin2@example.com"
-      let adminEmails = get(/environments/NEXT_PUBLIC_ADMIN_EMAILS).split(',');
-      return request.auth.token.email in adminEmails;
+      let adminEmails = ['admin1@example.com', 'admin2@example.com'];
+      return request.auth != null && request.auth.token.email in adminEmails;
     }
 
-    // Rules for the 'catalog' collection
+    // Rules for the 'catalog' collection.
+    // Anyone can read the catalog, but only authenticated admins can write to it.
     match /catalog/{categoryId} {
-      // Allow read access for everyone to view products.
       allow read: if true;
-      // Allow write access (create, update, delete) only for authenticated administrators.
-      allow write: if request.auth != null && isAdmin();
+      allow write: if isAdmin();
     }
-    
-    // Rules for the 'community-tips' collection
+
+    // Rules for the 'community-tips' collection.
     match /community-tips/{tipId} {
-      // Allow anyone to read approved tips.
+      // ANYONE can READ tips that have been approved by the AI.
       allow read: if resource.data.isApproved == true;
-      
-      // Allow anyone to create a new tip document.
+
+      // ANYONE can CREATE a new tip. The isApproved field will be set by the backend.
       allow create: if true;
       
-      // Allow any authenticated user to update a tip (e.g., add a reply).
+      // An AUTHENTICATED user can UPDATE a tip (e.g., to add a reply).
+      // An ADMIN can also UPDATE a tip (e.g., to remove a reply).
       allow update: if request.auth != null;
-      
-      // IMPORTANT: Only allow administrators to delete a tip.
-      allow delete: if request.auth != null && isAdmin();
+
+      // ONLY an ADMIN can DELETE a tip.
+      allow delete: if isAdmin();
     }
 
-    // Default deny all other reads/writes
-    match /{document=**} {
-      allow read, write: if false;
-    }
   }
 }
