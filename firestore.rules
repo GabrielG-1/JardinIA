@@ -1,35 +1,30 @@
-// firestore.rules
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
+    // Función para verificar si el usuario tiene el claim de 'admin' en su token.
+    // Este claim debe ser añadido a través de un proceso seguro (ej. Cloud Function).
+    // Como solución temporal para este entorno, nos basamos en la lista de correos.
     function isAdmin() {
-      // **IMPORTANTE:** REEMPLAZA ESTOS CORREOS CON LOS DE TUS ADMINISTRADORES REALES.
-      // Deben estar en minúsculas y coincidir con NEXT_PUBLIC_ADMIN_EMAILS en tu hosting.
-      let adminEmails = ['admin1@example.com', 'admin2@example.com'];
-      return request.auth != null && request.auth.token.email in adminEmails;
+       // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
+      let adminEmails = ['tu-admin@email.com', 'otro-admin@email.com']; 
+      return request.auth != null && request.auth.token.email.lower() in adminEmails;
     }
 
+    // Reglas para el catálogo de productos
     match /catalog/{categoryId} {
-      allow read: if true;
-      allow write: if isAdmin(); // Solo los administradores pueden escribir en el catálogo.
+      allow read: if true; // Cualquiera puede leer el catálogo
+      allow write: if isAdmin(); // Solo los administradores pueden modificar el catálogo
     }
 
+    // Reglas para los consejos de la comunidad
     match /community-tips/{tipId} {
       allow read: if resource.data.isApproved == true;
-      allow create: if true; // Cualquiera puede enviar un consejo para moderación.
-      
-      // Se permite actualizar si el usuario está autenticado (para añadir respuestas)
-      // O si es un administrador (para eliminar respuestas).
-      allow update: if request.auth != null || isAdmin();
-      
-      // Solo un administrador puede eliminar un consejo completo.
-      allow delete: if isAdmin();
-    }
-
-    // Regla de denegación predeterminada para cualquier otra colección.
-    match /{document=**} {
-      allow read, write: if false;
+      allow create: if true;
+      allow update: if request.auth != null; // Cualquier usuario logueado puede añadir respuestas.
+      allow delete: if isAdmin(); // Solo los administradores pueden borrar el consejo completo.
     }
   }
 }

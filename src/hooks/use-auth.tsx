@@ -15,7 +15,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const checkIsAdmin = (user: User | null): boolean => {
+const checkIsAdminOnClient = (user: User | null): boolean => {
     if (!user || !user.email) return false;
     const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
         .split(',')
@@ -29,9 +29,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
-      setIsAdmin(checkIsAdmin(user));
+      if (user) {
+        // Al cambiar el estado de autenticación, obtenemos el token más reciente con los claims.
+        const idTokenResult = await user.getIdTokenResult(true); // Forzar actualización
+        setIsAdmin(!!idTokenResult.claims.admin);
+      } else {
+        setIsAdmin(false);
+      }
       setIsLoading(false);
     });
 
@@ -41,18 +47,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, pass: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
     const loggedInUser = userCredential.user;
-    const isAdmin = checkIsAdmin(loggedInUser);
     
-    // Set admin status immediately on sign-in
-    setIsAdmin(isAdmin);
+    // Verificamos si es un admin usando la lista de correos del lado del cliente.
+    const isClientSideAdmin = checkIsAdminOnClient(loggedInUser);
+
+    // Forzamos la actualización del token para obtener los nuevos claims (si los hubiera)
+    // El onAuthStateChanged se encargará de actualizar el estado de `isAdmin`.
+    const idTokenResult = await loggedInUser.getIdTokenResult(true);
+    const hasAdminClaim = !!idTokenResult.claims.admin;
+
+    // La verdadera fuente de verdad es el claim, pero la comprobación del cliente es una buena fallback.
+    const isAdminUser = hasAdminClaim || isClientSideAdmin;
+    setIsAdmin(isAdminUser);
     setUser(loggedInUser);
 
-    return { user: loggedInUser, isAdmin };
+    return { user: loggedInUser, isAdmin: isAdminUser };
   };
 
   const signOut = async () => {
     await firebaseSignOut(auth);
-    // onAuthStateChanged will handle setting user to null and admin to false
+    // onAuthStateChanged se encargará de poner user a null y isAdmin a false.
   };
 
   const value = { user, isAdmin, isLoading, signIn, signOut };
