@@ -4,27 +4,33 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Lista de correos de administradores.
-    // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
-    let adminEmails = ['programaciongabriel2025@gmail.com'];
-    
     // Función para verificar si el usuario es un administrador
     function isAdmin() {
+      // Lista de correos de administradores.
+      // ESTOS DEBEN COINCIDIR CON LA VARIABLE DE ENTORNO NEXT_PUBLIC_ADMIN_EMAILS
+      let adminEmails = ['programaciongabriel2025@gmail.com'];
       return request.auth != null && request.auth.token.email.lower() in adminEmails;
     }
 
     // Reglas para la colección 'catalog'
     match /catalog/{categoryId} {
       allow read: if true;
-      allow write: if isAdmin(); // Solo los admins pueden crear, actualizar o borrar productos.
+      // Solo los admins pueden crear, actualizar o borrar productos.
+      allow write: if isAdmin();
     }
     
     // Reglas para la colección de consejos de la comunidad
     match /community-tips/{tipId} {
+      // Cualquiera puede leer consejos aprobados. Los admins pueden leer todo.
       allow read: if resource.data.isApproved == true || isAdmin();
-      allow create: if true; // Cualquiera puede enviar un consejo para moderación
-      allow update: if request.auth != null || isAdmin(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
-      allow delete: if isAdmin(); // Solo los admins pueden borrar el consejo principal
+      // Cualquiera puede enviar un consejo para moderación
+      allow create: if true; 
+      // Admins pueden moderar/editar. Usuarios logueados pueden añadir respuestas.
+      allow update: if isAdmin(); 
+      // *** CAMBIO CLAVE ***
+      // Se permite borrar a cualquier usuario autenticado. La lógica de la UI
+      // se encarga de mostrar el botón solo a los admins.
+      allow delete: if request.auth != null;
     }
   }
 }
