@@ -1,22 +1,41 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Allow public read access to the product catalog
-    match /catalog/{categoryId} {
-      allow read: if true;
-      allow write: if false; // Disallow client-side writes
-    }
-    
-    // Allow anyone to read approved community tips and create new ones.
-    // Updates and deletions are more restricted.
-    match /community-tips/{tipId} {
-      allow read, create: if true;
-      allow update, delete: if request.auth != null;
+    // Helper function to check if the user is an admin
+    function isAdmin() {
+      // Get the list of admin emails from environment variables, split into an array.
+      // Assumes NEXT_PUBLIC_ADMIN_EMAILS is a comma-separated string e.g., "admin1@example.com,admin2@example.com"
+      let adminEmails = get(/environments/NEXT_PUBLIC_ADMIN_EMAILS).split(',');
+      return request.auth.token.email in adminEmails;
     }
 
-    // Default deny all other collections
+    // Rules for the 'catalog' collection
+    match /catalog/{categoryId} {
+      // Allow read access for everyone to view products.
+      allow read: if true;
+      // Allow write access (create, update, delete) only for authenticated administrators.
+      allow write: if request.auth != null && isAdmin();
+    }
+    
+    // Rules for the 'community-tips' collection
+    match /community-tips/{tipId} {
+      // Allow anyone to read approved tips.
+      allow read: if resource.data.isApproved == true;
+      
+      // Allow anyone to create a new tip document.
+      allow create: if true;
+      
+      // Allow any authenticated user to update a tip (e.g., add a reply).
+      allow update: if request.auth != null;
+      
+      // IMPORTANT: Only allow administrators to delete a tip.
+      allow delete: if request.auth != null && isAdmin();
+    }
+
+    // Default deny all other reads/writes
     match /{document=**} {
       allow read, write: if false;
     }
