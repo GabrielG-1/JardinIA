@@ -46,7 +46,9 @@ export function DeleteConfirmationDialog({ itemType, itemName, onConfirm }: Dele
     }
   };
 
-  const truncatedItemName = itemName.length > 50 ? `${itemName.substring(0, 50)}...` : itemName;
+  // FIX: Add a fallback for itemName to prevent runtime error if it's undefined.
+  const safeItemName = itemName || "";
+  const truncatedItemName = safeItemName.length > 50 ? `${safeItemName.substring(0, 50)}...` : safeItemName;
 
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
