@@ -1,43 +1,35 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  
-    // Función para verificar si el usuario autenticado es un administrador.
-    // Los correos deben estar en minúsculas en la lista.
-    function isAdmin() {
-      // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
-      let adminEmails = ['admin1@example.com', 'admin2@example.com']; 
-      return request.auth != null && request.auth.token.email.lower() in adminEmails;
-    }
 
     // Reglas para la colección 'catalog'
     match /catalog/{categoryId} {
-      // Cualquiera puede leer el catálogo de productos.
-      allow read: if true;
-      
-      // Solo los administradores pueden crear, actualizar o eliminar categorías/productos.
-      allow write: if isAdmin();
+      allow read: if true; // Cualquiera puede leer el catálogo
+      allow write: if isAdmin(); // Solo los administradores pueden crear, actualizar o eliminar productos
     }
-    
+
     // Reglas para la colección 'community-tips'
     match /community-tips/{tipId} {
-      // Cualquiera puede leer los consejos que han sido aprobados.
-      allow read: if resource.data.isApproved == true;
+      allow read: if resource.data.isApproved == true || isAdmin(); // Cualquiera puede leer consejos aprobados, los admins pueden leer todos
+      allow create: if true; // Cualquiera puede enviar un consejo para moderación
       
-      // Cualquiera puede crear un nuevo consejo.
-      allow create: if true;
-      
-      // Los usuarios autenticados pueden actualizar (para añadir respuestas) y los admins también.
-      allow update: if request.auth != null || isAdmin();
-      
-      // Solo los administradores pueden eliminar un consejo completo.
-      allow delete: if isAdmin();
+      // Permitir que cualquier usuario autenticado actualice (para añadir respuestas) y que los admins eliminen
+      allow update, delete: if request.auth != null; 
     }
-    
-    // Reglas para cualquier otra colección (denegar por defecto)
-    match /{document=**} {
-      allow read, write: if false;
+
+    // --- Funciones de Ayuda ---
+
+    /**
+     * Comprueba si el correo electrónico del usuario autenticado está en la lista de administradores.
+     * ¡IMPORTANTE! Debes reemplazar los correos de ejemplo con los correos reales de tus administradores.
+     * Asegúrate de que los correos estén en minúsculas.
+     */
+    function isAdmin() {
+      // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
+      let adminEmails = ['admin1@example.com', 'admin2@example.com'];
+      return request.auth != null && request.auth.token.email.lower() in adminEmails;
     }
   }
 }
