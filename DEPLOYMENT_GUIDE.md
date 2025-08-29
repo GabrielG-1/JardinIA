@@ -22,7 +22,7 @@ service cloud.firestore {
     
     // Lista de correos de administradores.
     // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
-    let adminEmails = ['admin1@example.com', 'admin2@example.com'];
+    let adminEmails = ['programaciongabriel2025@gmail.com'];
     
     // Función para verificar si el usuario es un administrador
     function isAdmin() {
