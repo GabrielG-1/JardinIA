@@ -57,8 +57,6 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
       <AdminLayoutContent>{children}</AdminLayoutContent>
-    </AuthProvider>
   );
 }
