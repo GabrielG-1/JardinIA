@@ -12,6 +12,9 @@ import {
   updateDoc,
   arrayUnion,
   Timestamp,
+  deleteDoc,
+  getDoc,
+  arrayRemove,
 } from "firebase/firestore";
 import { type Tip, type Reply } from "@/types/tip";
 import { analyzeTip } from "@/ai/flows/analyze-tip";
@@ -98,4 +101,35 @@ export const addReplyToTip = async (tipId: string, replyData: { name: string; te
         console.error("Error adding reply:", error);
         throw error;
     }
+};
+
+/**
+ * Deletes a community tip document from Firestore.
+ * @param tipId The ID of the tip to delete.
+ */
+export const deleteCommunityTip = async (tipId: string): Promise<void> => {
+  try {
+    const tipRef = doc(db, TIPS_COLLECTION, tipId);
+    await deleteDoc(tipRef);
+  } catch (error) {
+    console.error("Error deleting tip:", error);
+    throw error;
+  }
+};
+
+/**
+ * Deletes a specific reply from a community tip.
+ * @param tipId The ID of the tip containing the reply.
+ * @param reply The entire reply object to be deleted.
+ */
+export const deleteReplyFromTip = async (tipId: string, reply: Reply): Promise<void> => {
+  try {
+    const tipRef = doc(db, TIPS_COLLECTION, tipId);
+    await updateDoc(tipRef, {
+      replies: arrayRemove(reply),
+    });
+  } catch (error) {
+    console.error("Error deleting reply:", error);
+    throw error;
+  }
 };

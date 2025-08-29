@@ -12,7 +12,9 @@ import { Skeleton } from "../ui/skeleton";
 import { Users, Send, CornerDownRight, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/use-auth";
+import { DeleteConfirmationDialog } from "@/components/community/delete-confirmation-dialog";
+import { deleteCommunityTip, deleteReplyFromTip } from "@/services/community-tips-service";
 
 function ReplyForm({ tipId, onReplyAdded }: { tipId: string, onReplyAdded: () => void }) {
   const [replyName, setReplyName] = useState("");
@@ -79,6 +81,7 @@ export function CommunitySection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openReplyForm, setOpenReplyForm] = useState<string | null>(null);
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     const unsubscribe = getCommunityTips((tipsData) => {
@@ -111,6 +114,22 @@ export function CommunitySection() {
       }
     }
   };
+  
+  const onTipDeleted = (tipId: string) => {
+    setTips(prevTips => prevTips.filter(t => t.id !== tipId));
+     toast({
+      title: "Consejo Eliminado",
+      description: "El consejo de la comunidad ha sido eliminado.",
+    });
+  }
+  
+  const onReplyDeleted = () => {
+    // For now, just show a toast. The real-time listener will update the UI.
+     toast({
+      title: "Respuesta Eliminada",
+      description: "La respuesta ha sido eliminada.",
+    });
+  }
 
   return (
     <section id="comunidad" className="py-20 px-4" style={{ backgroundColor: 'hsl(var(--card))' }}>
@@ -145,7 +164,16 @@ export function CommunitySection() {
                             </Card>
                         ))}
                         {!loading && tips.map((tip) => (
-                        <Card key={tip.id} className="p-6 shadow-md bg-background overflow-hidden">
+                        <Card key={tip.id} className="p-6 shadow-md bg-background overflow-hidden relative">
+                           {isAdmin && (
+                                <div className="absolute top-2 right-2">
+                                     <DeleteConfirmationDialog
+                                        itemType="consejo"
+                                        itemName={tip.advice}
+                                        onConfirm={() => deleteCommunityTip(tip.id).then(() => onTipDeleted(tip.id))}
+                                    />
+                                </div>
+                           )}
                             <div className="flex items-start gap-4">
                                 <div className="w-1.5 h-12 bg-primary rounded-full mt-1 shrink-0" />
                                 <div className="flex-grow">
@@ -155,10 +183,19 @@ export function CommunitySection() {
                             </div>
                              <div className="pl-4 mt-4 space-y-3">
                                 {tip.replies?.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds).map((reply, index) => (
-                                    <div key={`${tip.id}-reply-${index}`} className="flex items-start gap-3 text-sm">
+                                    <div key={`${tip.id}-reply-${index}`} className="flex items-start gap-3 text-sm group">
                                         <CornerDownRight className="w-4 h-4 mt-1 text-muted-foreground shrink-0"/>
-                                        <div className="flex-grow bg-muted/50 p-3 rounded-md">
-                                            <p className="text-foreground">{reply.text}</p>
+                                        <div className="flex-grow bg-muted/50 p-3 rounded-md relative">
+                                             {isAdmin && (
+                                                <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <DeleteConfirmationDialog
+                                                        itemType="respuesta"
+                                                        itemName={reply.text}
+                                                        onConfirm={() => deleteReplyFromTip(tip.id, reply).then(onReplyDeleted)}
+                                                    />
+                                                </div>
+                                             )}
+                                            <p className="text-foreground pr-8">{reply.text}</p>
                                             <p className="text-xs text-muted-foreground font-semibold mt-1">- {reply.name}</p>
                                         </div>
                                     </div>
@@ -166,7 +203,7 @@ export function CommunitySection() {
                             </div>
                             <div className="flex justify-end mt-2">
                                 <Button variant="ghost" size="sm" onClick={() => setOpenReplyForm(openReplyForm === tip.id ? null : tip.id)}>
-                                    <MessageSquare />
+                                    <MessageSquare className="mr-2" />
                                     Responder
                                 </Button>
                             </div>
