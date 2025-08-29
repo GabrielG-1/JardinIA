@@ -1,32 +1,23 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Función para verificar si el usuario tiene el claim de administrador en su token.
-    // Este claim se asigna del lado del servidor cuando el usuario inicia sesión.
-    function isUserAdmin() {
-      return request.auth.token.admin == true;
-    }
-
     // Reglas para la colección 'catalog'
     match /catalog/{categoryId} {
       allow read: if true;
-      // Solo los administradores pueden crear, actualizar o borrar (write).
-      allow write: if isUserAdmin();
+      // Solo los administradores (con el claim 'admin') pueden escribir.
+      allow write: if request.auth != null && request.auth.token.admin == true;
     }
     
     // Reglas para la colección de consejos de la comunidad
     match /community-tips/{tipId} {
-      // Todos pueden leer consejos aprobados. Los admins pueden leer todo.
-      allow read: if resource.data.isApproved == true || isUserAdmin();
-      // Cualquiera puede enviar un consejo para moderación.
-      allow create: if true;
-      // Los usuarios autenticados pueden añadir respuestas (actualizar el array). Los admins pueden modificar todo.
-      allow update: if request.auth != null || isUserAdmin();
-      // Solo los administradores pueden borrar el consejo principal.
-      allow delete: if isUserAdmin();
+      allow read: if resource.data.isApproved == true || (request.auth != null && request.auth.token.admin == true);
+      allow create: if true; // Cualquiera puede enviar un consejo para moderación
+      // Los usuarios logueados pueden añadir respuestas. Los administradores pueden modificar.
+      allow update: if request.auth != null; 
+      // Solo los administradores (con el claim 'admin') pueden borrar.
+      allow delete: if request.auth != null && request.auth.token.admin == true; 
     }
   }
 }
