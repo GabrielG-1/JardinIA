@@ -14,7 +14,6 @@
     "db:seed": "tsx scripts/seed-firestore.ts"
   },
   "dependencies": {
-    "@genkit-ai/firebase": "1.16.1",
     "@genkit-ai/googleai": "1.16.1",
     "@genkit-ai/next": "1.16.1",
     "@hookform/resolvers": "^4.1.3",
@@ -43,7 +42,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
-    "firebase": "12.2.0",
+    "firebase": "10.14.1",
     "firebase-admin": "^12.2.0",
     "genkit": "1.16.1",
     "lucide-react": "^0.475.0",
