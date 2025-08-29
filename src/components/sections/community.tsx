@@ -115,20 +115,20 @@ export function CommunitySection() {
     }
   };
   
-  const onTipDeleted = (tipId: string) => {
-    setTips(prevTips => prevTips.filter(t => t.id !== tipId));
+  const handleTipDeleted = () => {
      toast({
       title: "Consejo Eliminado",
       description: "El consejo de la comunidad ha sido eliminado.",
     });
+    // The real-time listener will update the UI automatically.
   }
   
-  const onReplyDeleted = () => {
-    // For now, just show a toast. The real-time listener will update the UI.
+  const handleReplyDeleted = () => {
      toast({
       title: "Respuesta Eliminada",
       description: "La respuesta ha sido eliminada.",
     });
+    // The real-time listener will update the UI automatically.
   }
 
   return (
@@ -170,7 +170,7 @@ export function CommunitySection() {
                                      <DeleteConfirmationDialog
                                         itemType="consejo"
                                         itemName={tip.advice}
-                                        onConfirm={() => deleteCommunityTip(tip.id).then(() => onTipDeleted(tip.id))}
+                                        onConfirm={() => deleteCommunityTip(tip.id).then(handleTipDeleted)}
                                     />
                                 </div>
                            )}
@@ -191,7 +191,7 @@ export function CommunitySection() {
                                                     <DeleteConfirmationDialog
                                                         itemType="respuesta"
                                                         itemName={reply.text}
-                                                        onConfirm={() => deleteReplyFromTip(tip.id, reply).then(onReplyDeleted)}
+                                                        onConfirm={() => deleteReplyFromTip(tip.id, reply).then(handleReplyDeleted)}
                                                     />
                                                 </div>
                                              )}
