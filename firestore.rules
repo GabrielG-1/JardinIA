@@ -2,38 +2,42 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // --- Helper Functions ---
-    // Checks if the requesting user's email is in the list of admins.
+  
+    // Función para verificar si el usuario autenticado es un administrador.
+    // Los correos deben estar en minúsculas en la lista.
     function isAdmin() {
-      // IMPORTANT: Replace the placeholder emails below with the real emails 
-      // of your administrators before deploying your application.
-      let adminEmails = ['admin1@example.com', 'admin2@example.com'];
-      return request.auth != null && request.auth.token.email in adminEmails;
+      // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
+      let adminEmails = ['admin1@example.com', 'admin2@example.com']; 
+      return request.auth != null && request.auth.token.email.lower() in adminEmails;
     }
 
-    // --- Catalog Rules ---
-    // Anyone can read the catalog.
-    // Only admins can modify (create, update, delete) the catalog.
+    // Reglas para la colección 'catalog'
     match /catalog/{categoryId} {
+      // Cualquiera puede leer el catálogo de productos.
       allow read: if true;
+      
+      // Solo los administradores pueden crear, actualizar o eliminar categorías/productos.
       allow write: if isAdmin();
     }
-
-    // --- Community Tips Rules ---
+    
+    // Reglas para la colección 'community-tips'
     match /community-tips/{tipId} {
-      // Anyone can read tips that are approved.
+      // Cualquiera puede leer los consejos que han sido aprobados.
       allow read: if resource.data.isApproved == true;
-
-      // Anyone can submit a new tip.
+      
+      // Cualquiera puede crear un nuevo consejo.
       allow create: if true;
       
-      // Anyone authenticated can update a tip (to add replies).
-      // Admins can also update (to remove replies).
-      allow update: if request.auth != null;
-
-      // Only admins can delete a whole tip.
+      // Los usuarios autenticados pueden actualizar (para añadir respuestas) y los admins también.
+      allow update: if request.auth != null || isAdmin();
+      
+      // Solo los administradores pueden eliminar un consejo completo.
       allow delete: if isAdmin();
+    }
+    
+    // Reglas para cualquier otra colección (denegar por defecto)
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

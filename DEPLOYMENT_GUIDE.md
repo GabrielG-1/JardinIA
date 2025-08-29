@@ -18,7 +18,7 @@ Para que los administradores puedan moderar contenido, debes editar tus reglas d
 function isAdmin() {
   // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
   let adminEmails = ['tu-admin@email.com', 'otro-admin@email.com']; 
-  return request.auth != null && request.auth.token.email in adminEmails;
+  return request.auth != null && request.auth.token.email.lower() in adminEmails;
 }
 ```
 
