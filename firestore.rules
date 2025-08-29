@@ -1,35 +1,35 @@
-
+// firestore.rules
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Reglas para la colección 'catalog'
-    match /catalog/{categoryId} {
-      allow read: if true; // Cualquiera puede leer el catálogo
-      allow write: if isAdmin(); // Solo los administradores pueden crear, actualizar o eliminar productos
-    }
-
-    // Reglas para la colección 'community-tips'
-    match /community-tips/{tipId} {
-      allow read: if resource.data.isApproved == true || isAdmin(); // Cualquiera puede leer consejos aprobados, los admins pueden leer todos
-      allow create: if true; // Cualquiera puede enviar un consejo para moderación
-      
-      // Permitir que cualquier usuario autenticado actualice (para añadir respuestas) y que los admins eliminen
-      allow update, delete: if request.auth != null; 
-    }
-
-    // --- Funciones de Ayuda ---
-
-    /**
-     * Comprueba si el correo electrónico del usuario autenticado está en la lista de administradores.
-     * ¡IMPORTANTE! Debes reemplazar los correos de ejemplo con los correos reales de tus administradores.
-     * Asegúrate de que los correos estén en minúsculas.
-     */
+    
     function isAdmin() {
-      // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
+      // **IMPORTANTE:** REEMPLAZA ESTOS CORREOS CON LOS DE TUS ADMINISTRADORES REALES.
+      // Deben estar en minúsculas y coincidir con NEXT_PUBLIC_ADMIN_EMAILS en tu hosting.
       let adminEmails = ['admin1@example.com', 'admin2@example.com'];
-      return request.auth != null && request.auth.token.email.lower() in adminEmails;
+      return request.auth != null && request.auth.token.email in adminEmails;
+    }
+
+    match /catalog/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin(); // Solo los administradores pueden escribir en el catálogo.
+    }
+
+    match /community-tips/{tipId} {
+      allow read: if resource.data.isApproved == true;
+      allow create: if true; // Cualquiera puede enviar un consejo para moderación.
+      
+      // Se permite actualizar si el usuario está autenticado (para añadir respuestas)
+      // O si es un administrador (para eliminar respuestas).
+      allow update: if request.auth != null || isAdmin();
+      
+      // Solo un administrador puede eliminar un consejo completo.
+      allow delete: if isAdmin();
+    }
+
+    // Regla de denegación predeterminada para cualquier otra colección.
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
