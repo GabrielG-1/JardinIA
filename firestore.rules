@@ -2,36 +2,38 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper function to check if the requesting user is an admin.
-    // IMPORTANT: Replace the placeholder emails below with your actual admin emails before deploying.
+    
+    // --- Helper Functions ---
+    // Checks if the requesting user's email is in the list of admins.
     function isAdmin() {
+      // IMPORTANT: Replace the placeholder emails below with the real emails 
+      // of your administrators before deploying your application.
       let adminEmails = ['admin1@example.com', 'admin2@example.com'];
       return request.auth != null && request.auth.token.email in adminEmails;
     }
 
-    // Rules for the 'catalog' collection.
-    // Anyone can read the catalog, but only authenticated admins can write to it.
+    // --- Catalog Rules ---
+    // Anyone can read the catalog.
+    // Only admins can modify (create, update, delete) the catalog.
     match /catalog/{categoryId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Rules for the 'community-tips' collection.
+    // --- Community Tips Rules ---
     match /community-tips/{tipId} {
-      // ANYONE can READ tips that have been approved by the AI.
+      // Anyone can read tips that are approved.
       allow read: if resource.data.isApproved == true;
 
-      // ANYONE can CREATE a new tip. The isApproved field will be set by the backend.
+      // Anyone can submit a new tip.
       allow create: if true;
       
-      // An AUTHENTICATED user can UPDATE a tip (e.g., to add a reply).
-      // An ADMIN can also UPDATE a tip (e.g., to remove a reply).
+      // Anyone authenticated can update a tip (to add replies).
+      // Admins can also update (to remove replies).
       allow update: if request.auth != null;
 
-      // ONLY an ADMIN can DELETE a tip.
+      // Only admins can delete a whole tip.
       allow delete: if isAdmin();
     }
-
   }
 }

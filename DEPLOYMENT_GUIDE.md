@@ -10,13 +10,13 @@ Para que los administradores puedan moderar contenido, debes editar tus reglas d
 
 1.  Abre el archivo `firestore.rules`.
 2.  Busca la función `isAdmin()`.
-3.  **Reemplaza los correos de ejemplo** (`'admin1@example.com', 'admin2@example.com'`) con los correos electrónicos reales de tus administradores.
+3.  **Reemplaza los correos de ejemplo** (`'admin1@example.com', 'admin2@example.com'`) con los correos electrónicos reales de tus administradores. **Asegúrate de que los correos estén en minúsculas y no tengan espacios extra.**
 
 ```javascript
 // firestore.rules
 
 function isAdmin() {
-  // REEMPLAZA ESTO CON TUS CORREOS REALES
+  // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
   let adminEmails = ['tu-admin@email.com', 'otro-admin@email.com']; 
   return request.auth != null && request.auth.token.email in adminEmails;
 }
