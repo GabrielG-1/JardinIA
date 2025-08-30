@@ -2,24 +2,32 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Lista de correos de administradores.
+    // ¡IMPORTANTE! REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
+    let adminEmails = ['programaciongabriel2025@gmail.com'];
+    
+    // Función para verificar si el usuario es un administrador
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email.lower() in adminEmails;
+    }
 
     // Reglas para la colección 'catalog'
-    // Permite a cualquiera leer, pero solo los administradores pueden escribir, actualizar o eliminar.
     match /catalog/{categoryId} {
       allow read: if true;
-      allow write: if request.auth.token.admin == true;
+      // Solo los admins pueden crear, actualizar o borrar productos.
+      allow write: if isAdmin();
     }
     
     // Reglas para la colección de consejos de la comunidad
     match /community-tips/{tipId} {
-      // Cualquiera puede leer consejos aprobados, los admins pueden leer todos.
-      allow read: if resource.data.isApproved == true || request.auth.token.admin == true;
-      // Cualquiera puede enviar un consejo para moderación.
-      allow create: if true;
-      // Admins pueden modificar. Usuarios autenticados pueden añadir respuestas.
-      allow update: if request.auth.token.admin == true || request.auth != null;
-      // Los administradores solo pueden borrar el consejo principal si NO tiene respuestas.
-      allow delete: if request.auth.token.admin == true && (resource.data.replies == null || resource.data.replies.size() == 0);
+      allow read: if resource.data.isApproved == true || isAdmin();
+      // Cualquiera puede enviar un consejo para moderación
+      allow create: if true; 
+      // Usuarios logueados pueden añadir respuestas (actualizar el array), admins pueden modificar todo.
+      allow update: if request.auth != null || isAdmin(); 
+      // Solo los admins pueden borrar el consejo principal
+      allow delete: if isAdmin();
     }
   }
 }
