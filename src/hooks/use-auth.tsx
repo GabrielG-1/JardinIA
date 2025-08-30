@@ -15,16 +15,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Esta función se ejecuta en el cliente y comprueba si un email está en la lista de admins
-// definida en las variables de entorno.
-const checkIsAdminOnClient = (user: User | null): boolean => {
-    if (!user || !user.email) return false;
-    // Lee la variable de entorno PÚBLICA.
-    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
+/**
+ * Parses the admin emails string from environment variables into a clean, lowercase array.
+ * @returns An array of admin emails, ready for comparison.
+ */
+const getAdminEmails = (): string[] => {
+    const emailsString = process.env.NEXT_PUBLIC_ADMIN_EMAILS || "";
+    return emailsString
         .split(',')
-        .map(email => email.trim().toLowerCase());
-    return adminEmails.includes(user.email.toLowerCase());
+        .map(email => email.trim().toLowerCase())
+        .filter(Boolean); // Removes any empty strings that might result from trailing commas
 };
+
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -32,17 +34,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // onIdTokenChanged es más eficiente que onAuthStateChanged porque se dispara
-    // cuando el token cambia (ej: al forzar la actualización), asegurando que los claims
-    // de administrador se lean correctamente.
+    const adminEmails = getAdminEmails();
+
     const unsubscribe = auth.onIdTokenChanged(async (user) => {
       setUser(user);
-      if (user) {
-        // Forzamos la actualización del token para obtener los claims más recientes.
+      if (user?.email) {
+        // La fuente de verdad principal es el claim 'admin' del token para seguridad de backend.
         const idTokenResult = await user.getIdTokenResult(true); 
-        // El claim 'admin' es la fuente de verdad definitiva.
         const hasAdminClaim = !!idTokenResult.claims.admin;
-        setIsAdmin(hasAdminClaim);
+        
+        // Para la UI, usamos una verificación local robusta como fallback o para inmediatez.
+        // Esto es especialmente útil si los claims tardan en propagarse.
+        const isEmailInClientList = adminEmails.includes(user.email.toLowerCase());
+        
+        // Un usuario es admin si tiene el claim O está en la lista del cliente.
+        setIsAdmin(hasAdminClaim || isEmailInClientList);
+
       } else {
         setIsAdmin(false);
       }
@@ -56,21 +63,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
     const loggedInUser = userCredential.user;
     
-    // Aunque el listener onIdTokenChanged se encargará de esto, podemos forzar
-    // una actualización inmediata aquí para asegurar que el estado sea consistente
-    // justo después del login.
+    // Forzamos la actualización del token para obtener los claims más recientes.
     const idTokenResult = await loggedInUser.getIdTokenResult(true);
     const hasAdminClaim = !!idTokenResult.claims.admin;
+
+    // Usamos la misma lógica robusta para la UI inmediatamente después del login.
+    const adminEmails = getAdminEmails();
+    const isEmailInClientList = loggedInUser.email ? adminEmails.includes(loggedInUser.email.toLowerCase()) : false;
     
-    setIsAdmin(hasAdminClaim);
+    const finalIsAdmin = hasAdminClaim || isEmailInClientList;
+
+    setIsAdmin(finalIsAdmin);
     setUser(loggedInUser);
 
-    return { user: loggedInUser, isAdmin: hasAdminClaim };
+    return { user: loggedInUser, isAdmin: finalIsAdmin };
   };
 
   const signOut = async () => {
     await firebaseSignOut(auth);
-    // El listener se encargará de poner user a null y isAdmin a false.
+    // El listener onIdTokenChanged se encargará de poner user a null y isAdmin a false.
   };
 
   const value = { user, isAdmin, isLoading, signIn, signOut };
