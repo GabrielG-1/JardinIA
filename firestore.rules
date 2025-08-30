@@ -1,34 +1,25 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Regla para la colección 'catalog'
+
+    // Reglas para la colección 'catalog'
+    // Permite a cualquiera leer, pero solo los administradores pueden escribir, actualizar o eliminar.
     match /catalog/{categoryId} {
       allow read: if true;
-      // Solo los usuarios autenticados cuyo token de ID contenga el claim `admin: true`
-      // pueden escribir (crear, actualizar, borrar) en el catálogo.
-      // Esta es la fuente de verdad para los permisos.
       allow write: if request.auth.token.admin == true;
     }
     
     // Reglas para la colección de consejos de la comunidad
     match /community-tips/{tipId} {
-      // Todos pueden leer consejos aprobados.
-      // Los administradores pueden leer todos los consejos (incluidos los pendientes de moderación).
+      // Cualquiera puede leer consejos aprobados, los admins pueden leer todos.
       allow read: if resource.data.isApproved == true || request.auth.token.admin == true;
-      
       // Cualquiera puede enviar un consejo para moderación.
-      allow create: if true; 
-      
-      // Los usuarios logueados pueden añadir respuestas.
-      // Los administradores pueden editar cualquier campo (para moderar).
-      allow update: if request.auth != null;
-      
-      // Solo los administradores pueden borrar el consejo principal y sus respuestas.
-      // Se unifica la regla con la del catálogo para consistencia.
-      allow delete: if request.auth.token.admin == true;
+      allow create: if true;
+      // Admins pueden modificar. Usuarios autenticados pueden añadir respuestas.
+      allow update: if request.auth.token.admin == true || request.auth != null;
+      // Los administradores solo pueden borrar el consejo principal si NO tiene respuestas.
+      allow delete: if request.auth.token.admin == true && (resource.data.replies == null || resource.data.replies.size() == 0);
     }
   }
 }
