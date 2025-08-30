@@ -86,11 +86,11 @@ export const addReplyToTip = async (tipId: string, replyData: { name: string; te
     try {
         const tipRef = doc(db, TIPS_COLLECTION, tipId);
         
-        const newReply: Omit<Reply, 'createdAt'> & { createdAt: any } = {
+        const newReply: Reply = {
             id: doc(collection(db, 'dummy')).id, // Generate a unique ID for the reply
             name: replyData.name,
             text: replyData.text,
-            createdAt: serverTimestamp(),
+            createdAt: Timestamp.now(), // FIX: Use client-side timestamp
         };
 
         await updateDoc(tipRef, {
