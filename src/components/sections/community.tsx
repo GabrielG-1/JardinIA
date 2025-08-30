@@ -85,25 +85,6 @@ export function CommunitySection() {
   const { toast } = useToast();
   const { user, isAdmin } = useAuth();
 
-  // <<< CÓDIGO DE DIAGNÓSTICO AÑADIDO >>>
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (user) {
-        console.log("DIAGNÓSTICO DE PERMISOS:");
-        console.log("Email:", user.email, "UID:", user.uid);
-        try {
-          const adminDocRef = doc(db, "admins", user.uid);
-          const adminDocSnap = await getDoc(adminDocRef);
-          console.log("¿Documento de admin existe en Firestore?", adminDocSnap.exists());
-        } catch (error) {
-            console.error("Error al verificar el documento de admin:", error);
-        }
-      }
-    };
-    checkAdminStatus();
-  }, [user]);
-  // <<< FIN DEL CÓDIGO DE DIAGNÓSTICO >>>
-
   useEffect(() => {
     const unsubscribe = getCommunityTips((tipsData) => {
       setTips(tipsData);

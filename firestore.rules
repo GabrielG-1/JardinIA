@@ -3,41 +3,33 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // ==================================================================
-    // Helpers - Funciones reutilizables
-    // ==================================================================
-
-    // Función para verificar si el usuario es un administrador.
-    // Un usuario es admin si su UID existe como un documento en la colección 'admins'.
+    // Función para verificar si el usuario es un administrador
+    // Comprueba si el UID del usuario que hace la petición existe como un documento en la colección 'admins'.
     function isAdmin() {
       return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
-    // ==================================================================
-    // Reglas para Colecciones
-    // ==================================================================
+    // --- REGLA AÑADIDA ---
+    // Reglas para la colección de administradores.
+    // Permite que cualquier usuario autenticado lea la lista de admins para verificar permisos en el cliente.
+    // La escritura está restringida para que solo se pueda gestionar desde un entorno de confianza (backend o consola).
+    match /admins/{userId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Previene la escritura desde el cliente
+    }
 
     // Reglas para la colección 'catalog'
     match /catalog/{categoryId} {
       allow read: if true;
-      // Solo los admins pueden escribir (crear, actualizar, borrar) en el catálogo.
-      allow write: if isAdmin();
+      allow write: if isAdmin(); // Solo los admins pueden crear, actualizar o borrar productos.
     }
     
     // Reglas para la colección de consejos de la comunidad
     match /community-tips/{tipId} {
-      // Leer si está aprobado O si eres admin (para ver consejos pendientes de moderación)
-      allow read: if (resource.data.isApproved == true || isAdmin());
-      
-      // Cualquiera autenticado puede crear un consejo (que luego será moderado)
-      allow create: if request.auth != null;
-      
-      // Para actualizar (ej. añadir respuestas), el usuario debe estar logueado.
-      // Los admins también pueden actualizar cualquier campo.
-      allow update: if request.auth != null || isAdmin();
-      
-      // Borrar SOLO si eres admin.
-      allow delete: if isAdmin();
+      allow read: if resource.data.isApproved == true || isAdmin();
+      allow create: if true; // Cualquiera puede enviar un consejo para moderación
+      allow update: if request.auth != null || isAdmin(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
+      allow delete: if isAdmin(); // Solo los admins pueden borrar el consejo principal y sus respuestas
     }
   }
 }
