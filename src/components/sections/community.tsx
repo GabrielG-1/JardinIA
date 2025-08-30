@@ -15,6 +15,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useAuth } from "@/hooks/use-auth";
 import { DeleteConfirmationDialog } from "@/components/community/delete-confirmation-dialog";
 import { deleteCommunityTip, deleteReplyFromTip } from "@/services/community-tips-service";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 function ReplyForm({ tipId, onReplyAdded }: { tipId: string, onReplyAdded: () => void }) {
   const [replyName, setReplyName] = useState("");
@@ -81,7 +83,26 @@ export function CommunitySection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openReplyForm, setOpenReplyForm] = useState<string | null>(null);
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
+
+  // <<< CÓDIGO DE DIAGNÓSTICO AÑADIDO >>>
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user) {
+        console.log("DIAGNÓSTICO DE PERMISOS:");
+        console.log("Email:", user.email, "UID:", user.uid);
+        try {
+          const adminDocRef = doc(db, "admins", user.uid);
+          const adminDocSnap = await getDoc(adminDocRef);
+          console.log("¿Documento de admin existe en Firestore?", adminDocSnap.exists());
+        } catch (error) {
+            console.error("Error al verificar el documento de admin:", error);
+        }
+      }
+    };
+    checkAdminStatus();
+  }, [user]);
+  // <<< FIN DEL CÓDIGO DE DIAGNÓSTICO >>>
 
   useEffect(() => {
     const unsubscribe = getCommunityTips((tipsData) => {
@@ -257,3 +278,5 @@ export function CommunitySection() {
     </section>
   );
 }
+
+    
