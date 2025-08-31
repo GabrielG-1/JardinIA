@@ -56,7 +56,6 @@ export const addCommunityTip = async (tip: { name: string; advice: string }): Pr
  * @returns An unsubscribe function to detach the listener.
  */
 export const getCommunityTips = (callback: (tips: Tip[]) => void): Unsubscribe => {
-  // **FIX**: Query only for approved tips to match security rules for non-admins.
   const q = query(
     collection(db, TIPS_COLLECTION),
     where("isApproved", "==", true),
