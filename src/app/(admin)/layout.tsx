@@ -13,32 +13,25 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // No hacer nada mientras carga.
-    if (isLoading) return;
+    if (isLoading) {
+      return; 
+    }
 
-    // Si el usuario ha iniciado sesión y es administrador, pero está en la página de login, llévalo al dashboard.
-    if (user && isAdmin && pathname === '/admin') {
-      router.replace("/admin/dashboard");
-      return; // Detener ejecución para evitar otras comprobaciones.
+    const isAuthPage = pathname === '/admin';
+    const isDashboard = pathname.startsWith('/admin/dashboard');
+
+    if (user && isAdmin) {
+      if (isAuthPage) {
+        router.replace('/admin/dashboard');
+      }
+    } else {
+      if (isDashboard) {
+        router.replace('/admin');
+      }
     }
     
-    // Si no es admin pero intenta acceder a una ruta protegida (que no es la de login),
-    // lo devolvemos a la página de login.
-    if (!user && pathname.startsWith('/admin/dashboard')) {
-      router.replace("/admin");
-      return; // Detener ejecución.
-    }
-    
-    // Si el usuario está logueado pero no es admin, y trata de ir al dashboard, lo mandamos al login.
-    if(user && !isAdmin && pathname.startsWith('/admin/dashboard')) {
-      router.replace("/admin");
-      return;
-    }
-
-
   }, [user, isAdmin, isLoading, router, pathname]);
 
-  // Mientras carga, mostrar el esqueleto.
   if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
@@ -51,10 +44,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
   
-  // Si no está cargando, y después de las redirecciones, mostrar siempre el contenido.
-  // Esto asegura que /admin (login) siempre se muestre si el usuario no es admin.
-  // También muestra /admin/dashboard si el usuario es admin.
-  // La lógica del useEffect se encarga de las redirecciones incorrectas.
   return <>{children}</>;
 }
 
