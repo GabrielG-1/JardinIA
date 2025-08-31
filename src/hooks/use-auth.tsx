@@ -16,35 +16,40 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * Checks if a given user is an administrator by verifying their UID
- * against the 'admins' collection in Firestore.
- * @param user - The Firebase user object.
- * @returns A boolean indicating if the user is an admin.
- */
-const checkIsAdmin = async (user: User | null): Promise<boolean> => {
-    if (!user) return false;
-    try {
-        const adminDocRef = doc(db, 'admins', user.uid);
-        const adminDocSnap = await getDoc(adminDocRef);
-        return adminDocSnap.exists();
-    } catch (error) {
-        console.error("Error checking admin status:", error);
-        return false;
-    }
-};
-
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  /**
+   * Checks if a given user is an administrator by verifying their UID
+   * against the 'admins' collection in Firestore.
+   * @param user - The Firebase user object.
+   * @returns A boolean indicating if the user is an admin.
+   */
+  const checkIsAdmin = async (user: User | null): Promise<boolean> => {
+      if (!user) return false;
+      try {
+          const adminDocRef = doc(db, 'admins', user.uid);
+          const adminDocSnap = await getDoc(adminDocRef);
+          return adminDocSnap.exists();
+      } catch (error) {
+          console.error("Error checking admin status:", error);
+          return false;
+      }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      const adminStatus = await checkIsAdmin(user);
-      setIsAdmin(adminStatus);
+      setIsLoading(true);
+      if (user) {
+        setUser(user);
+        const adminStatus = await checkIsAdmin(user);
+        setIsAdmin(adminStatus);
+      } else {
+        setUser(null);
+        setIsAdmin(false);
+      }
       setIsLoading(false);
     });
 
@@ -55,8 +60,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
     const loggedInUser = userCredential.user;
     
+    // Forzar la actualización del token es una buena práctica para obtener claims,
+    // aunque no es estrictamente necesario para nuestra lógica de `getDoc`.
+    await loggedInUser.getIdToken(true);
+
     const adminStatus = await checkIsAdmin(loggedInUser);
     
+    // El listener onAuthStateChanged también se disparará,
+    // pero actualizamos el estado aquí inmediatamente para una respuesta más rápida de la UI.
     setIsAdmin(adminStatus);
     setUser(loggedInUser);
 

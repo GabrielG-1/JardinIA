@@ -83,7 +83,7 @@ export function CommunitySection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openReplyForm, setOpenReplyForm] = useState<string | null>(null);
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   useEffect(() => {
     const unsubscribe = getCommunityTips((tipsData) => {
