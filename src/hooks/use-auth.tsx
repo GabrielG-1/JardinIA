@@ -22,14 +22,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   const checkIsAdmin = useCallback(async (user: User | null): Promise<boolean> => {
+    // Si no hay usuario, no puede ser admin.
     if (!user) return false;
+    
     try {
-      // Esta es la lógica correcta: comprobar si el documento del admin existe.
+      // Comprueba si el documento del admin existe en Firestore.
       const adminDocRef = doc(db, 'admins', user.uid);
       const adminDoc = await getDoc(adminDocRef);
       return adminDoc.exists();
     } catch (error) {
       console.error("Error checking admin status:", error);
+      // Si hay un error (ej. de permisos momentáneo), asumimos que no es admin por seguridad.
       return false;
     }
   }, []);
@@ -37,11 +40,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setIsLoading(true);
+      // Solo si Firebase confirma un usuario, verificamos si es admin.
       if (user) {
         const adminStatus = await checkIsAdmin(user);
         setUser(user);
         setIsAdmin(adminStatus);
       } else {
+        // Si no hay usuario, reseteamos el estado.
         setUser(null);
         setIsAdmin(false);
       }
@@ -51,16 +56,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [checkIsAdmin]);
 
   const signIn = async (email: string, pass: string) => {
-    // 1. Autenticar al usuario.
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
     const loggedInUser = userCredential.user;
     
-    // 2. Esperar a que onAuthStateChanged se ejecute y determine el estado de admin.
-    // Para devolver el estado correcto, volvemos a comprobarlo aquí.
+    // Después de un inicio de sesión exitoso, onAuthStateChanged se disparará
+    // y manejará la actualización del estado del usuario y de administrador,
+    // pero para una respuesta inmediata en la UI, podemos comprobarlo aquí también.
     const adminStatus = await checkIsAdmin(loggedInUser);
 
-    // No actualizamos el estado aquí para evitar sobrescribir lo que hace onAuthStateChanged,
-    // pero devolvemos el estado correcto para que la página de login pueda reaccionar.
+    // No actualizamos el estado global aquí para evitar condiciones de carrera,
+    // `onAuthStateChanged` es la única fuente de verdad para el estado global.
+    // Devolvemos el estado para que la página de login pueda reaccionar inmediatamente.
     return { user: loggedInUser, isAdmin: adminStatus };
   };
 
