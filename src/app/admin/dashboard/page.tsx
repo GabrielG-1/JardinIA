@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -35,6 +33,8 @@ function AdminProductList() {
   const { toast } = useToast();
 
   const handleProductUpdate = () => {
+    // El listener de onSnapshot refrescará la lista automáticamente.
+    // Podemos usar esto para mostrar un toast si quisiéramos.
     console.log("Producto actualizado, creado o eliminado. La lista se refrescará.");
   };
 
@@ -76,7 +76,6 @@ function AdminProductList() {
       console.error("Error uploading image: ", error);
     } finally {
       setUploadingProductId(null);
-      // Reset file input value
       if (event.target) {
         event.target.value = "";
       }
@@ -218,7 +217,7 @@ export default function AdminDashboardPage() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push('/admin');
+    // El layout se encargará de la redirección
   };
 
   return (

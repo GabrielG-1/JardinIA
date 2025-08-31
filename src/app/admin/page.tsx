@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -38,6 +37,7 @@ export default function AdminLoginPage() {
       const { user, isAdmin } = await signIn(data.email, data.password);
       if (user && isAdmin) {
         toast({ title: "Inicio de sesión exitoso", description: "Bienvenido al panel de administración." });
+        // La redirección ahora es manejada por el layout
       } else if (user && !isAdmin) {
         toast({ title: "Acceso Denegado", description: "No tienes permisos de administrador.", variant: "destructive" });
       } else {

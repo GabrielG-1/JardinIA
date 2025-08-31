@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect } from "react";
@@ -13,6 +12,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    // No hacer nada mientras se carga el estado de autenticación
     if (isLoading) {
       return; 
     }
@@ -20,18 +20,24 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     const isAuthPage = pathname === '/admin';
     const isDashboard = pathname.startsWith('/admin/dashboard');
 
+    // Si el usuario es administrador...
     if (user && isAdmin) {
+      // Y está en la página de login, lo redirigimos al dashboard
       if (isAuthPage) {
         router.replace('/admin/dashboard');
       }
-    } else {
-      if (isDashboard) {
+    } 
+    // Si el usuario no es administrador (o no está logueado)...
+    else {
+      // Y está intentando acceder a cualquier página de admin que no sea el login, lo devolvemos
+      if (!isAuthPage) {
         router.replace('/admin');
       }
     }
     
   }, [user, isAdmin, isLoading, router, pathname]);
 
+  // Muestra un esqueleto de carga mientras se determina el estado de auth
   if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
@@ -43,7 +49,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  
+
+  // Si no está cargando, simplemente renderiza el contenido de la página actual
   return <>{children}</>;
 }
 
