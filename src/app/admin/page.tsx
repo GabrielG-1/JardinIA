@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="flex justify-center items-center mb-4">
-            <Icons.Logo className="h-10 w-10 text-primary" />
+            <Icons.Logo className="h-12 w-12 text-primary" />
           </div>
           <CardTitle>Panel de Administración</CardTitle>
           <CardDescription>Inicia sesión para gestionar la tienda.</CardDescription>
