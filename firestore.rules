@@ -1,31 +1,37 @@
-// firestore.rules
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Lista de correos de administradores.
-    // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
-    let adminEmails = ['programaciongabriel2025@gmail.com'];
-    
-    // Función para verificar si el usuario es un administrador
-    function isAdmin() {
-      return request.auth != null && request.auth.token.email.lower() in adminEmails;
+
+    // === Rol de admin por documento ===
+    // Debe existir /admins/<UID> para cada admin.
+    match /admins/{uid} {
+      // cada usuario puede LEER solo su propio doc (útil para diagnosticar)
+      allow read: if request.auth != null && request.auth.uid == uid;
+      // no permitir escribir desde el cliente (evita escalar privilegios)
+      allow write: if false;
     }
 
+    // helper: verifica rol admin SIN necesidad de lectura
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
     // Reglas para la colección 'catalog'
     match /catalog/{categoryId} {
       allow read: if true;
       allow write: if isAdmin(); // Solo los admins pueden crear, actualizar o borrar productos.
     }
-    
-    // Reglas para la colección de consejos de la comunidad
+
+    // === community-tips ===
     match /community-tips/{tipId} {
       allow read: if resource.data.isApproved == true || isAdmin();
-      allow create: if true; // Cualquiera puede enviar un consejo para moderación
-      allow update: if request.auth != null || isAdmin(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
-      allow delete: if isAdmin(); // Solo los admins pueden borrar el consejo principal
+      allow create: if request.auth != null;
+      // (como antes) usuarios logueados pueden editar respuestas en el array
+      allow update: if request.auth != null || isAdmin();
+      // BORRAR SOLO ADMIN (vía /admins/<uid>)
+      allow delete: if isAdmin();
     }
   }
 }
