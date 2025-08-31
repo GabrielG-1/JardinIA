@@ -24,7 +24,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     
     // Si no es admin pero intenta acceder a una ruta protegida (que no es la de login),
     // lo devolvemos a la página de login.
-    if (!user && !isAdmin && pathname.startsWith('/admin/dashboard')) {
+    if (!user && pathname.startsWith('/admin/dashboard')) {
       router.replace("/admin");
       return; // Detener ejecución.
     }
