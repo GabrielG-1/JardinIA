@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
 import { DeleteConfirmationDialog } from "@/components/community/delete-confirmation-dialog";
-import { deleteCommunityTip, deleteReplyFromTip } from "@/services/community-tips-service";
+import { deleteReplyFromTip } from "@/services/community-tips-service";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -117,14 +117,6 @@ export function CommunitySection() {
     }
   };
   
-  const handleTipDeleted = () => {
-     toast({
-      title: "Consejo Eliminado",
-      description: "El consejo de la comunidad ha sido eliminado.",
-    });
-    // The real-time listener will update the UI automatically.
-  }
-  
   const handleReplyDeleted = () => {
      toast({
       title: "Respuesta Eliminada",
@@ -167,15 +159,6 @@ export function CommunitySection() {
                         ))}
                         {!loading && tips.map((tip) => (
                         <Card key={tip.id} className="p-6 shadow-md bg-background overflow-hidden relative">
-                           {isAdmin && (
-                                <div className="absolute top-2 right-2">
-                                     <DeleteConfirmationDialog
-                                        itemType="consejo"
-                                        itemName={tip.advice}
-                                        onConfirm={() => deleteCommunityTip(tip.id).then(handleTipDeleted)}
-                                    />
-                                </div>
-                           )}
                             <div className="flex items-start gap-4">
                                 <div className="w-1.5 h-12 bg-primary rounded-full mt-1 shrink-0" />
                                 <div className="flex-grow">
