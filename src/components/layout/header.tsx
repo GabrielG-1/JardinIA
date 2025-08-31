@@ -17,7 +17,7 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm shadow-md">
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center space-x-3">
-          <Icons.Logo className="h-10 w-10" />
+          <Icons.Logo className="h-8 w-8 text-primary" />
           <span className="font-bold text-xl text-foreground font-headline hidden sm:inline-block">
             Jardín y Huerta Labranza
           </span>
