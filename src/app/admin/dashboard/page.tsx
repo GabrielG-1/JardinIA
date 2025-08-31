@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,23 +7,107 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { getCatalog, updateProductImage, updateProductStockStatus, type Category, type Product } from "@/services/catalog-service";
-import { uploadProductImage } from "@/services/storage-service";
+import { uploadLogo, uploadProductImage } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { AlertTriangle, Upload } from "lucide-react";
+import { AlertTriangle, Upload, Image as ImageIcon } from "lucide-react";
 import { EditProductDialog } from "@/components/admin/edit-product-dialog";
 import { CreateProductDialog } from "@/components/admin/create-product-dialog";
 import { DeleteProductDialog } from "@/components/admin/delete-product-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { getLogoUrl, updateLogoUrl } from "@/services/settings-service";
 
 const formatPrice = (price: string) => {
     const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
     if (isNaN(number)) return price;
     return `$${number.toLocaleString('es-CL')}`;
 };
+
+function SiteSettings() {
+  const [currentLogo, setCurrentLogo] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Fetch initial logo URL
+    getLogoUrl().then(setCurrentLogo);
+  }, []);
+
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const downloadURL = await uploadLogo(file);
+      await updateLogoUrl(downloadURL);
+      setCurrentLogo(downloadURL);
+      toast({
+        title: "Logo Actualizado",
+        description: "El logo del sitio se ha cambiado correctamente.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error al subir el logo",
+        description: "No se pudo subir la nueva imagen del logo.",
+        variant: "destructive",
+      });
+      console.error("Error uploading logo:", error);
+    } finally {
+      setIsUploading(false);
+      if (event.target) {
+        event.target.value = "";
+      }
+    }
+  };
+
+  return (
+    <Card className="mb-8">
+      <CardHeader>
+        <CardTitle>Configuración del Sitio</CardTitle>
+        <CardDescription>Gestiona la apariencia y datos globales de tu tienda.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center gap-6">
+          <div className="flex-shrink-0">
+            <p className="font-medium text-sm mb-2">Logo Actual</p>
+            <div className="w-24 h-24 rounded-md border bg-muted flex items-center justify-center">
+              {currentLogo ? (
+                <Image src={currentLogo} alt="Logo actual" width={96} height={96} className="object-contain rounded-md" />
+              ) : (
+                <ImageIcon className="w-10 h-10 text-muted-foreground" />
+              )}
+            </div>
+          </div>
+          <div className="flex-grow">
+            <Label htmlFor="logo-upload" className="font-medium text-sm">Cambiar Logo</Label>
+            <p className="text-xs text-muted-foreground mb-2">Sube una nueva imagen para el logo.</p>
+            <input
+              type="file"
+              id="logo-upload"
+              className="hidden"
+              accept="image/png, image/jpeg, image/webp, image/svg+xml"
+              onChange={handleLogoUpload}
+              disabled={isUploading}
+            />
+            <Button
+              variant="outline"
+              onClick={() => document.getElementById('logo-upload')?.click()}
+              disabled={isUploading}
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              {isUploading ? "Subiendo..." : "Subir Imagen"}
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 
 function AdminProductList() {
   const [catalogData, setCatalogData] = useState<Category[]>([]);
@@ -232,6 +317,7 @@ export default function AdminDashboardPage() {
         </Button>
       </header>
       <main>
+        <SiteSettings />
         <AdminProductList />
       </main>
     </div>
