@@ -21,32 +21,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const checkIsAdmin = useCallback(async (user: User | null): Promise<boolean> => {
-    // Si no hay usuario, no puede ser admin.
-    if (!user) return false;
-    
-    try {
-      // Comprueba si el documento del admin existe en Firestore.
-      const adminDocRef = doc(db, 'admins', user.uid);
-      const adminDoc = await getDoc(adminDocRef);
-      return adminDoc.exists();
-    } catch (error) {
-      console.error("Error checking admin status:", error);
-      // Si hay un error (ej. de permisos momentáneo), asumimos que no es admin por seguridad.
+  const checkIsAdmin = useCallback(async (userToCheck: User): Promise<boolean> => {
+    if (!userToCheck || !userToCheck.email) {
       return false;
     }
+    
+    // Lista de correos de administradores (debe coincidir con la de las reglas de Firestore)
+    // Se obtiene de una variable de entorno pública.
+    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "").split(',');
+    
+    return adminEmails.includes(userToCheck.email);
   }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setIsLoading(true);
-      // Solo si Firebase confirma un usuario, verificamos si es admin.
       if (user) {
         const adminStatus = await checkIsAdmin(user);
         setUser(user);
         setIsAdmin(adminStatus);
       } else {
-        // Si no hay usuario, reseteamos el estado.
         setUser(null);
         setIsAdmin(false);
       }
@@ -57,22 +51,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, pass: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-    const loggedInUser = userCredential.user;
-    
-    // Después de un inicio de sesión exitoso, onAuthStateChanged se disparará
-    // y manejará la actualización del estado del usuario y de administrador,
-    // pero para una respuesta inmediata en la UI, podemos comprobarlo aquí también.
-    const adminStatus = await checkIsAdmin(loggedInUser);
-
-    // No actualizamos el estado global aquí para evitar condiciones de carrera,
-    // `onAuthStateChanged` es la única fuente de verdad para el estado global.
-    // Devolvemos el estado para que la página de login pueda reaccionar inmediatamente.
-    return { user: loggedInUser, isAdmin: adminStatus };
+    // Deja que onAuthStateChanged maneje la actualización del estado.
+    // Simplemente devolvemos la información para que el componente de login pueda reaccionar.
+    const adminStatus = await checkIsAdmin(userCredential.user);
+    return { user: userCredential.user, isAdmin: adminStatus };
   };
 
   const signOut = async () => {
     await firebaseSignOut(auth);
-    // onAuthStateChanged se encargará de limpiar el estado (user a null, isAdmin a false).
+    // onAuthStateChanged se encargará de limpiar el estado.
   };
 
   const value = { user, isAdmin, isLoading, signIn, signOut };

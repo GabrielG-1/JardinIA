@@ -4,9 +4,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Lista de correos de administradores.
+    // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
+    let adminEmails = ['programaciongabriel2025@gmail.com'];
+    
+    // Función para verificar si el usuario es un administrador
     function isAdmin() {
-      // Un administrador es un usuario autenticado cuyo UID existe en la colección de 'admins'.
-      return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return request.auth != null && request.auth.token.email.lower() in adminEmails;
     }
 
     // Reglas para la colección 'catalog'
@@ -15,23 +19,12 @@ service cloud.firestore {
       allow write: if isAdmin(); // Solo los admins pueden crear, actualizar o borrar productos.
     }
     
-    // Reglas para la colección 'admins'.
-    match /admins/{adminId} {
-        // Solo un admin puede leer su propio documento. Nadie puede escribir aquí desde el cliente.
-        allow read: if isAdmin() && request.auth.uid == adminId;
-        allow write: if false; // La colección de admins se gestiona desde la consola de Firebase.
-    }
-
     // Reglas para la colección de consejos de la comunidad
     match /community-tips/{tipId} {
       allow read: if resource.data.isApproved == true || isAdmin();
       allow create: if true; // Cualquiera puede enviar un consejo para moderación
-      
-      // La actualización se permite si un usuario está logueado (para añadir respuestas)
-      // O si es un admin (para borrar respuestas, que es una actualización del array).
-      allow update: if request.auth != null || isAdmin();
-      
-      // Se elimina el permiso de borrado para los consejos principales.
+      allow update: if request.auth != null || isAdmin(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
+      // Se elimina el permiso de borrado para el documento principal
       allow delete: if false; 
     }
   }
