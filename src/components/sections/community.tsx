@@ -83,7 +83,7 @@ export function CommunitySection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openReplyForm, setOpenReplyForm] = useState<string | null>(null);
   const { toast } = useToast();
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     const unsubscribe = getCommunityTips((tipsData) => {
@@ -259,5 +259,3 @@ export function CommunitySection() {
     </section>
   );
 }
-
-    
