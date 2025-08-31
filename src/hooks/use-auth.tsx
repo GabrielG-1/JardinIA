@@ -3,7 +3,8 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, type User } from "firebase/auth";
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface AuthContextType {
   user: User | null;
@@ -15,30 +16,32 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const getAdminEmails = (): string[] => {
-    const emails = process.env.NEXT_PUBLIC_ADMIN_EMAILS || "";
-    return emails.split(',').map(email => email.trim().toLowerCase());
-};
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const checkIsAdmin = useCallback((user: User | null): boolean => {
-      if (!user || !user.email) return false;
-      const adminEmails = getAdminEmails();
-      const isAdminStatus = adminEmails.includes(user.email.toLowerCase());
-      console.log(`Verificando admin para ${user.email}. Lista de admins: [${adminEmails.join(', ')}]. Es admin: ${isAdminStatus}`);
+  const checkIsAdmin = useCallback(async (user: User | null): Promise<boolean> => {
+    if (!user) return false;
+    try {
+      const adminDocRef = doc(db, 'admins', user.uid);
+      const adminDoc = await getDoc(adminDocRef);
+      const isAdminStatus = adminDoc.exists();
+      console.log(`Admin check for ${user.email}: ${isAdminStatus}`);
       return isAdminStatus;
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      return false;
+    }
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setIsLoading(true);
       if (user) {
+        const adminStatus = await checkIsAdmin(user);
         setUser(user);
-        setIsAdmin(checkIsAdmin(user));
+        setIsAdmin(adminStatus);
       } else {
         setUser(null);
         setIsAdmin(false);
@@ -51,16 +54,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, pass: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
     const loggedInUser = userCredential.user;
-    const adminStatus = checkIsAdmin(loggedInUser);
+    const adminStatus = await checkIsAdmin(loggedInUser);
     
-    // El listener onAuthStateChanged se encargará de actualizar el estado,
-    // pero devolvemos el estado calculado para una respuesta inmediata en la UI.
+    // Actualiza el estado local inmediatamente
+    setIsAdmin(adminStatus);
+    setUser(loggedInUser);
+
     return { user: loggedInUser, isAdmin: adminStatus };
   };
 
   const signOut = async () => {
     await firebaseSignOut(auth);
-    // El listener onAuthStateChanged se encargará de limpiar el estado.
+    // onAuthStateChanged se encargará de limpiar el estado
   };
 
   const value = { user, isAdmin, isLoading, signIn, signOut };

@@ -4,7 +4,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     
     // Lista de correos de administradores.
-    // IMPORTANTE: Esta lista debe coincidir con la variable de entorno NEXT_PUBLIC_ADMIN_EMAILS
+    // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
     let adminEmails = ['programaciongabriel2025@gmail.com'];
     
     // Función para verificar si el usuario es un administrador
