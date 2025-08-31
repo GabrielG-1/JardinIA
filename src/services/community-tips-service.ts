@@ -51,12 +51,14 @@ export const addCommunityTip = async (tip: { name: string; advice: string }): Pr
 
 /**
  * Listens for real-time updates to the community tips collection.
+ * It only fetches tips that are marked as approved.
  * @param callback - A function to be called with the updated list of tips.
  * @returns An unsubscribe function to detach the listener.
  */
 export const getCommunityTips = (callback: (tips: Tip[]) => void): Unsubscribe => {
+  // **FIX**: Query only for approved tips to match security rules for non-admins.
   const q = query(
-    collection(db, TIPS_COLLECTION), 
+    collection(db, TIPS_COLLECTION),
     where("isApproved", "==", true),
     orderBy("createdAt", "desc")
   );
@@ -69,6 +71,7 @@ export const getCommunityTips = (callback: (tips: Tip[]) => void): Unsubscribe =
     callback(tips);
   }, (error) => {
     console.error("Error fetching community tips:", error);
+    // Pass an empty array to the callback on error to clear any existing state
     callback([]);
   });
 
@@ -90,7 +93,7 @@ export const addReplyToTip = async (tipId: string, replyData: { name: string; te
             id: doc(collection(db, 'dummy')).id, // Generate a unique ID for the reply
             name: replyData.name,
             text: replyData.text,
-            createdAt: Timestamp.now(), // FIX: Use client-side timestamp
+            createdAt: Timestamp.now(), 
         };
 
         await updateDoc(tipRef, {
