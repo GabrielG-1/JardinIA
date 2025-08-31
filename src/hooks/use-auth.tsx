@@ -21,20 +21,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // This function now serves as the single source of truth for admin status.
   const checkIsAdmin = useCallback(async (user: User | null): Promise<boolean> => {
       if (!user) return false;
       try {
+          // It checks for the existence of a document in /admins/{uid}
           const adminDocRef = doc(db, 'admins', user.uid);
           const adminDocSnap = await getDoc(adminDocRef);
           const adminStatus = adminDocSnap.exists();
-          console.log(`CheckIsAdmin for ${user.email}: ${adminStatus}`);
+          console.log(`Admin status for ${user.email}: ${adminStatus}`);
           return adminStatus;
       } catch (error) {
           console.error("Error checking admin status:", error);
+          // If rules prevent reading, we must assume false.
           return false;
       }
   }, []);
 
+  // Effect runs on initial load and when auth state changes.
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setIsLoading(true);
@@ -52,14 +56,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, [checkIsAdmin]);
 
+  // SignIn function explicitly re-checks admin status upon login.
   const signIn = async (email: string, pass: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
     const loggedInUser = userCredential.user;
     
     const adminStatus = await checkIsAdmin(loggedInUser);
     
-    // El listener onAuthStateChanged también se disparará, pero actualizamos el estado aquí
-    // para una respuesta más rápida de la UI, aunque el listener es la fuente de verdad final.
+    // Set state immediately for faster UI response. onAuthStateChanged will also fire.
     setIsAdmin(adminStatus);
     setUser(loggedInUser);
 
@@ -68,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     await firebaseSignOut(auth);
-    // onAuthStateChanged se encargará de limpiar el estado
+    // onAuthStateChanged listener will handle clearing user and admin state.
   };
 
   const value = { user, isAdmin, isLoading, signIn, signOut };

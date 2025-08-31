@@ -3,34 +3,38 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // === Rol de admin por documento ===
-    // Debe existir /admins/<UID> para cada admin.
+    // Helper function to check if the requesting user is an admin.
+    // It checks for the existence of a document with the user's UID in the /admins collection.
+    function isAdmin() {
+      return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Rules for the 'admins' collection itself.
+    // Only other admins can read this collection. No one can write to it from the client.
     match /admins/{uid} {
-      // cada usuario puede LEER solo su propio doc (útil para diagnosticar)
-      allow read: if request.auth != null && request.auth.uid == uid;
-      // no permitir escribir desde el cliente (evita escalar privilegios)
+      allow read: if isAdmin();
       allow write: if false;
     }
 
-    // helper: verifica rol admin SIN necesidad de lectura
-    function isAdmin() {
-      return request.auth != null
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
-    }
-    
-    // Reglas para la colección 'catalog'
+    // Rules for the 'catalog' collection.
+    // Anyone can read, but only admins can write (create, update, delete).
     match /catalog/{categoryId} {
       allow read: if true;
-      allow write: if isAdmin(); // Solo los admins pueden crear, actualizar o borrar productos.
+      allow write: if isAdmin();
     }
-
-    // === community-tips ===
+    
+    // Rules for the 'community-tips' collection.
     match /community-tips/{tipId} {
+      // Anyone can read a tip if it is approved. Admins can read all tips.
       allow read: if resource.data.isApproved == true || isAdmin();
+      
+      // Any authenticated user can create a tip (it will be submitted for moderation).
       allow create: if request.auth != null;
-      // (como antes) usuarios logueados pueden editar respuestas en el array
+      
+      // Any authenticated user can add a reply. Admins can modify the whole document.
       allow update: if request.auth != null || isAdmin();
-      // BORRAR SOLO ADMIN (vía /admins/<uid>)
+      
+      // Only admins can delete a tip or a reply within it.
       allow delete: if isAdmin();
     }
   }
