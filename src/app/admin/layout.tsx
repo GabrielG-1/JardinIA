@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAuth, AuthProvider } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 import { usePathname, useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -23,10 +23,17 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     
     // Si no es admin pero intenta acceder a una ruta protegida (que no es la de login),
     // lo devolvemos a la página de login.
-    if (!isAdmin && pathname.startsWith('/admin/') && pathname !== '/admin') {
+    if (!user && !isAdmin && pathname.startsWith('/admin/') && pathname !== '/admin') {
       router.replace("/admin");
       return; // Detener ejecución.
     }
+    
+    // Si el usuario está logueado pero no es admin, y trata de ir al dashboard, lo mandamos al login.
+    if(user && !isAdmin && pathname.startsWith('/admin/dashboard')) {
+      router.replace("/admin");
+      return;
+    }
+
 
   }, [user, isAdmin, isLoading, router, pathname]);
 

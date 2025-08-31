@@ -1,7 +1,7 @@
 
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, type User } from "firebase/auth";
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -10,7 +10,7 @@ interface AuthContextType {
   user: User | null;
   isAdmin: boolean;
   isLoading: boolean;
-  signIn: (email: string, pass:string) => Promise<{ user: User | null, isAdmin: boolean }>;
+  signIn: (email: string, pass:string) => Promise<{ user: User, isAdmin: boolean }>;
   signOut: () => Promise<void>;
 }
 
@@ -21,23 +21,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  /**
-   * Checks if a given user is an administrator by verifying their UID
-   * against the 'admins' collection in Firestore.
-   * @param user - The Firebase user object.
-   * @returns A boolean indicating if the user is an admin.
-   */
-  const checkIsAdmin = async (user: User | null): Promise<boolean> => {
+  const checkIsAdmin = useCallback(async (user: User | null): Promise<boolean> => {
       if (!user) return false;
       try {
           const adminDocRef = doc(db, 'admins', user.uid);
           const adminDocSnap = await getDoc(adminDocRef);
-          return adminDocSnap.exists();
+          const adminStatus = adminDocSnap.exists();
+          console.log(`CheckIsAdmin for ${user.email}: ${adminStatus}`);
+          return adminStatus;
       } catch (error) {
           console.error("Error checking admin status:", error);
           return false;
       }
-  };
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -54,20 +50,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [checkIsAdmin]);
 
   const signIn = async (email: string, pass: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
     const loggedInUser = userCredential.user;
     
-    // Forzar la actualización del token es una buena práctica para obtener claims,
-    // aunque no es estrictamente necesario para nuestra lógica de `getDoc`.
-    await loggedInUser.getIdToken(true);
-
     const adminStatus = await checkIsAdmin(loggedInUser);
     
-    // El listener onAuthStateChanged también se disparará,
-    // pero actualizamos el estado aquí inmediatamente para una respuesta más rápida de la UI.
+    // El listener onAuthStateChanged también se disparará, pero actualizamos el estado aquí
+    // para una respuesta más rápida de la UI, aunque el listener es la fuente de verdad final.
     setIsAdmin(adminStatus);
     setUser(loggedInUser);
 
@@ -76,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     await firebaseSignOut(auth);
-    // The onAuthStateChanged listener will handle setting user to null and isAdmin to false.
+    // onAuthStateChanged se encargará de limpiar el estado
   };
 
   const value = { user, isAdmin, isLoading, signIn, signOut };
