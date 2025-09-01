@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { getCatalog, updateProductImage, type Category, type Product, addProductToCategory, updateProduct, deleteProduct } from "@/services/catalog-service";
+import { getCatalog, updateProductImage, type Category, type Product, addProductToCategory, updateProduct, deleteProduct, updateProductStockStatus } from "@/services/catalog-service";
 import { uploadSiteLogo, uploadProductImage as uploadImageService } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -345,3 +345,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+    
