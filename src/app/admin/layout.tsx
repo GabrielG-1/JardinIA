@@ -4,7 +4,6 @@
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { usePathname, useRouter } from "next/navigation";
-import { Skeleton } from "@/components/ui/skeleton";
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, isAdmin, isLoading } = useAuth();
@@ -12,45 +11,34 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // No hacer nada mientras se carga el estado de autenticación
+    // La pantalla de carga principal en AuthProvider maneja el estado inicial.
+    // Cuando este componente se renderiza, isLoading ya debería ser false.
+    // Si por alguna razón todavía está cargando, no hacemos nada.
     if (isLoading) {
-      return; 
+      return;
     }
 
     const isAuthPage = pathname === '/admin';
-    const isDashboard = pathname.startsWith('/admin/dashboard');
-
-    // Si el usuario es administrador...
+    
+    // Si hay un usuario y es admin, lo dejamos en paz a menos que esté en
+    // la página de login, en cuyo caso lo mandamos al dashboard.
     if (user && isAdmin) {
-      // Y está en la página de login, lo redirigimos al dashboard
       if (isAuthPage) {
         router.replace('/admin/dashboard');
       }
-    } 
-    // Si el usuario no es administrador (o no está logueado)...
-    else {
-      // Y está intentando acceder a cualquier página de admin que no sea el login, lo devolvemos
-      if (!isAuthPage) {
-        router.replace('/admin');
-      }
+      return;
     }
-    
+
+    // Si no es admin (o no está logueado) y no está en la página de login,
+    // lo redirigimos a la página de login.
+    if (!isAuthPage) {
+        router.replace('/admin');
+    }
+
   }, [user, isAdmin, isLoading, router, pathname]);
 
-  // Muestra un esqueleto de carga mientras se determina el estado de auth
-  if (isLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-         <div className="flex flex-col items-center gap-4">
-            <Skeleton className="h-12 w-12 rounded-full" />
-            <Skeleton className="h-8 w-[250px]" />
-            <Skeleton className="h-4 w-[200px]" />
-         </div>
-      </div>
-    );
-  }
-
-  // Si no está cargando, simplemente renderiza el contenido de la página actual
+  // isLoading ya es manejado por el AuthProvider, por lo que aquí simplemente
+  // renderizamos los hijos, y el useEffect se encargará de la redirección.
   return <>{children}</>;
 }
 
