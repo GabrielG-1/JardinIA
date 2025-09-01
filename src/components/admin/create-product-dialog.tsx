@@ -28,7 +28,7 @@ const formSchema = z.object({
   name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres." }),
   price: z.string().regex(/^\$?[\d,.]*$/, { message: "Introduce un precio válido (ej: $15.500 o 15500)." }),
   categoryId: z.string({ required_error: "Debes seleccionar una categoría." }),
-  image: z.instanceof(File, { message: "Se requiere una imagen para el producto." }),
+  image: z.instanceof(File, { message: "Se requiere una imagen para el producto." }).optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -59,10 +59,14 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsSubmitting(true);
+    let imageUrl = "https://placehold.co/200x200.png"; // Default image
+
     try {
-      // 1. Subir la imagen
-      const safeProductName = data.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-      const imageUrl = await uploadProductImage(data.image, safeProductName);
+      // 1. Subir la imagen si se proporcionó
+      if (data.image) {
+        const safeProductName = data.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+        imageUrl = await uploadProductImage(data.image, safeProductName);
+      }
 
       // 2. Formatear el precio
       const cleanPrice = data.price.replace(/[^0-9]/g, '');
@@ -97,7 +101,6 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
     }
   };
   
-  // Limpia el formulario cuando se cierra el diálogo
   const handleOpenChange = (open: boolean) => {
     if (!open) {
         form.reset();
@@ -177,7 +180,7 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
                                 ) : (
                                     <label htmlFor="product-image-upload" className="cursor-pointer text-primary font-semibold flex flex-col items-center gap-2">
                                         <UploadCloud className="w-8 h-8" />
-                                        <span>Subir imagen</span>
+                                        <span>Subir imagen (Opcional)</span>
                                     </label>
                                 )}
                                 <input id="product-image-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} />
@@ -201,5 +204,3 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
     </Dialog>
   );
 }
-
-    

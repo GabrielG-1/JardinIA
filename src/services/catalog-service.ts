@@ -56,6 +56,51 @@ const generateStableProductId = (categoryId: string, productName: string): strin
     return `${categoryId}-${safeName}-${shortHash}`;
 }
 
+/**
+ * Sets up a real-time listener for the entire product catalog.
+ * @param onDataReceived - Callback function to handle the fetched data.
+ * @param onError - Callback function to handle any errors.
+ * @returns An unsubscribe function to detach the listener.
+ */
+export const getCatalogWithListener = (
+  onDataReceived: (data: Category[]) => void,
+  onError: (error: Error) => void
+): Unsubscribe => {
+  const q = query(collection(db, CATALOG_COLLECTION));
+
+  const unsubscribe = onSnapshot(
+    q,
+    (querySnapshot) => {
+      const categories: Category[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const catId = doc.id;
+        const products = Array.isArray(data.products)
+            ? data.products.map((p: any, idx: number) => ({
+                ...p,
+                id: p.id || generateStableProductId(catId, p.name), // Ensure ID exists
+                inStock: p.inStock !== false,
+            }))
+            : [];
+
+        categories.push({
+            id: catId,
+            name: data.name,
+            icon: data.icon,
+            products: products,
+        });
+      });
+      onDataReceived(categories);
+    },
+    (error) => {
+      console.error("Error with catalog listener: ", error);
+      onError(error);
+    }
+  );
+
+  return unsubscribe;
+};
+
 
 /**
  * Fetches the entire product catalog from Firestore once.
@@ -246,7 +291,7 @@ export const updateProductStockStatus = async (categoryId: string, productId: st
  * @param categoryId The ID of the category to add the product to.
  * @param newProductData The product object to add. Note: it should not have an id, one will be generated.
  */
-export const addProductToCategory = async (categoryId: string, newProductData: Omit<Product, 'id'>) => {
+export const addProductToCategory = async (categoryId: string, newProductData: Omit<Product, 'id' | 'inStock'>) => {
     if (!categoryId) {
         throw new Error("El ID de la categoría es requerido.");
     }
@@ -259,6 +304,8 @@ export const addProductToCategory = async (categoryId: string, newProductData: O
             inStock: true, // New products are in stock by default
         };
 
+        // We use updateDoc with arrayUnion instead of overwriting the whole array
+        // to avoid race conditions if another admin is editing at the same time.
         await updateDoc(categoryRef, {
             products: arrayUnion(productToAdd)
         });
@@ -273,6 +320,7 @@ export const addProductToCategory = async (categoryId: string, newProductData: O
 
 /**
  * Deletes a product from a category.
+ * This function reconstructs the array, which is safer than arrayRemove for objects.
  * @param categoryId The ID of the category containing the product.
  * @param productId The ID of the product to delete.
  */
@@ -288,14 +336,18 @@ export const deleteProduct = async (categoryId: string, productId: string) => {
         const categoryData = categorySnap.data() as Omit<Category, 'id'>;
         const products = categoryData.products || [];
         
-        const productToDelete = products.find(p => p.id === productId);
+        // Filter out the product to be deleted
+        const updatedProducts = products.filter(p => p.id !== productId);
 
-        if (!productToDelete) {
-             throw new Error(`Product with id ${productId} not found in category ${categoryId} for deletion.`);
+        if (products.length === updatedProducts.length) {
+            console.warn(`Product with id ${productId} not found in category ${categoryId} for deletion.`);
+            // No need to throw an error, just means the product was already gone.
+            return;
         }
 
+        // Overwrite the products array with the new filtered array
         await updateDoc(categoryRef, {
-            products: arrayRemove(productToDelete)
+            products: updatedProducts
         });
     } catch (error) {
         console.error("Error deleting product: ", error);

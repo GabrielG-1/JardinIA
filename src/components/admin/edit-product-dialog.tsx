@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { updateProduct, type Product } from "@/services/catalog-service";
+import { useAuth } from "@/hooks/use-auth";
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres." }),
@@ -38,6 +39,7 @@ export function EditProductDialog({ product, categoryId, onProductUpdated }: Edi
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -48,9 +50,12 @@ export function EditProductDialog({ product, categoryId, onProductUpdated }: Edi
   });
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
+    if (!isAdmin) {
+      toast({ title: "Acción no permitida", description: "No tienes permisos para editar productos.", variant: "destructive" });
+      return;
+    }
     setIsSubmitting(true);
     try {
-      // Limpiamos el precio para guardarlo como un string de solo números si es necesario
       const cleanPrice = data.price.replace(/[^0-9]/g, '');
       const priceToSave = data.price.startsWith('$') ? data.price : `$${parseInt(cleanPrice, 10).toLocaleString('es-CL')}`;
 
@@ -76,7 +81,7 @@ export function EditProductDialog({ product, categoryId, onProductUpdated }: Edi
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-muted-foreground">
+        <Button variant="ghost" size="icon" className="text-muted-foreground" disabled={!isAdmin}>
           <Pencil className="h-5 w-5" />
           <span className="sr-only">Editar producto</span>
         </Button>

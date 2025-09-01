@@ -1,7 +1,7 @@
 
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, type User } from "firebase/auth";
 import { auth } from '@/lib/firebase';
 
@@ -17,25 +17,24 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      
+      const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
+          .toLowerCase()
+          .split(',')
+          .filter(email => email.trim() !== '');
 
-      // Calculate admin status right after user state is known
       if (currentUser && currentUser.email) {
-        const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
-            .toLowerCase()
-            .split(',')
-            .filter(email => email.trim() !== '');
         setIsAdmin(adminEmails.includes(currentUser.email.toLowerCase()));
       } else {
         setIsAdmin(false);
       }
       
-      // Mark auth as loaded only after user and admin status are set
       setIsAuthLoading(false);
     });
 
@@ -44,9 +43,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, pass: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-    
-    // This part is for immediate feedback on the login page, 
-    // the useEffect will handle the definitive state
     const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
         .toLowerCase()
         .split(',')
@@ -61,10 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const value = { user, isAdmin, isAuthLoading, signIn, signOut };
-
-  // This loading screen is critical to prevent race conditions.
-  // It ensures that no component attempts to read from Firestore
-  // before the initial authentication state is resolved.
+  
   if (isAuthLoading) {
       return (
          <div className="flex h-screen w-full items-center justify-center bg-background">

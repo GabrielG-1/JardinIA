@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { deleteProduct, type Product } from "@/services/catalog-service";
+import { useAuth } from "@/hooks/use-auth";
 
 interface DeleteProductDialogProps {
   product: Product;
@@ -27,8 +28,13 @@ interface DeleteProductDialogProps {
 export function DeleteProductDialog({ product, categoryId, onProductDeleted }: DeleteProductDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
 
   const handleDelete = async () => {
+    if (!isAdmin) {
+      toast({ title: "Acción no permitida", description: "No tienes permisos para eliminar productos.", variant: "destructive" });
+      return;
+    }
     setIsDeleting(true);
     try {
       await deleteProduct(categoryId, product.id);
@@ -52,14 +58,14 @@ export function DeleteProductDialog({ product, categoryId, onProductDeleted }: D
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
+        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" disabled={!isAdmin}>
           <Trash2 className="h-5 w-5" />
           <span className="sr-only">Eliminar producto</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+          <AlertDialogTitle>¿Estás absolutely seguro?</AlertDialogTitle>
           <AlertDialogDescription>
             Esta acción no se puede deshacer. Esto eliminará permanentemente el producto
             <span className="font-semibold"> {product.name} </span>
