@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
 import { getCatalog, updateProductImage, updateProductStockStatus, type Category, type Product } from "@/services/catalog-service";
 import { uploadSiteLogo } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -128,7 +127,7 @@ function AdminProductList() {
   const [uploadingProductId, setUploadingProductId] = useState<string | null>(null);
   const [stockChangeProductId, setStockChangeProductId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { isAuthLoading, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
 
   const fetchCatalogData = async () => {
     try {
@@ -144,11 +143,13 @@ function AdminProductList() {
   };
 
   useEffect(() => {
-    // Solo busca datos si la autenticación ha terminado y el usuario es un administrador.
-    if (!isAuthLoading && isAdmin) {
+    // Solo busca datos si el usuario es un administrador.
+    // El AuthProvider y AdminLayout ya se encargan de prevenir el renderizado
+    // prematuro de este componente.
+    if (isAdmin) {
       fetchCatalogData();
     }
-  }, [isAuthLoading, isAdmin]);
+  }, [isAdmin]);
 
   const handleProductUpdate = () => {
     fetchCatalogData();
@@ -332,10 +333,8 @@ export default function AdminDashboardPage() {
     await signOut();
   };
   
-  // No renderizar el contenido hasta que la autenticación haya terminado de cargar.
-  // Esto previene que los componentes hijos intenten hacer llamadas antes de tiempo.
   if (isAuthLoading) {
-      return null; // O un esqueleto de página de dashboard
+      return null;
   }
 
   return (
