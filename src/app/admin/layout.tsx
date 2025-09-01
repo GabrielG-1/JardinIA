@@ -6,38 +6,45 @@ import { useAuth } from "@/hooks/use-auth";
 import { usePathname, useRouter } from "next/navigation";
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
-  const { user, isAdmin, isLoading } = useAuth();
+  const { user, isAdmin, isAuthLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (isLoading) {
+    if (isAuthLoading) {
       return; // Espera a que el AuthProvider termine de cargar.
     }
 
     const isAuthPage = pathname === '/admin';
     
+    // Si el usuario está logueado y es admin...
     if (user && isAdmin) {
+      // y está en la página de login, lo redirigimos al dashboard.
       if (isAuthPage) {
         router.replace('/admin/dashboard');
       }
-      return;
+      return; // Se queda en la página de admin que esté visitando.
     }
 
+    // Si no hay usuario y no está en la página de login, lo redirigimos al login.
     if (!user && !isAuthPage) {
       router.replace('/admin');
+      return;
     }
     
+    // Si hay un usuario pero NO es admin, lo sacamos de la sección de admin.
     if(user && !isAdmin){
         router.replace('/');
+        return;
     }
 
-  }, [user, isAdmin, isLoading, router, pathname]);
+  }, [user, isAdmin, isAuthLoading, router, pathname]);
 
-  // Muestra una pantalla de carga si la autenticación aún está en proceso.
-  // Esto es crucial para prevenir que los componentes hijos intenten leer datos
-  // antes de que los permisos de administrador estén confirmados.
-  if (isLoading) {
+  // isAuthLoading ahora es manejado por el AuthProvider, pero mantenemos este
+  // chequeo como una segunda capa de seguridad para la sección de admin.
+  // El AuthProvider ya muestra una pantalla de carga, así que este podría ser redundante,
+  // pero no hace daño tenerlo.
+  if (isAuthLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">

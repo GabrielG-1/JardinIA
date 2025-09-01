@@ -8,7 +8,7 @@ import { auth } from '@/lib/firebase';
 interface AuthContextType {
   user: User | null;
   isAdmin: boolean;
-  isLoading: boolean;
+  isAuthLoading: boolean; // Renombrado para mayor claridad
   signIn: (email: string, pass:string) => Promise<{ user: User, isAdmin: boolean }>;
   signOut: () => Promise<void>;
 }
@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthLoading, setIsAuthLoading] = useState(true); // Inicia en true
 
   const isAdmin = useMemo(() => {
     if (!user || !user.email) {
@@ -33,10 +33,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   useEffect(() => {
+    // onAuthStateChanged se ejecuta cuando el estado de auth cambia
+    // y también una vez al inicio cuando se resuelve el estado inicial.
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setIsLoading(false);
+      setIsAuthLoading(false); // Solo se establece en false una vez que tenemos una respuesta definitiva
     });
+    // Limpia la suscripción al desmontar el componente
     return () => unsubscribe();
   }, []);
 
@@ -56,9 +59,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await firebaseSignOut(auth);
   };
 
-  const value = { user, isAdmin, isLoading, signIn, signOut };
+  const value = { user, isAdmin, isAuthLoading, signIn, signOut };
 
-  if (isLoading) {
+  // Muestra una pantalla de carga global mientras se verifica la sesión.
+  // Esto previene que los componentes hijos hagan lecturas de Firestore antes de tiempo.
+  if (isAuthLoading) {
       return (
          <div className="flex h-screen w-full items-center justify-center bg-background">
              <div className="flex flex-col items-center gap-4">

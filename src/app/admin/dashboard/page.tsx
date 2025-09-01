@@ -128,7 +128,7 @@ function AdminProductList() {
   const [uploadingProductId, setUploadingProductId] = useState<string | null>(null);
   const [stockChangeProductId, setStockChangeProductId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { isAuthLoading, isAdmin } = useAuth(); // Obtiene el estado de carga de la autenticación.
+  const { isAuthLoading, isAdmin } = useAuth();
 
   const fetchCatalogData = async () => {
     try {
@@ -151,9 +151,7 @@ function AdminProductList() {
   }, [isAuthLoading, isAdmin]);
 
   const handleProductUpdate = () => {
-    // Vuelve a cargar los datos después de una actualización.
     fetchCatalogData();
-    console.log("Producto actualizado, creado o eliminado. La lista se refrescará.");
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, product: Product, categoryId: string) => {
@@ -170,7 +168,6 @@ function AdminProductList() {
         title: "Imagen actualizada",
         description: `La imagen de ${product.name} se ha cambiado correctamente.`,
       });
-      // Vuelve a cargar los datos para mostrar la nueva imagen.
       fetchCatalogData();
     } catch (error) {
       toast({
@@ -195,7 +192,6 @@ function AdminProductList() {
               title: "Stock actualizado",
               description: `El stock de ${product.name} ha sido actualizado.`
           });
-          // Actualiza el estado localmente para una respuesta de UI más rápida
           setCatalogData(prevData =>
             prevData.map(cat =>
               cat.id === categoryId
@@ -220,8 +216,7 @@ function AdminProductList() {
       }
   }
 
-  // Muestra un esqueleto si la autenticación o los datos están cargando.
-  if (loading || isAuthLoading) {
+  if (loading) {
     return (
       <div className="space-y-4">
         {Array.from({ length: 3 }).map((_, i) => (
@@ -331,12 +326,17 @@ function AdminProductList() {
 }
 
 export default function AdminDashboardPage() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAuthLoading } = useAuth();
   
   const handleSignOut = async () => {
     await signOut();
-    // El layout se encargará de la redirección
   };
+  
+  // No renderizar el contenido hasta que la autenticación haya terminado de cargar.
+  // Esto previene que los componentes hijos intenten hacer llamadas antes de tiempo.
+  if (isAuthLoading) {
+      return null; // O un esqueleto de página de dashboard
+  }
 
   return (
     <div className="container mx-auto p-4 md:p-8 bg-muted/20 min-h-screen pt-28">
