@@ -30,23 +30,22 @@ export const uploadProductImage = async (file: File, productName: string): Promi
  * @param file The logo file to upload.
  * @returns A promise that resolves with the public download URL of the uploaded logo.
  */
-export const uploadLogo = async (file: File): Promise<string> => {
-  // Use a fixed path to ensure there's only one logo file, which gets overwritten.
-  const filePath = `site-settings/logo`;
-  const storageRef = ref(storage, filePath);
-  
-  // Upload the file, overwriting the existing one if it exists
-  await uploadBytes(storageRef, file, { contentType: file.type });
+export const uploadSiteLogo = async (file: File): Promise<string> => {
+  const path = "site-settings/logo"; // Fixed path for the logo
+  const logoRef = ref(storage, path);
 
-  // Get the download URL
-  const downloadURL = await getDownloadURL(storageRef);
-  
-  // Save the URL to Firestore for easy access on the client-side
+  // Upload the file, overwriting if it exists
+  await uploadBytes(logoRef, file, { contentType: file.type });
+
+  // Get the public URL for the image
+  const url = await getDownloadURL(logoRef);
+
+  // Save the URL to Firestore for easy client-side access
   await setDoc(
-    doc(db, "settings", "siteConfig"),
-    { logoUrl: downloadURL, updatedAt: serverTimestamp() },
+    doc(db, "site-settings", "global"),
+    { logoUrl: url, updatedAt: serverTimestamp() },
     { merge: true }
   );
 
-  return downloadURL;
+  return url;
 };

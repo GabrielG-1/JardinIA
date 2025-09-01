@@ -14,11 +14,31 @@ import {
   getDoc,
   arrayRemove,
   getDocs,
+  limit,
 } from "firebase/firestore";
 import { type Tip, type Reply } from "@/types/tip";
 import { analyzeTip } from "@/ai/flows/analyze-tip";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 const TIPS_COLLECTION = "community-tips";
+
+/**
+ * Espera hasta que el estado de autenticación de Firebase esté resuelto.
+ */
+async function authReady(): Promise<void> {
+    const a = auth;
+    if (a.currentUser) {
+        return;
+    }
+    await new Promise(resolve => {
+        const unsubscribe = onAuthStateChanged(a, (user) => {
+            unsubscribe();
+            resolve(user);
+        });
+    });
+}
+
 
 /**
  * Adds a new community tip to the Firestore collection after AI moderation.
@@ -58,7 +78,8 @@ export const getCommunityTips = async (): Promise<Tip[]> => {
     const q = query(
       collection(db, TIPS_COLLECTION),
       where("isApproved", "==", true),
-      orderBy("createdAt", "desc")
+      orderBy("createdAt", "desc"),
+      limit(50)
     );
     
     const querySnapshot = await getDocs(q);
@@ -83,6 +104,7 @@ export const getCommunityTips = async (): Promise<Tip[]> => {
  * @returns A promise that resolves when the reply is added.
  */
 export const addReplyToTip = async (tipId: string, replyData: { name: string; text: string }) => {
+    await authReady(); // Espera a que auth esté listo
     try {
         const tipRef = doc(db, TIPS_COLLECTION, tipId);
         
@@ -108,6 +130,7 @@ export const addReplyToTip = async (tipId: string, replyData: { name: string; te
  * @param tipId The ID of the tip to delete.
  */
 export const deleteTip = async (tipId: string): Promise<void> => {
+    await authReady(); // Espera a que auth esté listo
     try {
         const tipRef = doc(db, TIPS_COLLECTION, tipId);
         await deleteDoc(tipRef);
@@ -124,6 +147,7 @@ export const deleteTip = async (tipId: string): Promise<void> => {
  * @param reply The entire reply object to be deleted.
  */
 export const deleteReplyFromTip = async (tipId: string, reply: Reply): Promise<void> => {
+  await authReady(); // Espera a que auth esté listo
   try {
     const tipRef = doc(db, TIPS_COLLECTION, tipId);
     await updateDoc(tipRef, {

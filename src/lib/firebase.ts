@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, setLogLevel } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 
@@ -27,6 +27,11 @@ if (!getApps().length) {
 const db = getFirestore(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
+
+// Activa el modo debug de Firestore en desarrollo
+if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+  setLogLevel("debug");
+}
 
 
 export { app, db, storage, auth };

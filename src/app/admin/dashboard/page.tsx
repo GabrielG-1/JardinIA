@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { getCatalogWithListener, updateProductImage, updateProductStockStatus, type Category, type Product } from "@/services/catalog-service";
-import { uploadLogo, uploadProductImage } from "@/services/storage-service";
+import { uploadSiteLogo, uploadProductImage } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,19 +34,22 @@ function SiteSettings() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Fetch initial logo URL and listen for real-time updates
-    const unsubscribe = onSnapshot(doc(db, "settings", "siteConfig"), (doc) => {
+    // Escucha en tiempo real para el logo
+    const unsubscribe = onSnapshot(doc(db, "site-settings", "global"), (doc) => {
         if (doc.exists()) {
             setCurrentLogo(doc.data()?.logoUrl || null);
         }
     }, (error) => {
         console.error("Error fetching logo in real-time: ", error);
-        // Fallback to one-time fetch if listener fails (e.g., due to brief network issues)
-        getLogoUrl().then(setCurrentLogo);
+        toast({
+          title: "Error",
+          description: "No se pudo cargar el logo en tiempo real.",
+          variant: "destructive"
+        })
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [toast]);
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -54,11 +57,8 @@ function SiteSettings() {
 
     setIsUploading(true);
     try {
-      // The uploadLogo function now also updates Firestore, so we don't need to call updateLogoUrl here.
-      const downloadURL = await uploadLogo(file);
-      // The onSnapshot listener will automatically update the UI.
-      // We can optimistically set it to avoid waiting for the listener.
-      setCurrentLogo(downloadURL); 
+      await uploadSiteLogo(file);
+      // El listener de onSnapshot actualizará la UI automáticamente.
       toast({
         title: "Logo Actualizado",
         description: "El logo del sitio se ha cambiado correctamente.",

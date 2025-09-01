@@ -2,8 +2,8 @@
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
-const SETTINGS_COLLECTION = "settings";
-const SITE_CONFIG_DOC = "siteConfig"; // A single document for all site-wide settings
+const SETTINGS_COLLECTION = "site-settings";
+const SITE_CONFIG_DOC = "global"; // A single document for all site-wide settings
 
 /**
  * Retrieves the URL of the site logo from Firestore.
