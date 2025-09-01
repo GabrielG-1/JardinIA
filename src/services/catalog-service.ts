@@ -96,50 +96,6 @@ export const getCatalog = async (): Promise<Category[]> => {
 
 
 /**
- * Listens for real-time updates to the catalog collection for the admin panel.
- * @param onSuccess - A function to be called with the updated list of categories.
- * @param onError - An optional function to handle errors.
- * @returns An unsubscribe function to detach the listener.
- */
-export const getCatalogWithListener = (
-    onSuccess: (categories: Category[]) => void, 
-    onError?: (error: Error) => void
-): Unsubscribe => {
-  const q = query(collection(db, CATALOG_COLLECTION));
-
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    const categories: Category[] = [];
-    querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const catId = doc.id; // ID de la categoría del documento
-
-        const products = Array.isArray(data.products)
-            ? data.products.map((p: any, idx: number) => ({
-                ...p,
-                id: p.id || `${catId}-p-${idx}`, 
-                inStock: p.inStock !== false, 
-            }))
-            : [];
-
-        categories.push({ 
-            id: catId, 
-            ...data,
-            products: products
-        } as Category);
-    });
-    onSuccess(categories);
-  }, (error) => {
-    console.error("Error fetching catalog with listener: ", error);
-    if (onError) {
-        onError(error);
-    }
-  });
-
-  return unsubscribe;
-};
-
-
-/**
  * Retrieves all products from all categories in the catalog, ensuring each product has a stable ID.
  * @returns A promise that resolves to a flat array of all products.
  */

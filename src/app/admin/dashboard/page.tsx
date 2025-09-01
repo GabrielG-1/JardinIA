@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { getCatalogWithListener, updateProductImage, updateProductStockStatus, type Category, type Product } from "@/services/catalog-service";
+import { getCatalog, updateProductImage, updateProductStockStatus, type Category, type Product } from "@/services/catalog-service";
 import { uploadSiteLogo } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -128,32 +128,33 @@ function AdminProductList() {
   const [uploadingProductId, setUploadingProductId] = useState<string | null>(null);
   const [stockChangeProductId, setStockChangeProductId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { isLoading: isAuthLoading } = useAuth(); // Obtiene el estado de carga de la autenticación.
+  const { isAuthLoading, isAdmin } = useAuth(); // Obtiene el estado de carga de la autenticación.
 
-  useEffect(() => {
-    // No intentes obtener datos si la autenticación todavía está en proceso.
-    if (isAuthLoading) {
-      return;
+  const fetchCatalogData = async () => {
+    try {
+      setLoading(true);
+      const data = await getCatalog();
+      setCatalogData(data);
+    } catch (err) {
+      console.error(err);
+      setError("No se pudieron cargar los productos. Revisa la consola para más detalles.");
+    } finally {
+      setLoading(false);
     }
-    
-    const unsubscribe = getCatalogWithListener(
-      (data) => {
-        setCatalogData(data);
-        setLoading(false);
-      },
-      (err) => {
-        console.error(err);
-        setError("No se pudieron cargar los productos. Revisa la consola para más detalles.");
-        setLoading(false);
-      }
-    );
-    return () => unsubscribe();
-  }, [isAuthLoading]); // El efecto se volverá a ejecutar cuando la autenticación termine.
-
-  const handleProductUpdate = () => {
-    console.log("Producto actualizado, creado o eliminado. La lista se refrescará.");
   };
 
+  useEffect(() => {
+    // Solo busca datos si la autenticación ha terminado y el usuario es un administrador.
+    if (!isAuthLoading && isAdmin) {
+      fetchCatalogData();
+    }
+  }, [isAuthLoading, isAdmin]);
+
+  const handleProductUpdate = () => {
+    // Vuelve a cargar los datos después de una actualización.
+    fetchCatalogData();
+    console.log("Producto actualizado, creado o eliminado. La lista se refrescará.");
+  };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, product: Product, categoryId: string) => {
     const file = event.target.files?.[0];
@@ -169,6 +170,8 @@ function AdminProductList() {
         title: "Imagen actualizada",
         description: `La imagen de ${product.name} se ha cambiado correctamente.`,
       });
+      // Vuelve a cargar los datos para mostrar la nueva imagen.
+      fetchCatalogData();
     } catch (error) {
       toast({
         title: "Error al subir la imagen",
@@ -192,6 +195,19 @@ function AdminProductList() {
               title: "Stock actualizado",
               description: `El stock de ${product.name} ha sido actualizado.`
           });
+          // Actualiza el estado localmente para una respuesta de UI más rápida
+          setCatalogData(prevData =>
+            prevData.map(cat =>
+              cat.id === categoryId
+                ? {
+                    ...cat,
+                    products: cat.products.map(p =>
+                      p.id === product.id ? { ...p, inStock: newStockStatus } : p
+                    ),
+                  }
+                : cat
+            )
+          );
       } catch (error) {
           toast({
               title: "Error al actualizar el stock",
