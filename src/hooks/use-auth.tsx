@@ -27,7 +27,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
     
     // Obtiene la lista de correos de administradores de la variable de entorno.
-    // Esta es la única fuente de verdad, no se requiere lectura de Firestore.
     const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
         .toLowerCase()
         .split(',')
@@ -39,11 +38,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // onAuthStateChanged maneja la escucha de cambios de estado de autenticación.
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setIsLoading(true);
       setUser(currentUser); // Establece el usuario actual (puede ser null)
-      const adminStatus = checkIsAdmin(currentUser); // Comprueba si el usuario actual es admin
-      setIsAdmin(adminStatus);
-      setIsLoading(false);
+      setIsAdmin(checkIsAdmin(currentUser)); // Comprueba si el usuario actual es admin
+      setIsLoading(false); // La carga ha terminado, ya sea con usuario o sin él.
     });
 
     // Se desuscribe del listener al desmontar el componente para evitar fugas de memoria.
