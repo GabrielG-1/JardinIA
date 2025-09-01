@@ -1,14 +1,14 @@
 
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, type User } from "firebase/auth";
 import { auth } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
   isAdmin: boolean;
-  isAuthLoading: boolean; // Renombrado para mayor claridad
+  isAuthLoading: boolean;
   signIn: (email: string, pass:string) => Promise<{ user: User, isAdmin: boolean }>;
   signOut: () => Promise<void>;
 }
@@ -17,35 +17,36 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true); // Inicia en true
-
-  const isAdmin = useMemo(() => {
-    if (!user || !user.email) {
-      return false;
-    }
-    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
-        .toLowerCase()
-        .split(',')
-        .filter(email => email.trim() !== '');
-    
-    return adminEmails.includes(user.email.toLowerCase());
-  }, [user]);
-
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
-    // onAuthStateChanged se ejecuta cuando el estado de auth cambia
-    // y también una vez al inicio cuando se resuelve el estado inicial.
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setIsAuthLoading(false); // Solo se establece en false una vez que tenemos una respuesta definitiva
+
+      // Calculate admin status right after user state is known
+      if (currentUser && currentUser.email) {
+        const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
+            .toLowerCase()
+            .split(',')
+            .filter(email => email.trim() !== '');
+        setIsAdmin(adminEmails.includes(currentUser.email.toLowerCase()));
+      } else {
+        setIsAdmin(false);
+      }
+      
+      // Mark auth as loaded only after user and admin status are set
+      setIsAuthLoading(false);
     });
-    // Limpia la suscripción al desmontar el componente
+
     return () => unsubscribe();
   }, []);
 
   const signIn = async (email: string, pass: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
     
+    // This part is for immediate feedback on the login page, 
+    // the useEffect will handle the definitive state
     const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
         .toLowerCase()
         .split(',')
@@ -61,8 +62,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const value = { user, isAdmin, isAuthLoading, signIn, signOut };
 
-  // Muestra una pantalla de carga global mientras se verifica la sesión.
-  // Esto previene que los componentes hijos hagan lecturas de Firestore antes de tiempo.
+  // This loading screen is critical to prevent race conditions.
+  // It ensures that no component attempts to read from Firestore
+  // before the initial authentication state is resolved.
   if (isAuthLoading) {
       return (
          <div className="flex h-screen w-full items-center justify-center bg-background">
