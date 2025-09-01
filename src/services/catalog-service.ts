@@ -57,52 +57,6 @@ const generateStableProductId = (categoryId: string, productName: string): strin
 }
 
 /**
- * Sets up a real-time listener for the entire product catalog.
- * @param onDataReceived - Callback function to handle the fetched data.
- * @param onError - Callback function to handle any errors.
- * @returns An unsubscribe function to detach the listener.
- */
-export const getCatalogWithListener = (
-  onDataReceived: (data: Category[]) => void,
-  onError: (error: Error) => void
-): Unsubscribe => {
-  const q = query(collection(db, CATALOG_COLLECTION));
-
-  const unsubscribe = onSnapshot(
-    q,
-    (querySnapshot) => {
-      const categories: Category[] = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const catId = doc.id;
-        const products = Array.isArray(data.products)
-            ? data.products.map((p: any, idx: number) => ({
-                ...p,
-                id: p.id || generateStableProductId(catId, p.name), // Ensure ID exists
-                inStock: p.inStock !== false,
-            }))
-            : [];
-
-        categories.push({
-            id: catId,
-            name: data.name,
-            icon: data.icon,
-            products: products,
-        });
-      });
-      onDataReceived(categories);
-    },
-    (error) => {
-      console.error("Error with catalog listener: ", error);
-      onError(error);
-    }
-  );
-
-  return unsubscribe;
-};
-
-
-/**
  * Fetches the entire product catalog from Firestore once.
  * This is not a real-time listener.
  * @returns A promise that resolves to an array of categories.
@@ -185,59 +139,16 @@ export const searchProducts = async (queryTerm: string): Promise<Product[]> => {
     return matchingProducts;
 }
 
-const updateProductField = async (categoryId: string, productId: string, field: string, value: any) => {
-    const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
-    const categorySnap = await getDoc(categoryRef);
-
-    if (!categorySnap.exists()) {
-        throw new Error(`Category with id ${categoryId} not found.`);
-    }
-    
-    const categoryData = categorySnap.data() as Omit<Category, 'id'>;
-    const products = categoryData.products || [];
-    
-    let productFound = false;
-    const updatedProducts = products.map(p => {
-        if (p.id === productId) {
-            productFound = true;
-            return { ...p, [field]: value };
-        }
-        return p;
-    });
-
-    if (!productFound) {
-        throw new Error(`Product with id ${productId} not found in category ${categoryId}.`);
-    }
-
-    await updateDoc(categoryRef, { products: updatedProducts });
-};
-
-
 /**
- * Updates the image URL for a specific product within a category.
- * @param categoryId The ID of the category containing the product.
- * @param productId The ID of the product to update.
- * @param newImageUrl The new image URL for the product.
- */
-export const updateProductImage = async (categoryId: string, productId: string, newImageUrl: string) => {
-    try {
-        await updateProductField(categoryId, productId, 'image', newImageUrl);
-    } catch (error) {
-        console.error("Error updating product image: ", error);
-        throw error;
-    }
-}
-
-/**
- * Updates a specific product's data (name and price).
+ * Updates a specific product's data (name, price, image, stock).
  * @param categoryId The ID of the category containing the product.
  * @param productId The original ID of the product to update.
- * @param updatedData An object with the new name and price.
+ * @param updatedData An object with the new product data.
  */
 export const updateProduct = async (
     categoryId: string, 
     productId: string, 
-    updatedData: { name: string; price: string }
+    updatedData: { name: string; price: string; image: string, inStock?: boolean }
 ) => {
     try {
         const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
@@ -254,7 +165,15 @@ export const updateProduct = async (
         const updatedProducts = products.map(p => {
             if (p.id === productId) {
                 productFound = true;
-                return { ...p, ...updatedData };
+                // Merge existing product data with the updated data
+                return { 
+                  ...p, 
+                  name: updatedData.name,
+                  price: updatedData.price,
+                  image: updatedData.image,
+                  // Use new inStock value if provided, otherwise keep the existing one
+                  inStock: typeof updatedData.inStock === 'boolean' ? updatedData.inStock : p.inStock
+                };
             }
             return p;
         });
@@ -267,21 +186,6 @@ export const updateProduct = async (
 
     } catch (error) {
         console.error("Error al actualizar el producto: ", error);
-        throw error;
-    }
-};
-
-/**
- * Updates the stock status for a specific product.
- * @param categoryId The ID of the category containing the product.
- * @param productId The ID of the product to update.
- * @param inStock The new stock status (boolean).
- */
-export const updateProductStockStatus = async (categoryId: string, productId: string, inStock: boolean) => {
-    try {
-        await updateProductField(categoryId, productId, 'inStock', inStock);
-    } catch (error) {
-        console.error("Error updating product stock status: ", error);
         throw error;
     }
 };

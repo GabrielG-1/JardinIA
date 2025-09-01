@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { getCatalog, updateProductImage, type Category, type Product, addProductToCategory, updateProduct, deleteProduct, updateProductStockStatus } from "@/services/catalog-service";
+import { getCatalog, updateProduct, type Category, type Product, addProductToCategory, deleteProduct } from "@/services/catalog-service";
 import { uploadSiteLogo, uploadProductImage as uploadImageService } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -165,7 +165,13 @@ function AdminProductList() {
 
     try {
       const downloadURL = await uploadImageService(file, product.id);
-      await updateProductImage(categoryId, product.id, downloadURL);
+      // Actualiza el producto con la nueva URL de la imagen, manteniendo los datos existentes.
+      await updateProduct(categoryId, product.id, { 
+        name: product.name, 
+        price: product.price, 
+        image: downloadURL,
+        inStock: product.inStock
+      });
       toast({
         title: "Imagen actualizada",
         description: `La imagen de ${product.name} se ha cambiado correctamente.`,
@@ -193,7 +199,12 @@ function AdminProductList() {
       }
       setStockChangeProductId(product.id);
       try {
-          await updateProductStockStatus(categoryId, product.id, newStockStatus);
+          await updateProduct(categoryId, product.id, { 
+            name: product.name, 
+            price: product.price, 
+            image: product.image,
+            inStock: newStockStatus 
+          });
           toast({
               title: "Stock actualizado",
               description: `El stock de ${product.name} ha sido actualizado.`
