@@ -3,33 +3,40 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Lista de correos de administradores. 
-    // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
+    // --- Lista de correos de administradores ---
     let adminEmails = ['programaciongabriel2025@gmail.com'];
     
-    // Función para verificar si el usuario es un administrador
-    function isAdminEmail() {
+    // --- Función para verificar si el usuario es un administrador ---
+    function isAdmin() {
       return request.auth != null && request.auth.token.email.lower() in adminEmails;
     }
 
-    // Reglas para la colección 'catalog'
+    // --- Reglas para la colección 'catalog' ---
+    // Cualquiera puede leer el catálogo.
+    // Solo los administradores pueden crear, actualizar o borrar productos.
     match /catalog/{categoryId} {
       allow read: if true;
-      allow write: if isAdminEmail();
+      allow write: if isAdmin();
     }
     
-    // Reglas para la colección de consejos de la comunidad
+    // --- Reglas para la colección de consejos de la comunidad ---
     match /community-tips/{tipId} {
-      allow read: if resource.data.isApproved == true || isAdminEmail();
-      allow create: if true; // Cualquiera puede enviar un consejo para moderación
-      allow update: if request.auth != null || isAdminEmail(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
-      allow delete: if isAdminEmail(); // Solo los admins pueden borrar el consejo principal
+      // Los usuarios pueden leer consejos aprobados o si son administradores (para moderar).
+      allow read: if resource.data.isApproved == true || isAdmin();
+      // Cualquiera puede enviar un consejo para moderación.
+      allow create: if true;
+      // Usuarios autenticados pueden añadir respuestas, administradores pueden modificar todo.
+      allow update: if request.auth != null || isAdmin();
+      // Solo los administradores pueden borrar el consejo principal.
+      allow delete: if isAdmin();
     }
 
-    // Reglas para la configuración del sitio (logo)
+    // --- Reglas para la configuración del sitio (logo) ---
     match /site-settings/{docId} {
-      allow read: if true;
-      allow write: if isAdminEmail();
+        // Cualquiera puede leer la configuración del sitio (para ver el logo).
+        allow read: if true;
+        // Solo los administradores pueden escribir la configuración.
+        allow write: if isAdmin();
     }
   }
 }
