@@ -19,6 +19,8 @@ import { DeleteProductDialog } from "@/components/admin/delete-product-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { getLogoUrl, updateLogoUrl } from "@/services/settings-service";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const formatPrice = (price: string) => {
     const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
@@ -316,7 +318,7 @@ export default function AdminDashboardPage() {
           <h1 className="text-3xl font-bold font-headline">Panel de Administrador</h1>
           {user && <p className="text-muted-foreground truncate">Sesión iniciada como {user.email}</p>}
         </div>
-        <Button onClick={handleSignOut}>
+        <Button onClick={handleSignOut} variant="destructive">
           Cerrar Sesión
         </Button>
       </header>
@@ -327,5 +329,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    
