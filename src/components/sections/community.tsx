@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { addCommunityTip, getCommunityTips, addReplyToTip } from "@/services/community-tips-service";
 import { type Tip } from "@/types/tip";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -15,8 +15,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useAuth } from "@/hooks/use-auth";
 import { DeleteConfirmationDialog } from "@/components/community/delete-confirmation-dialog";
 import { deleteReplyFromTip } from "@/services/community-tips-service";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 
 function ReplyForm({ tipId, onReplyAdded }: { tipId: string, onReplyAdded: () => void }) {
   const [replyName, setReplyName] = useState("");
@@ -83,15 +81,18 @@ export function CommunitySection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openReplyForm, setOpenReplyForm] = useState<string | null>(null);
   const { toast } = useToast();
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
+  
+  const fetchTips = useCallback(async () => {
+    setLoading(true);
+    const tipsData = await getCommunityTips();
+    setTips(tipsData);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
-    const unsubscribe = getCommunityTips((tipsData) => {
-      setTips(tipsData);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+    fetchTips();
+  }, [fetchTips]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,6 +108,7 @@ export function CommunitySection() {
         });
         setNewName("");
         setNewAdvice("");
+        fetchTips(); // Refresh the tips list
       } else {
         toast({
           title: "Consejo No Relevante",
@@ -122,7 +124,12 @@ export function CommunitySection() {
       title: "Respuesta Eliminada",
       description: "La respuesta ha sido eliminada.",
     });
-    // The real-time listener will update the UI automatically.
+    fetchTips(); // Refresh the tips list
+  }
+  
+  const handleReplyAdded = () => {
+      setOpenReplyForm(null);
+      fetchTips(); // Refresh the tips list
   }
 
   return (
@@ -192,7 +199,7 @@ export function CommunitySection() {
                                     Responder
                                 </Button>
                             </div>
-                            {openReplyForm === tip.id && <ReplyForm tipId={tip.id} onReplyAdded={() => setOpenReplyForm(null)} />}
+                            {openReplyForm === tip.id && <ReplyForm tipId={tip.id} onReplyAdded={handleReplyAdded} />}
                         </Card>
                         ))}
                     </div>

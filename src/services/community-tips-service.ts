@@ -15,6 +15,7 @@ import {
   deleteDoc,
   getDoc,
   arrayRemove,
+  getDocs,
 } from "firebase/firestore";
 import { type Tip, type Reply } from "@/types/tip";
 import { analyzeTip } from "@/ai/flows/analyze-tip";
@@ -50,31 +51,30 @@ export const addCommunityTip = async (tip: { name: string; advice: string }): Pr
 };
 
 /**
- * Listens for real-time updates to the community tips collection.
- * It only fetches tips that are marked as approved.
- * @param callback - A function to be called with the updated list of tips.
- * @returns An unsubscribe function to detach the listener.
+ * Fetches approved community tips once from the Firestore collection.
+ * This is not a real-time listener.
+ * @returns A promise that resolves to an array of approved tips.
  */
-export const getCommunityTips = (callback: (tips: Tip[]) => void): Unsubscribe => {
-  const q = query(
-    collection(db, TIPS_COLLECTION),
-    where("isApproved", "==", true),
-    orderBy("createdAt", "desc")
-  );
-  
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+export const getCommunityTips = async (): Promise<Tip[]> => {
+  try {
+    const q = query(
+      collection(db, TIPS_COLLECTION),
+      where("isApproved", "==", true),
+      orderBy("createdAt", "desc")
+    );
+    
+    const querySnapshot = await getDocs(q);
     const tips: Tip[] = [];
     querySnapshot.forEach((doc) => {
       tips.push({ id: doc.id, ...doc.data() } as Tip);
     });
-    callback(tips);
-  }, (error) => {
-    console.error("Error fetching community tips:", error);
-    // Pass an empty array to the callback on error to clear any existing state
-    callback([]);
-  });
+    return tips;
 
-  return unsubscribe;
+  } catch (error) {
+    console.error("Error fetching community tips:", error);
+    // Return an empty array in case of error.
+    return [];
+  }
 };
 
 
