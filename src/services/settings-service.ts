@@ -1,6 +1,6 @@
 
 import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 
 const SETTINGS_COLLECTION = "settings";
 const SITE_CONFIG_DOC = "siteConfig"; // A single document for all site-wide settings
@@ -38,3 +38,5 @@ export const updateLogoUrl = async (newUrl: string): Promise<void> => {
     throw error;
   }
 };
+
+    
