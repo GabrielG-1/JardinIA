@@ -35,12 +35,7 @@ function SiteSettings() {
 
   useEffect(() => {
     // Fetch initial logo URL
-    const unsubscribe = onSnapshot(doc(db, "settings", "siteConfig"), (doc) => {
-        if (doc.exists()) {
-            setCurrentLogo(doc.data()?.logoUrl || null);
-        }
-    });
-    return () => unsubscribe();
+    getLogoUrl().then(setCurrentLogo);
   }, []);
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,6 +46,7 @@ function SiteSettings() {
     try {
       const downloadURL = await uploadLogo(file);
       await updateLogoUrl(downloadURL);
+      setCurrentLogo(downloadURL); // Update local state immediately
       toast({
         title: "Logo Actualizado",
         description: "El logo del sitio se ha cambiado correctamente.",
