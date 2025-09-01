@@ -2,16 +2,21 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // Las imágenes de los productos y el logo del sitio son públicos para lectura
+    // Las imágenes de productos son públicas para que cualquiera pueda verlas.
     match /product-images/{allPaths=**} {
       allow read: if true;
     }
-    match /site-settings/{allPaths=**} {
+
+    // El logo del sitio es público.
+    match /site-settings/logo {
       allow read: if true;
     }
 
     // Solo los usuarios autenticados pueden escribir en el almacenamiento.
-    // Esto es suficiente para el panel de admin, ya que el admin debe estar logueado.
-    allow write: if request.auth != null;
+    // Esto es suficiente para que el administrador (que debe estar autenticado)
+    // pueda subir imágenes de productos y el logo.
+    match /{allPaths=**} {
+      allow write: if request.auth != null;
+    }
   }
 }

@@ -3,19 +3,19 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Lista de correos de administradores en minúsculas.
-    // ESTO DEBE COINCIDIR CON LA VARIABLE DE ENTORNO NEXT_PUBLIC_ADMIN_EMAILS
+    // Lista de correos de administradores.
+    // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
     let adminEmails = ['programaciongabriel2025@gmail.com'];
     
     // Función para verificar si el usuario es un administrador
     function isAdmin() {
-      return request.auth != null && request.auth.token.email.lower() in adminEmails;
+      return request.auth != null && request.auth.token.email in adminEmails;
     }
 
     // Reglas para la colección 'catalog'
     match /catalog/{categoryId} {
       allow read: if true;
-      allow write: if isAdmin(); // Solo los admins pueden crear, actualizar o borrar.
+      allow write: if isAdmin(); // Solo los admins pueden crear, actualizar o borrar productos.
     }
     
     // Reglas para la colección de consejos de la comunidad
@@ -23,14 +23,13 @@ service cloud.firestore {
       allow read: if resource.data.isApproved == true || isAdmin();
       allow create: if true; // Cualquiera puede enviar un consejo para moderación
       allow update: if request.auth != null || isAdmin(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
-      allow delete: if isAdmin(); // Solo los admins pueden borrar.
+      allow delete: if isAdmin(); // Solo los admins pueden borrar el consejo principal
     }
 
-    // Reglas para la configuración del sitio (como el logo)
+    // Reglas para la configuración del sitio (logo)
     match /settings/{docId} {
-        // CAMBIO CLAVE: Se usa 'get' para una lectura pública inequívoca de un solo documento.
-        allow get: if true; 
-        allow list, write: if isAdmin(); // Solo los admins pueden listar o modificar.
+        allow get: if true; // Permite que CUALQUIERA lea el documento (get es para un solo doc)
+        allow write: if isAdmin(); // Solo los admins pueden modificar la configuración
     }
   }
 }
