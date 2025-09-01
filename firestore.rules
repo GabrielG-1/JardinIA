@@ -1,35 +1,35 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    let adminEmails = ["programaciongabriel2025@gmail.com"];
     
+    // --- admin por email (ajusta si tienes más) ---
+    let adminEmails = ["programaciongabriel2025@gmail.com"];
     function isAdminEmail() {
       return request.auth != null
              && request.auth.token.email != null
              && request.auth.token.email.lower() in adminEmails;
     }
 
+    // === catálogo (como ya lo tienes) ===
     match /catalog/{categoryId} {
       allow read: if true;
       allow write: if isAdminEmail();
     }
 
+    // === comentarios (como ya lo tienes) ===
     match /community-tips/{tipId} {
-      allow read: if resource.data.isApproved == true || isAdminEmail();
+      allow read:   if resource.data.isApproved == true || isAdminEmail();
       allow create: if true;
       allow update: if request.auth != null || isAdminEmail();
       allow delete: if isAdminEmail();
     }
-    
+
+    // === site-settings (logoUrl, etc.) ===
     match /site-settings/{docId} {
-        allow read: if true;
-        allow write: if isAdminEmail();
-    }
-    
-    match /settings/{docId} {
-        allow read: if true;
-        allow write: if isAdminEmail();
+      // que cualquiera pueda LEER (si solo hay info pública como el logo)
+      allow read: if true;
+      // solo admin por email puede crear/editar
+      allow write: if isAdminEmail();
     }
   }
 }
