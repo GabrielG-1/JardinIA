@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Regla general: por defecto, nadie puede leer o escribir.
+    // Esto asegura que todos los accesos deben ser explícitamente permitidos.
+    // match /{allPaths=**} {
+    //   allow read, write: if false;
+    // }
+
+    // Regla para las imágenes de productos y el logo del sitio.
+    // Permite la lectura pública a cualquiera, ya que las imágenes no son sensibles.
+    match /product-images/{imageName} {
+      allow read: if true;
+    }
+    
+    match /site-settings/logo {
+       allow read: if true;
+    }
+
+    // Permite la escritura (subida, actualización, eliminación) de cualquier archivo
+    // únicamente si el usuario está autenticado. Esto es suficiente para el
+    // panel de administrador, ya que el admin debe iniciar sesión para acceder.
+    // Combinado con las reglas de Firestore, que solo los admins pueden modificar
+    // las URLs de las imágenes, la seguridad se mantiene.
+    match /{allPaths=**} {
+      allow write: if request.auth != null;
+    }
+  }
+}
