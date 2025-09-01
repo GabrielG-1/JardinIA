@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { getCatalogWithListener, updateProductImage, updateProductStockStatus, type Category, type Product } from "@/services/catalog-service";
-import { uploadSiteLogo } from "@/services/storage-service";
+import { getCatalog, updateProductImage, updateProductStockStatus, type Category, type Product, addProductToCategory, updateProduct, deleteProduct } from "@/services/catalog-service";
+import { uploadSiteLogo, uploadProductImage as uploadImageService } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -128,34 +128,30 @@ function AdminProductList() {
   const [stockChangeProductId, setStockChangeProductId] = useState<string | null>(null);
   const { toast } = useToast();
   const { isAdmin, isAuthLoading } = useAuth();
-
-  useEffect(() => {
-    if (isAuthLoading || !isAdmin) {
-      // Don't fetch data if auth is loading or user is not an admin
-      // The layout should prevent non-admins from seeing this, but this is a safeguard.
-      setLoading(!isAuthLoading); // If auth is done and not admin, stop loading.
-      return;
+  
+  const fetchCatalogData = async () => {
+    try {
+      const data = await getCatalog();
+      setCatalogData(data);
+    } catch(err) {
+      console.error(err);
+      setError("No se pudieron cargar los productos. Revisa la consola para más detalles.");
+    } finally {
+      setLoading(false);
     }
-
-    const unsubscribe = getCatalogWithListener(
-      (data) => {
-        setCatalogData(data);
-        setLoading(false);
-      },
-      (err) => {
-        console.error(err);
-        setError("No se pudieron cargar los productos. Revisa la consola para más detalles. Posible error de permisos.");
-        setLoading(false);
-      }
-    );
-
-    // Cleanup subscription on component unmount
-    return () => unsubscribe();
-  }, [isAdmin, isAuthLoading]);
+  }
+  
+  useEffect(() => {
+    // Only fetch data once the user's admin status is confirmed.
+    if (!isAuthLoading && isAdmin) {
+      fetchCatalogData();
+    }
+  }, [isAuthLoading, isAdmin]);
 
 
-  const handleProductUpdate = () => {
-    // onSnapshot will handle the update automatically
+  const handleProductUpdate = async () => {
+    // Refetch the entire catalog to show changes
+    await fetchCatalogData();
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, product: Product, categoryId: string) => {
@@ -165,14 +161,13 @@ function AdminProductList() {
     setUploadingProductId(product.id);
 
     try {
-      const safeProductName = product.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-      const downloadURL = await uploadProductImage(file, safeProductName);
+      const downloadURL = await uploadImageService(file, product.id);
       await updateProductImage(categoryId, product.id, downloadURL);
       toast({
         title: "Imagen actualizada",
         description: `La imagen de ${product.name} se ha cambiado correctamente.`,
       });
-      // No need to fetch manually, onSnapshot will update
+      await fetchCatalogData();
     } catch (error) {
       toast({
         title: "Error al subir la imagen",
@@ -196,7 +191,7 @@ function AdminProductList() {
               title: "Stock actualizado",
               description: `El stock de ${product.name} ha sido actualizado.`
           });
-          // No need to update state manually, onSnapshot will handle it.
+          await fetchCatalogData();
       } catch (error) {
           toast({
               title: "Error al actualizar el stock",
