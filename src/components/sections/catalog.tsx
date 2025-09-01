@@ -45,21 +45,20 @@ export function CatalogSection() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // La lógica de `getCatalog` ahora es un listener en tiempo real.
-    // El unsubscribe detiene el listener cuando el componente se desmonta.
-    const unsubscribe = getCatalog(
-      (data) => {
-        setCatalogData(data);
-        setLoading(false);
-      }, 
-      (err) => { 
-        console.error(err);
-        setError("No se pudieron cargar los productos. Verifique la configuración de Firebase y las reglas de seguridad.");
-        setLoading(false);
-      }
-    );
-    return () => unsubscribe();
-  }, []); // El array vacío asegura que esto solo se ejecute una vez.
+    const fetchCatalog = async () => {
+        try {
+            const data = await getCatalog();
+            setCatalogData(data);
+        } catch (err) {
+            console.error(err);
+            setError("No se pudieron cargar los productos. Verifique la configuración de Firebase y las reglas de seguridad.");
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    fetchCatalog();
+  }, []);
   
   const safeCatalog = useMemo(() => Array.isArray(catalogData) ? catalogData : [], [catalogData]);
 

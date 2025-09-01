@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { getCatalog, updateProductImage, updateProductStockStatus, type Category, type Product } from "@/services/catalog-service";
+import { getCatalogWithListener, updateProductImage, updateProductStockStatus, type Category, type Product } from "@/services/catalog-service";
 import { uploadLogo, uploadProductImage } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -130,7 +130,7 @@ function AdminProductList() {
   };
 
   useEffect(() => {
-    const unsubscribe = getCatalog(
+    const unsubscribe = getCatalogWithListener(
       (data) => {
         setCatalogData(data);
         setLoading(false);

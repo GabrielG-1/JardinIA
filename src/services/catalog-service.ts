@@ -58,13 +58,50 @@ const generateStableProductId = (categoryId: string, productName: string): strin
 
 
 /**
- * Listens for real-time updates to the catalog collection.
- * It ensures every category and product has a stable ID.
- * @param callback - A function to be called with the updated list of categories.
+ * Fetches the entire product catalog from Firestore once.
+ * This is not a real-time listener.
+ * @returns A promise that resolves to an array of categories.
+ */
+export const getCatalog = async (): Promise<Category[]> => {
+    try {
+        const q = query(collection(db, CATALOG_COLLECTION));
+        const querySnapshot = await getDocs(q);
+
+        const categories: Category[] = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const catId = doc.id;
+
+            const products = Array.isArray(data.products)
+                ? data.products.map((p: any, idx: number) => ({
+                    ...p,
+                    id: p.id || `${catId}-p-${idx}`,
+                    inStock: p.inStock !== false,
+                }))
+                : [];
+
+            categories.push({
+                id: catId,
+                ...data,
+                products: products
+            } as Category);
+        });
+
+        return categories;
+    } catch (error) {
+        console.error("Error fetching catalog: ", error);
+        throw error; // Re-throw the error to be handled by the caller
+    }
+};
+
+
+/**
+ * Listens for real-time updates to the catalog collection for the admin panel.
+ * @param onSuccess - A function to be called with the updated list of categories.
  * @param onError - An optional function to handle errors.
  * @returns An unsubscribe function to detach the listener.
  */
-export const getCatalog = (
+export const getCatalogWithListener = (
     onSuccess: (categories: Category[]) => void, 
     onError?: (error: Error) => void
 ): Unsubscribe => {
@@ -76,12 +113,11 @@ export const getCatalog = (
         const data = doc.data();
         const catId = doc.id; // ID de la categoría del documento
 
-        // Asegurar que cada producto tenga un ID único y estable.
         const products = Array.isArray(data.products)
             ? data.products.map((p: any, idx: number) => ({
                 ...p,
-                id: p.id || `${catId}-p-${idx}`, // Fallback por si el ID no existe
-                inStock: p.inStock !== false, // Por defecto es true
+                id: p.id || `${catId}-p-${idx}`, 
+                inStock: p.inStock !== false, 
             }))
             : [];
 
@@ -93,7 +129,7 @@ export const getCatalog = (
     });
     onSuccess(categories);
   }, (error) => {
-    console.error("Error fetching catalog: ", error);
+    console.error("Error fetching catalog with listener: ", error);
     if (onError) {
         onError(error);
     }
