@@ -21,26 +21,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   const checkIsAdmin = useCallback((userToCheck: User | null): boolean => {
+    // Si no hay usuario o no tiene email, no puede ser admin.
     if (!userToCheck || !userToCheck.email) {
       return false;
     }
     
-    // La lista de correos de administradores se obtiene de una variable de entorno pública.
-    // Esta es la única fuente de verdad para determinar si un usuario es administrador.
-    // No se requiere ninguna lectura a Firestore.
-    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "").split(',');
+    // Obtiene la lista de correos de administradores de la variable de entorno.
+    // Esta es la única fuente de verdad, no se requiere lectura de Firestore.
+    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
+        .toLowerCase()
+        .split(',')
+        .filter(email => email.trim() !== ''); // Filtra correos vacíos
     
     return adminEmails.includes(userToCheck.email.toLowerCase());
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    // onAuthStateChanged maneja la escucha de cambios de estado de autenticación.
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setIsLoading(true);
-      const adminStatus = checkIsAdmin(user);
-      setUser(user);
+      setUser(currentUser); // Establece el usuario actual (puede ser null)
+      const adminStatus = checkIsAdmin(currentUser); // Comprueba si el usuario actual es admin
       setIsAdmin(adminStatus);
       setIsLoading(false);
     });
+
+    // Se desuscribe del listener al desmontar el componente para evitar fugas de memoria.
     return () => unsubscribe();
   }, [checkIsAdmin]);
 
