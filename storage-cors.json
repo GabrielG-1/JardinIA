@@ -8,7 +8,8 @@
       "http://localhost:9003",
       "http://localhost:9002",
       "http://localhost:5000",
-      "http://localhost:5173"
+      "http://localhost:5173",
+      "https://6000-firebase-studio-1755739796532.cluster-lqzyk3r5hzdcaqv6zwm7wv6pwa.cloudworkstations.dev"
     ],
     "method": ["GET", "HEAD", "PUT", "POST", "DELETE", "OPTIONS", "PATCH"],
     "responseHeader": [
