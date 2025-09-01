@@ -2,16 +2,19 @@
 [
   {
     "origin": [
-      "https://studio--jardnia.us-central1.hosted.app",
       "https://jardnia.web.app",
       "https://jardnia.firebaseapp.com",
-      "http://localhost:9003"
+      "http://localhost:9003",
+      "https://6000-firebase-studio-1755739796532.cluster-lqzyk3r5hzdcaqv6zwm7wv6pwa.cloudworkstations.dev"
     ],
-    "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "method": [
+      "GET",
+      "POST",
+      "PUT"
+    ],
     "responseHeader": [
       "Content-Type",
-      "Authorization",
-      "X-Goog-Upload-Protocol"
+      "Authorization"
     ],
     "maxAgeSeconds": 3600
   }

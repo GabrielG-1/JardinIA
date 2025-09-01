@@ -1,9 +1,11 @@
+
 rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
 
     function isAdminEmail() {
+      // Importante: La lista de correos debe coincidir con firestore.rules
       return request.auth != null
              && request.auth.token.email != null
              && request.auth.token.email.lower() in [
@@ -11,13 +13,13 @@ service firebase.storage {
              ];
     }
 
-    // El logo del sitio es público para leer, pero solo los administradores pueden cambiarlo.
+    // Logo del sitio: cualquiera puede leerlo, solo admin puede escribirlo.
     match /site-settings/logo {
       allow read: if true;
       allow write: if isAdminEmail();
     }
 
-    // Las imágenes de productos son públicas para leer. Solo los administradores pueden subirlas.
+    // Imágenes de productos: cualquiera puede leerlas, solo admin puede escribirlas.
     match /product-images/{allPaths=**} {
       allow read: if true;
       allow write: if isAdminEmail();
