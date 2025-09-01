@@ -144,7 +144,7 @@ function AdminProductList() {
 
   useEffect(() => {
     // Solo busca datos si el usuario es un administrador.
-    // El AuthProvider y AdminLayout ya se encargan de prevenir el renderizado
+    // El AuthProvider ya se encarga de prevenir el renderizado
     // prematuro de este componente.
     if (isAdmin) {
       fetchCatalogData();
@@ -327,15 +327,11 @@ function AdminProductList() {
 }
 
 export default function AdminDashboardPage() {
-  const { user, signOut, isAuthLoading } = useAuth();
+  const { user, signOut } = useAuth();
   
   const handleSignOut = async () => {
     await signOut();
   };
-  
-  if (isAuthLoading) {
-      return null;
-  }
 
   return (
     <div className="container mx-auto p-4 md:p-8 bg-muted/20 min-h-screen pt-28">
