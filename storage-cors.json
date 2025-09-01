@@ -1,11 +1,10 @@
-
 [
   {
     "origin": [
       "https://jardnia.web.app",
       "https://jardnia.firebaseapp.com",
       "http://localhost:9003",
-      "https://6000-firebase-studio-1755739796532.cluster-lqzyk3r5hzdcaqv6zwm7wv6pwa.cloudworkstations.dev"
+      "https://studio--jardnia.us-central1.hosted.app"
     ],
     "method": [
       "GET",
