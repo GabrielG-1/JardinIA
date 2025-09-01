@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { getCatalog, updateProductImage, updateProductStockStatus, type Category, type Product, addProductToCategory, updateProduct, deleteProduct } from "@/services/catalog-service";
+import { getCatalog, updateProductImage, type Category, type Product, addProductToCategory, updateProduct, deleteProduct } from "@/services/catalog-service";
 import { uploadSiteLogo, uploadProductImage as uploadImageService } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -30,6 +30,7 @@ function SiteSettings() {
   const [isUploading, setIsUploading] = useState(false);
   const [isLoadingLogo, setIsLoadingLogo] = useState(true);
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     const fetchLogo = async () => {
@@ -48,7 +49,7 @@ function SiteSettings() {
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file || !isAdmin) return;
 
     setIsUploading(true);
     try {
@@ -58,13 +59,13 @@ function SiteSettings() {
         title: "Logo Actualizado",
         description: "El logo del sitio se ha cambiado correctamente.",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error uploading logo:", error);
       toast({
         title: "Error al subir el logo",
-        description: "No se pudo subir la nueva imagen del logo.",
+        description: `No se pudo subir la nueva imagen del logo. Código: ${error.code || 'desconocido'}`,
         variant: "destructive",
       });
-      console.error("Error uploading logo:", error);
     } finally {
       setIsUploading(false);
       if (event.target) {
@@ -102,16 +103,17 @@ function SiteSettings() {
               className="hidden"
               accept="image/png, image/jpeg, image/webp, image/svg+xml"
               onChange={handleLogoUpload}
-              disabled={isUploading}
+              disabled={isUploading || !isAdmin}
             />
             <Button
               variant="outline"
               onClick={() => document.getElementById('logo-upload')?.click()}
-              disabled={isUploading}
+              disabled={isUploading || !isAdmin}
             >
               <Upload className="mr-2 h-4 w-4" />
               {isUploading ? "Subiendo..." : "Subir Imagen"}
             </Button>
+             {!isAdmin && <p className="text-xs text-destructive mt-2">No tienes permisos para cambiar el logo.</p>}
           </div>
         </div>
       </CardContent>
@@ -151,12 +153,13 @@ function AdminProductList() {
 
   const handleProductUpdate = async () => {
     // Refetch the entire catalog to show changes
+    setLoading(true);
     await fetchCatalogData();
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, product: Product, categoryId: string) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file || !isAdmin) return;
 
     setUploadingProductId(product.id);
 
@@ -168,10 +171,10 @@ function AdminProductList() {
         description: `La imagen de ${product.name} se ha cambiado correctamente.`,
       });
       await fetchCatalogData();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error al subir la imagen",
-        description: "No se pudo subir la imagen. Inténtalo de nuevo.",
+        description: `No se pudo subir la imagen. Código: ${error.code || 'desconocido'}`,
         variant: "destructive",
       });
       console.error("Error uploading image: ", error);
@@ -184,6 +187,10 @@ function AdminProductList() {
   };
 
   const handleStockChange = async (product: Product, categoryId: string, newStockStatus: boolean) => {
+      if (!isAdmin) {
+          toast({ title: "Acción no permitida", description: "No tienes permisos para cambiar el stock.", variant: "destructive" });
+          return;
+      }
       setStockChangeProductId(product.id);
       try {
           await updateProductStockStatus(categoryId, product.id, newStockStatus);
@@ -268,7 +275,7 @@ function AdminProductList() {
                             id={switchId}
                             checked={product.inStock}
                             onCheckedChange={(checked) => handleStockChange(product, category.id, checked)}
-                            disabled={isChangingStock}
+                            disabled={isChangingStock || !isAdmin}
                           />
                           <Label htmlFor={switchId} className="cursor-pointer">{product.inStock ? "Con Stock" : "Sin Stock"}</Label>
                       </div>
@@ -279,13 +286,13 @@ function AdminProductList() {
                             className="hidden"
                             accept="image/png, image/jpeg, image/webp"
                             onChange={(e) => handleImageUpload(e, product, category.id)}
-                            disabled={isUploading}
+                            disabled={isUploading || !isAdmin}
                           />
                         <Button 
                           variant="outline" 
                           size="sm" 
                           onClick={() => document.getElementById(fileInputId)?.click()}
-                          disabled={isUploading}
+                          disabled={isUploading || !isAdmin}
                         >
                           <Upload className="mr-2 h-4 w-4" />
                           {isUploading ? "Subiendo..." : "Imagen"}

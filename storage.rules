@@ -1,28 +1,35 @@
-
 rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
+    
+    // Lista de correos de administradores.
+    // DEBE COINCIDIR EXACTAMENTE CON LA LISTA EN firestore.rules
+    function getAdminEmails() {
+      return ['programaciongabriel2025@gmail.com'];
+    }
 
-    function isAdminEmail() {
-      // Importante: La lista de correos debe coincidir con firestore.rules
+    // Función para verificar si el usuario autenticado es un administrador.
+    function isAdmin() {
       return request.auth != null
              && request.auth.token.email != null
-             && request.auth.token.email.lower() in [
-               'programaciongabriel2025@gmail.com'
-             ];
+             && request.auth.token.email.lower() in getAdminEmails();
     }
 
-    // Logo del sitio: cualquiera puede leerlo, solo admin puede escribirlo.
-    match /site-settings/logo {
-      allow read: if true;
-      allow write: if isAdminEmail();
-    }
-
-    // Imágenes de productos: cualquiera puede leerlas, solo admin puede escribirlas.
+    // Reglas para las imágenes de productos
     match /product-images/{allPaths=**} {
+      // Cualquiera puede leer las imágenes de los productos.
       allow read: if true;
-      allow write: if isAdminEmail();
+      // Solo los administradores pueden subir, actualizar o eliminar imágenes de productos.
+      allow write: if isAdmin();
+    }
+
+    // Reglas para el logo del sitio
+    match /site-settings/logo {
+        // Cualquiera puede leer el logo.
+        allow read: if true;
+        // Solo los administradores pueden subir/actualizar el logo.
+        allow write: if isAdmin();
     }
   }
 }

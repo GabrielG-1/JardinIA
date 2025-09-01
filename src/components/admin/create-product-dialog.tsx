@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { addProductToCategory, type Category } from "@/services/catalog-service";
 import { uploadProductImage } from "@/services/storage-service";
 import Image from "next/image";
+import { useAuth } from "@/hooks/use-auth";
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres." }),
@@ -43,6 +44,7 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -58,14 +60,21 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
   };
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
+    if (!isAdmin) {
+      toast({ title: "Acción no permitida", description: "No tienes permisos para crear productos.", variant: "destructive" });
+      return;
+    }
+    
     setIsSubmitting(true);
     let imageUrl = "https://placehold.co/200x200.png"; // Default image
 
     try {
+      const safeProductName = data.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+      const tempProductId = `${data.categoryId}-${safeProductName}`;
+
       // 1. Subir la imagen si se proporcionó
       if (data.image) {
-        const safeProductName = data.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-        imageUrl = await uploadProductImage(data.image, safeProductName);
+        imageUrl = await uploadProductImage(data.image, tempProductId);
       }
 
       // 2. Formatear el precio
@@ -78,7 +87,6 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
         price: priceToSave,
         image: imageUrl,
         aiHint: "", // Default AI hint
-        inStock: true // New products are in stock by default
       });
 
       toast({
@@ -89,11 +97,11 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
       form.reset();
       setImagePreview(null);
       setIsOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       toast({
         title: "Error al crear el producto",
-        description: "No se pudo guardar el producto. Inténtalo de nuevo.",
+        description: `No se pudo guardar el producto. Código: ${error.code || 'desconocido'}`,
         variant: "destructive",
       });
     } finally {
@@ -112,7 +120,7 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>
+        <Button disabled={!isAdmin}>
           <PlusCircle className="mr-2 h-5 w-5" />
           Crear Producto
         </Button>
