@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { addCommunityTip, getCommunityTips, addReplyToTip } from "@/services/community-tips-service";
+import { addCommunityTip, getCommunityTips, addReplyToTip, deleteTip } from "@/services/community-tips-service";
 import { type Tip } from "@/types/tip";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -85,10 +85,20 @@ export function CommunitySection() {
   
   const fetchTips = useCallback(async () => {
     setLoading(true);
-    const tipsData = await getCommunityTips();
-    setTips(tipsData);
-    setLoading(false);
-  }, []);
+    try {
+        const tipsData = await getCommunityTips();
+        setTips(tipsData);
+    } catch(error) {
+        console.error("Error fetching tips in component:", error);
+        toast({
+            title: "Error al cargar consejos",
+            description: "No se pudieron obtener los consejos de la comunidad.",
+            variant: "destructive",
+        })
+    } finally {
+        setLoading(false);
+    }
+  }, [toast]);
 
   useEffect(() => {
     fetchTips();
@@ -119,6 +129,14 @@ export function CommunitySection() {
     }
   };
   
+  const handleTipDeleted = () => {
+    toast({
+      title: "Consejo Eliminado",
+      description: "El consejo ha sido eliminado correctamente.",
+    });
+    fetchTips();
+  }
+
   const handleReplyDeleted = () => {
      toast({
       title: "Respuesta Eliminada",
@@ -165,7 +183,16 @@ export function CommunitySection() {
                             </Card>
                         ))}
                         {!loading && tips.map((tip) => (
-                        <Card key={tip.id} className="p-6 shadow-md bg-background overflow-hidden relative">
+                        <Card key={tip.id} className="p-6 shadow-md bg-background overflow-hidden relative group">
+                             {isAdmin && (
+                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <DeleteConfirmationDialog
+                                        itemType="consejo"
+                                        itemName={tip.advice}
+                                        onConfirm={() => deleteTip(tip.id).then(handleTipDeleted)}
+                                    />
+                                </div>
+                             )}
                             <div className="flex items-start gap-4">
                                 <div className="w-1.5 h-12 bg-primary rounded-full mt-1 shrink-0" />
                                 <div className="flex-grow">
@@ -175,11 +202,11 @@ export function CommunitySection() {
                             </div>
                              <div className="pl-4 mt-4 space-y-3">
                                 {tip.replies?.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds).map((reply, index) => (
-                                    <div key={`${tip.id}-reply-${index}`} className="flex items-start gap-3 text-sm group">
+                                    <div key={`${tip.id}-reply-${index}`} className="flex items-start gap-3 text-sm reply-group relative">
                                         <CornerDownRight className="w-4 h-4 mt-1 text-muted-foreground shrink-0"/>
-                                        <div className="flex-grow bg-muted/50 p-3 rounded-md relative">
+                                        <div className="flex-grow bg-muted/50 p-3 rounded-md">
                                              {isAdmin && (
-                                                <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="absolute top-1 right-1 opacity-0 reply-group-hover:opacity-100 transition-opacity">
                                                     <DeleteConfirmationDialog
                                                         itemType="respuesta"
                                                         itemName={reply.text}

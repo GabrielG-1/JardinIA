@@ -104,6 +104,21 @@ export const addReplyToTip = async (tipId: string, replyData: { name: string; te
 };
 
 /**
+ * Deletes a community tip. This action should only be callable by an administrator.
+ * @param tipId The ID of the tip to delete.
+ */
+export const deleteTip = async (tipId: string): Promise<void> => {
+    try {
+        const tipRef = doc(db, TIPS_COLLECTION, tipId);
+        await deleteDoc(tipRef);
+    } catch (error) {
+        console.error("Error deleting tip:", error);
+        throw error;
+    }
+}
+
+
+/**
  * Deletes a specific reply from a community tip.
  * @param tipId The ID of the tip containing the reply.
  * @param reply The entire reply object to be deleted.
