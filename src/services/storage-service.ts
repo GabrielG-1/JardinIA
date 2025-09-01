@@ -1,6 +1,7 @@
 
-import { storage } from "@/lib/firebase";
+import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 /**
  * Uploads a product image to Firebase Storage.
@@ -25,7 +26,7 @@ export const uploadProductImage = async (file: File, productName: string): Promi
 
 
 /**
- * Uploads the site logo to a specific path in Firebase Storage.
+ * Uploads the site logo to a specific path in Firebase Storage and updates the URL in Firestore.
  * @param file The logo file to upload.
  * @returns A promise that resolves with the public download URL of the uploaded logo.
  */
@@ -35,11 +36,17 @@ export const uploadLogo = async (file: File): Promise<string> => {
   const storageRef = ref(storage, filePath);
   
   // Upload the file, overwriting the existing one if it exists
-  const snapshot = await uploadBytes(storageRef, file);
-  
+  await uploadBytes(storageRef, file, { contentType: file.type });
+
   // Get the download URL
-  const downloadURL = await getDownloadURL(snapshot.ref);
+  const downloadURL = await getDownloadURL(storageRef);
   
+  // Save the URL to Firestore for easy access on the client-side
+  await setDoc(
+    doc(db, "settings", "siteConfig"),
+    { logoUrl: downloadURL, updatedAt: serverTimestamp() },
+    { merge: true }
+  );
+
   return downloadURL;
 };
-

@@ -19,6 +19,8 @@ import { DeleteProductDialog } from "@/components/admin/delete-product-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { getLogoUrl, updateLogoUrl } from "@/services/settings-service";
+import { onSnapshot, doc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const formatPrice = (price: string) => {
     const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
@@ -32,8 +34,18 @@ function SiteSettings() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Fetch initial logo URL
-    getLogoUrl().then(setCurrentLogo);
+    // Fetch initial logo URL and listen for real-time updates
+    const unsubscribe = onSnapshot(doc(db, "settings", "siteConfig"), (doc) => {
+        if (doc.exists()) {
+            setCurrentLogo(doc.data()?.logoUrl || null);
+        }
+    }, (error) => {
+        console.error("Error fetching logo in real-time: ", error);
+        // Fallback to one-time fetch if listener fails (e.g., due to brief network issues)
+        getLogoUrl().then(setCurrentLogo);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,9 +54,11 @@ function SiteSettings() {
 
     setIsUploading(true);
     try {
+      // The uploadLogo function now also updates Firestore, so we don't need to call updateLogoUrl here.
       const downloadURL = await uploadLogo(file);
-      await updateLogoUrl(downloadURL);
-      setCurrentLogo(downloadURL); // Update local state immediately
+      // The onSnapshot listener will automatically update the UI.
+      // We can optimistically set it to avoid waiting for the listener.
+      setCurrentLogo(downloadURL); 
       toast({
         title: "Logo Actualizado",
         description: "El logo del sitio se ha cambiado correctamente.",

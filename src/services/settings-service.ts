@@ -20,6 +20,7 @@ export const getLogoUrl = async (): Promise<string | null> => {
     return null;
   } catch (error) {
     console.error("Error fetching logo URL:", error);
+    // Return null in case of permissions errors or other issues
     return null;
   }
 };
