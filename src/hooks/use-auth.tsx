@@ -3,8 +3,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, type User } from "firebase/auth";
-import { auth, db } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -21,29 +20,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const checkIsAdmin = useCallback(async (userToCheck: User): Promise<boolean> => {
+  const checkIsAdmin = useCallback((userToCheck: User | null): boolean => {
     if (!userToCheck || !userToCheck.email) {
       return false;
     }
     
-    // Lista de correos de administradores (debe coincidir con la de las reglas de Firestore)
-    // Se obtiene de una variable de entorno pública.
+    // La lista de correos de administradores se obtiene de una variable de entorno pública.
+    // Esta es la única fuente de verdad para determinar si un usuario es administrador.
+    // No se requiere ninguna lectura a Firestore.
     const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "").split(',');
     
-    return adminEmails.includes(userToCheck.email);
+    return adminEmails.includes(userToCheck.email.toLowerCase());
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsLoading(true);
-      if (user) {
-        const adminStatus = await checkIsAdmin(user);
-        setUser(user);
-        setIsAdmin(adminStatus);
-      } else {
-        setUser(null);
-        setIsAdmin(false);
-      }
+      const adminStatus = checkIsAdmin(user);
+      setUser(user);
+      setIsAdmin(adminStatus);
       setIsLoading(false);
     });
     return () => unsubscribe();
@@ -51,15 +46,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, pass: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-    // Deja que onAuthStateChanged maneje la actualización del estado.
-    // Simplemente devolvemos la información para que el componente de login pueda reaccionar.
-    const adminStatus = await checkIsAdmin(userCredential.user);
+    // onAuthStateChanged se encargará de la actualización del estado global.
+    // Devolvemos el estado de admin para que el componente de login pueda reaccionar inmediatamente.
+    const adminStatus = checkIsAdmin(userCredential.user);
     return { user: userCredential.user, isAdmin: adminStatus };
   };
 
   const signOut = async () => {
     await firebaseSignOut(auth);
-    // onAuthStateChanged se encargará de limpiar el estado.
+    // onAuthStateChanged se encargará de limpiar el estado (user a null, isAdmin a false).
   };
 
   const value = { user, isAdmin, isLoading, signIn, signOut };

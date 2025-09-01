@@ -1,3 +1,4 @@
+
 rules_version = '2';
 
 service cloud.firestore {
@@ -23,15 +24,13 @@ service cloud.firestore {
       allow read: if resource.data.isApproved == true || isAdmin();
       allow create: if true; // Cualquiera puede enviar un consejo para moderación
       allow update: if request.auth != null || isAdmin(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
-      allow delete: if false; // Nadie puede borrar el consejo principal
+      allow delete: if isAdmin(); // Solo los admins pueden borrar el consejo principal
     }
-    
-    // Reglas para la configuración del sitio (como el logo)
-    match /settings/{settingId} {
-        // Cualquiera puede leer la configuración (necesario para que el logo se muestre a todos)
-        allow read: if true;
-        // Solo los administradores pueden cambiar la configuración
-        allow write: if isAdmin();
+
+    // Reglas para la configuración del sitio (logo)
+    match /settings/siteConfig {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }
