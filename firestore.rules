@@ -3,33 +3,33 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Lista de correos de administradores.
+    // Lista de correos de administradores. 
     // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
     let adminEmails = ['programaciongabriel2025@gmail.com'];
     
     // Función para verificar si el usuario es un administrador
-    function isAdmin() {
+    function isAdminEmail() {
       return request.auth != null && request.auth.token.email.lower() in adminEmails;
     }
 
     // Reglas para la colección 'catalog'
     match /catalog/{categoryId} {
       allow read: if true;
-      allow write: if isAdmin(); // Solo los admins pueden crear, actualizar o borrar productos.
+      allow write: if isAdminEmail();
     }
     
     // Reglas para la colección de consejos de la comunidad
     match /community-tips/{tipId} {
-      allow read: if resource.data.isApproved == true || isAdmin();
+      allow read: if resource.data.isApproved == true || isAdminEmail();
       allow create: if true; // Cualquiera puede enviar un consejo para moderación
-      allow update: if request.auth != null || isAdmin(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
-      allow delete: if isAdmin(); // Solo los admins pueden borrar el consejo principal
+      allow update: if request.auth != null || isAdminEmail(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
+      allow delete: if isAdminEmail(); // Solo los admins pueden borrar el consejo principal
     }
 
-    // Reglas para la configuración del sitio (logo, etc.)
+    // Reglas para la configuración del sitio (logo)
     match /site-settings/{docId} {
-      allow read: if true; // Cualquiera puede leer la URL del logo
-      allow write: if isAdmin(); // Solo los admins pueden cambiar el logo
+      allow read: if true;
+      allow write: if isAdminEmail();
     }
   }
 }

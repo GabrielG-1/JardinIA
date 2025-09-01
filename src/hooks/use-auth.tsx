@@ -19,40 +19,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Derivamos el estado de isAdmin del usuario.
-  // Usamos useMemo para que no se recalcule en cada render, solo si cambia el usuario.
   const isAdmin = useMemo(() => {
-    // Si no hay usuario o no tiene email, no puede ser admin.
     if (!user || !user.email) {
       return false;
     }
-    
-    // Obtiene la lista de correos de administradores de la variable de entorno.
     const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
         .toLowerCase()
         .split(',')
-        .filter(email => email.trim() !== ''); // Filtra correos vacíos
+        .filter(email => email.trim() !== '');
     
     return adminEmails.includes(user.email.toLowerCase());
-  }, [user]); // La dependencia es el objeto 'user'
+  }, [user]);
 
 
   useEffect(() => {
-    // onAuthStateChanged maneja la escucha de cambios de estado de autenticación.
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // Establece el usuario actual (puede ser null)
-      setIsLoading(false); // La carga ha terminado, ya sea con usuario o sin él.
+      setUser(currentUser);
+      setIsLoading(false);
     });
-
-    // Se desuscribe del listener al desmontar el componente para evitar fugas de memoria.
     return () => unsubscribe();
   }, []);
 
   const signIn = async (email: string, pass: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-    // onAuthStateChanged se encargará de la actualización del estado global (user).
     
-    // Calculamos el estado de admin aquí para devolverlo inmediatamente al componente de login.
     const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
         .toLowerCase()
         .split(',')
@@ -64,12 +54,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     await firebaseSignOut(auth);
-    // onAuthStateChanged se encargará de limpiar el estado (user a null).
   };
 
   const value = { user, isAdmin, isLoading, signIn, signOut };
 
-  // Evitamos renderizar el resto de la app hasta que sepamos el estado de auth.
   if (isLoading) {
       return (
          <div className="flex h-screen w-full items-center justify-center bg-background">
