@@ -1,4 +1,3 @@
-
 rules_version = '2';
 
 service cloud.firestore {
@@ -22,15 +21,17 @@ service cloud.firestore {
     // Reglas para la colección de consejos de la comunidad
     match /community-tips/{tipId} {
       allow read: if resource.data.isApproved == true || isAdmin();
-      allow create: if request.auth != null; // Usuarios logueados pueden crear
-      allow update: if request.auth != null; // Usuarios logueados pueden añadir respuestas
+      allow create: if true; // Cualquiera puede enviar un consejo para moderación
+      allow update: if request.auth != null || isAdmin(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
       allow delete: if false; // Nadie puede borrar el consejo principal
     }
-
+    
     // Reglas para la configuración del sitio (como el logo)
     match /settings/{settingId} {
-        allow read: if true; // Cualquiera puede leer la configuración
-        allow write: if isAdmin(); // Solo los admins pueden cambiarla
+        // Cualquiera puede leer la configuración (necesario para que el logo se muestre a todos)
+        allow read: if true;
+        // Solo los administradores pueden cambiar la configuración
+        allow write: if isAdmin();
     }
   }
 }
