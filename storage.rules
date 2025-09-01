@@ -7,25 +7,20 @@ service firebase.storage {
       return request.auth != null
              && request.auth.token.email != null
              && request.auth.token.email.lower() in [
-               "programaciongabriel2025@gmail.com"
+               'programaciongabriel2025@gmail.com'
              ];
     }
 
-    // Carpeta del logo del sitio
-    match /site-settings/{allPaths=**} {
-      allow read: if true;          // público (para mostrar el logo)
-      allow write: if isAdminEmail(); // subir/actualizar solo admin
-    }
-
-    // Imágenes de productos
-    match /product-images/{allPaths=**} {
+    // El logo del sitio es público para leer, pero solo los administradores pueden cambiarlo.
+    match /site-settings/logo {
       allow read: if true;
       allow write: if isAdminEmail();
     }
 
-    // Denegar todo lo demás por defecto:
-    match /{allPaths=**} {
-      allow read, write: if false;
+    // Las imágenes de productos son públicas para leer. Solo los administradores pueden subirlas.
+    match /product-images/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdminEmail();
     }
   }
 }

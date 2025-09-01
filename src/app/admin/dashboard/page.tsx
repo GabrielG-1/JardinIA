@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { getCatalogWithListener, updateProductImage, updateProductStockStatus, type Category, type Product } from "@/services/catalog-service";
-import { uploadSiteLogo, uploadProductImage } from "@/services/storage-service";
+import { uploadSiteLogo } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,9 +18,7 @@ import { CreateProductDialog } from "@/components/admin/create-product-dialog";
 import { DeleteProductDialog } from "@/components/admin/delete-product-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { getLogoUrl, updateLogoUrl } from "@/services/settings-service";
-import { onSnapshot, doc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getLogoUrl } from "@/services/settings-service";
 
 const formatPrice = (price: string) => {
     const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
@@ -31,25 +29,24 @@ const formatPrice = (price: string) => {
 function SiteSettings() {
   const [currentLogo, setCurrentLogo] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoadingLogo, setIsLoadingLogo] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Escucha en tiempo real para el logo
-    const unsubscribe = onSnapshot(doc(db, "site-settings", "global"), (doc) => {
-        if (doc.exists()) {
-            setCurrentLogo(doc.data()?.logoUrl || null);
-        }
-    }, (error) => {
-        console.error("Error fetching logo in real-time: ", error);
-        toast({
-          title: "Error",
-          description: "No se pudo cargar el logo en tiempo real.",
-          variant: "destructive"
-        })
-    });
-
-    return () => unsubscribe();
-  }, [toast]);
+    const fetchLogo = async () => {
+      try {
+        setIsLoadingLogo(true);
+        const url = await getLogoUrl();
+        setCurrentLogo(url);
+      } catch (error) {
+        console.error("Error fetching initial logo:", error);
+        // No mostramos toast aquí para no molestar si solo es un problema de carga inicial
+      } finally {
+        setIsLoadingLogo(false);
+      }
+    };
+    fetchLogo();
+  }, []);
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -57,8 +54,8 @@ function SiteSettings() {
 
     setIsUploading(true);
     try {
-      await uploadSiteLogo(file);
-      // El listener de onSnapshot actualizará la UI automáticamente.
+      const newLogoUrl = await uploadSiteLogo(file);
+      setCurrentLogo(newLogoUrl); // Actualiza la UI inmediatamente con la nueva URL
       toast({
         title: "Logo Actualizado",
         description: "El logo del sitio se ha cambiado correctamente.",
@@ -89,7 +86,9 @@ function SiteSettings() {
           <div className="flex-shrink-0">
             <p className="font-medium text-sm mb-2">Logo Actual</p>
             <div className="w-24 h-24 rounded-md border bg-muted flex items-center justify-center">
-              {currentLogo ? (
+              {isLoadingLogo ? (
+                 <Skeleton className="h-full w-full" />
+              ) : currentLogo ? (
                 <Image src={currentLogo} alt="Logo actual" width={96} height={96} className="object-contain rounded-md" />
               ) : (
                 <ImageIcon className="w-10 h-10 text-muted-foreground" />
