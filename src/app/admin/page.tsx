@@ -13,8 +13,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Icons } from "@/components/icons";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { getLogoUrl } from "@/services/settings-service";
-import Image from "next/image";
 import { Leaf } from "lucide-react";
 
 const formSchema = z.object({
@@ -26,14 +24,9 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const { signIn } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
-
-  useEffect(() => {
-    getLogoUrl().then(setLogoUrl);
-  }, []);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -69,7 +62,7 @@ export default function AdminLoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="flex justify-center items-center mb-4">
-             <Icons />
+             <Leaf className="h-10 w-10 text-primary" />
           </div>
           <CardTitle>Panel de Administración</CardTitle>
           <CardDescription>Inicia sesión para gestionar la tienda.</CardDescription>
