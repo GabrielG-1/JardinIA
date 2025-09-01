@@ -40,7 +40,6 @@ function SiteSettings() {
         setCurrentLogo(url);
       } catch (error) {
         console.error("Error fetching initial logo:", error);
-        // No mostramos toast aquí para no molestar si solo es un problema de carga inicial
       } finally {
         setIsLoadingLogo(false);
       }
@@ -55,7 +54,7 @@ function SiteSettings() {
     setIsUploading(true);
     try {
       const newLogoUrl = await uploadSiteLogo(file);
-      setCurrentLogo(newLogoUrl); // Actualiza la UI inmediatamente con la nueva URL
+      setCurrentLogo(newLogoUrl);
       toast({
         title: "Logo Actualizado",
         description: "El logo del sitio se ha cambiado correctamente.",
@@ -129,14 +128,14 @@ function AdminProductList() {
   const [uploadingProductId, setUploadingProductId] = useState<string | null>(null);
   const [stockChangeProductId, setStockChangeProductId] = useState<string | null>(null);
   const { toast } = useToast();
-
-  const handleProductUpdate = () => {
-    // El listener de onSnapshot refrescará la lista automáticamente.
-    // Podemos usar esto para mostrar un toast si quisiéramos.
-    console.log("Producto actualizado, creado o eliminado. La lista se refrescará.");
-  };
+  const { isLoading: isAuthLoading } = useAuth(); // Obtiene el estado de carga de la autenticación.
 
   useEffect(() => {
+    // No intentes obtener datos si la autenticación todavía está en proceso.
+    if (isAuthLoading) {
+      return;
+    }
+    
     const unsubscribe = getCatalogWithListener(
       (data) => {
         setCatalogData(data);
@@ -149,7 +148,12 @@ function AdminProductList() {
       }
     );
     return () => unsubscribe();
-  }, []);
+  }, [isAuthLoading]); // El efecto se volverá a ejecutar cuando la autenticación termine.
+
+  const handleProductUpdate = () => {
+    console.log("Producto actualizado, creado o eliminado. La lista se refrescará.");
+  };
+
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, product: Product, categoryId: string) => {
     const file = event.target.files?.[0];
@@ -200,7 +204,8 @@ function AdminProductList() {
       }
   }
 
-  if (loading) {
+  // Muestra un esqueleto si la autenticación o los datos están cargando.
+  if (loading || isAuthLoading) {
     return (
       <div className="space-y-4">
         {Array.from({ length: 3 }).map((_, i) => (
@@ -311,8 +316,7 @@ function AdminProductList() {
 
 export default function AdminDashboardPage() {
   const { user, signOut } = useAuth();
-  const router = useRouter();
-
+  
   const handleSignOut = async () => {
     await signOut();
     // El layout se encargará de la redirección
