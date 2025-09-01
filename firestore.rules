@@ -25,11 +25,11 @@ service cloud.firestore {
       allow update: if request.auth != null || isAdmin(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
       allow delete: if isAdmin(); // Solo los admins pueden borrar el consejo principal
     }
-    
-    // Reglas para la configuración del sitio (ej: logo)
+
+    // Reglas para la configuración del sitio (logo, etc.)
     match /settings/{docId} {
-        allow read: if true; // Cualquiera puede leer la configuración del sitio
-        allow write: if isAdmin(); // Solo los admins pueden cambiarla
+        allow read: if true; // Cualquiera puede leer la URL del logo
+        allow write: if isAdmin(); // Solo los admins pueden cambiar la URL del logo
     }
   }
 }
