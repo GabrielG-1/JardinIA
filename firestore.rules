@@ -3,8 +3,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Lista de correos de administradores.
-    // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
+    // Lista de correos de administradores en minúsculas.
+    // ESTO DEBE COINCIDIR CON LA VARIABLE DE ENTORNO NEXT_PUBLIC_ADMIN_EMAILS
     let adminEmails = ['programaciongabriel2025@gmail.com'];
     
     // Función para verificar si el usuario es un administrador
@@ -15,7 +15,7 @@ service cloud.firestore {
     // Reglas para la colección 'catalog'
     match /catalog/{categoryId} {
       allow read: if true;
-      allow write: if isAdmin(); // Solo los admins pueden crear, actualizar o borrar productos.
+      allow write: if isAdmin(); // Solo los admins pueden crear, actualizar o borrar.
     }
     
     // Reglas para la colección de consejos de la comunidad
@@ -23,13 +23,14 @@ service cloud.firestore {
       allow read: if resource.data.isApproved == true || isAdmin();
       allow create: if true; // Cualquiera puede enviar un consejo para moderación
       allow update: if request.auth != null || isAdmin(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
-      allow delete: if isAdmin(); // Solo los admins pueden borrar el consejo principal
+      allow delete: if isAdmin(); // Solo los admins pueden borrar.
     }
 
-    // Reglas para la configuración del sitio (logo, etc.)
+    // Reglas para la configuración del sitio (como el logo)
     match /settings/{docId} {
-        allow read: if true; // Cualquiera puede leer la URL del logo
-        allow write: if isAdmin(); // Solo los admins pueden cambiar la URL del logo
+        // CAMBIO CLAVE: Se usa 'get' para una lectura pública inequívoca de un solo documento.
+        allow get: if true; 
+        allow list, write: if isAdmin(); // Solo los admins pueden listar o modificar.
     }
   }
 }
