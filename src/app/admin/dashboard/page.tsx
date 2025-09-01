@@ -143,9 +143,8 @@ function AdminProductList() {
   };
 
   useEffect(() => {
-    // Solo busca datos si el usuario es un administrador.
-    // El AuthProvider ya se encarga de prevenir el renderizado
-    // prematuro de este componente.
+    // The AuthProvider's loading screen prevents this component from rendering
+    // prematurely. This effect will only run once isAdmin is definitively true.
     if (isAdmin) {
       fetchCatalogData();
     }

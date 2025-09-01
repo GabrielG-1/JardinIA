@@ -12,38 +12,37 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isAuthLoading) {
-      return; // Espera a que el AuthProvider termine de cargar.
+      return; // Wait for the AuthProvider to finish loading.
     }
 
     const isAuthPage = pathname === '/admin';
     
-    // Si el usuario está logueado y es admin...
     if (user && isAdmin) {
-      // y está en la página de login, lo redirigimos al dashboard.
+      // if user is logged in and is an admin, and they are on the login page
+      // redirect them to the dashboard
       if (isAuthPage) {
         router.replace('/admin/dashboard');
       }
-      return; // Se queda en la página de admin que esté visitando.
+      return; // They can stay on any other admin page
     }
 
-    // Si no hay usuario y no está en la página de login, lo redirigimos al login.
     if (!user && !isAuthPage) {
+      // if there is no user, and they are not on the login page, redirect to login
       router.replace('/admin');
       return;
     }
     
-    // Si hay un usuario pero NO es admin, lo sacamos de la sección de admin.
     if(user && !isAdmin){
+      // if there is a user but they are NOT an admin, kick them out of the admin section
         router.replace('/');
         return;
     }
 
   }, [user, isAdmin, isAuthLoading, router, pathname]);
 
-  // isAuthLoading ahora es manejado por el AuthProvider, pero mantenemos este
-  // chequeo como una segunda capa de seguridad para la sección de admin.
-  // El AuthProvider ya muestra una pantalla de carga, así que este podría ser redundante,
-  // pero no hace daño tenerlo.
+  // The AuthProvider now handles the main loading screen. This check is a secondary
+  // safeguard for the admin section, but the UI for it may not even be visible
+  // if the AuthProvider's loading screen is active.
   if (isAuthLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -58,8 +57,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Una vez cargado, el useEffect se encarga de la redirección.
-  // Renderizamos los hijos para que las páginas de login o dashboard se muestren.
+  // Once loaded, the useEffect handles redirection.
+  // We render children so the login or dashboard pages can be displayed.
   return <>{children}</>;
 }
 
