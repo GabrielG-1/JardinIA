@@ -14,20 +14,21 @@ service cloud.firestore {
     // Reglas para la colección 'catalog'
     match /catalog/{categoryId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin(); // Solo los admins pueden crear, actualizar o borrar productos.
     }
     
     // Reglas para la colección de consejos de la comunidad
     match /community-tips/{tipId} {
       allow read: if resource.data.isApproved == true || isAdmin();
       allow create: if true; // Cualquiera puede enviar un consejo para moderación
-      allow update, delete: if isAdmin(); // Solo admins pueden modificar o borrar
+      allow update: if request.auth != null || isAdmin(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
+      allow delete: if isAdmin(); // Solo los admins pueden borrar el consejo principal
     }
 
     // Reglas para la configuración del sitio
     match /site-settings/{docId} {
-      allow read: if true;        // Cualquiera puede leer el logo/config
-      allow write: if isAdmin();   // Solo el admin escribe
+      allow read: if true; // Cualquiera puede leer la configuración del sitio (ej. logo)
+      allow write: if isAdmin(); // Solo los admins pueden modificarla
     }
   }
 }
