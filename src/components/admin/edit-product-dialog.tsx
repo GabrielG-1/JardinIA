@@ -58,8 +58,16 @@ export function EditProductDialog({ product, categoryId, onProductUpdated }: Edi
     try {
       const cleanPrice = data.price.replace(/[^0-9]/g, '');
       const priceToSave = data.price.startsWith('$') ? data.price : `$${parseInt(cleanPrice, 10).toLocaleString('es-CL')}`;
+      
+      // FIX: Pass all required product fields to the update function.
+      // We keep the existing image and inStock status while updating name and price.
+      await updateProduct(categoryId, product.id, { 
+        name: data.name, 
+        price: priceToSave,
+        image: product.image, // Keep the existing image
+        inStock: product.inStock, // Keep the existing stock status
+      });
 
-      await updateProduct(categoryId, product.id, { ...data, price: priceToSave });
       toast({
         title: "Producto Actualizado",
         description: `"${data.name}" se ha guardado correctamente.`,
