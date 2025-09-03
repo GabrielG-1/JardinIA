@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { getCatalog, updateProduct, type Category, type Product, addProductToCategory, deleteProduct } from "@/services/catalog-service";
+import { getCatalog, updateProduct, type Category, type Product } from "@/services/catalog-service";
 import { uploadSiteLogo, uploadProductImage as uploadImageService } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -129,9 +129,10 @@ function AdminProductList() {
   const [uploadingProductId, setUploadingProductId] = useState<string | null>(null);
   const [stockChangeProductId, setStockChangeProductId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { isAdmin, isAuthLoading } = useAuth();
+  const { isAdmin } = useAuth();
   
   const fetchCatalogData = async () => {
+    setLoading(true);
     try {
       const data = await getCatalog();
       setCatalogData(data);
@@ -144,11 +145,13 @@ function AdminProductList() {
   }
   
   useEffect(() => {
-    // Only fetch data once the user's admin status is confirmed.
-    if (!isAuthLoading && isAdmin) {
+    // Only fetch data once the user's admin status is confirmed to be true.
+    // This prevents race conditions on login where the component renders before
+    // the auth state is fully propagated.
+    if (isAdmin) {
       fetchCatalogData();
     }
-  }, [isAuthLoading, isAdmin]);
+  }, [isAdmin]);
 
 
   const handleProductUpdate = async () => {
@@ -356,5 +359,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    

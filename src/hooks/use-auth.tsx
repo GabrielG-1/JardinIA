@@ -1,7 +1,7 @@
 
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut, type User } from "firebase/auth";
 import { auth } from '@/lib/firebase';
 
@@ -20,40 +20,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      
+  const checkAdminStatus = useCallback((currentUser: User | null) => {
+    if (currentUser && currentUser.email) {
       const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
           .toLowerCase()
           .split(',')
           .filter(email => email.trim() !== '');
+      return adminEmails.includes(currentUser.email.toLowerCase());
+    }
+    return false;
+  }, []);
 
-      if (currentUser && currentUser.email) {
-        setIsAdmin(adminEmails.includes(currentUser.email.toLowerCase()));
-      } else {
-        setIsAdmin(false);
-      }
-      
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setIsAdmin(checkAdminStatus(currentUser));
       setIsAuthLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [checkAdminStatus]);
 
   const signIn = async (email: string, pass: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
-        .toLowerCase()
-        .split(',')
-        .filter(e => e.trim() !== '');
-    const adminStatus = adminEmails.includes(userCredential.user.email?.toLowerCase() || "");
-    
+    // The onAuthStateChanged listener will automatically update user and admin state.
+    // We just return the status for immediate feedback if needed.
+    const adminStatus = checkAdminStatus(userCredential.user);
     return { user: userCredential.user, isAdmin: adminStatus };
   };
 
   const signOut = async () => {
     await firebaseSignOut(auth);
+     // onAuthStateChanged will handle state updates.
   };
 
   const value = { user, isAdmin, isAuthLoading, signIn, signOut };

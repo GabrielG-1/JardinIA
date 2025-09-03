@@ -1,25 +1,30 @@
+
 rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    
-    // Función para verificar si el usuario es un administrador
+
+    // Helper function to check for admin role
     function isAdmin() {
-      return request.auth != null 
+      return request.auth != null
         && request.auth.token.email != null
         && request.auth.token.email.lower() in ['programaciongabriel2025@gmail.com'];
     }
 
-    // Regla para todas las rutas
-    match /{allPaths=**} {
-      // La lectura es pública para todos los archivos
+    // Site settings like the logo are public-read
+    match /site-settings/{allPaths=**} {
       allow read: if true;
+      allow write: if isAdmin();
+    }
 
-      // La escritura (create, update, delete) solo está permitida para administradores
-      // y con las condiciones adecuadas.
+    // Product images are public-read
+    match /product-images/{allPaths=**} {
+      allow read: if true;
+      // Allow write only for authenticated admins
+      // and enforce image content types and a reasonable size limit (e.g., 5MB)
       allow write: if isAdmin()
-                   && request.resource.size < 5 * 1024 * 1024 // Limita el tamaño a 5MB
-                   && request.resource.contentType.matches('image/.*'); // Solo permite imágenes
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
     }
   }
 }

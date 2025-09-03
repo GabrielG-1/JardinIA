@@ -16,18 +16,19 @@ export const uploadProductImage = async (file: File, productId: string): Promise
     const filePath = `product-images/${safeProductName}-${Date.now()}-${file.name}`;
     const storageRef = ref(storage, filePath);
 
-    // INCLUIR METADATOS es crucial para evitar errores de CORS/permisos
+    // Including metadata is crucial to avoid CORS/permission errors with stricter rules.
     const metadata = {
       contentType: file.type,
     };
 
+    console.log(`Uploading product image to: ${filePath} with type: ${file.type}`);
     const snapshot = await uploadBytes(storageRef, file, metadata);
     const downloadURL = await getDownloadURL(snapshot.ref);
     
     return downloadURL;
 
-  } catch (error) {
-    console.error(`Error uploading product image to Storage. Code: ${(error as any).code}. Message: ${error}`, error);
+  } catch (error: any) {
+    console.error(`Error uploading product image. Code: ${error.code}. Message: ${error.message}`, error);
     throw error;
   }
 };
@@ -39,6 +40,8 @@ export const uploadProductImage = async (file: File, productId: string): Promise
  * @returns A promise that resolves with the public download URL of the uploaded logo.
  */
 export const uploadSiteLogo = async (file: File): Promise<string> => {
+  // Use a consistent path for the logo to overwrite it. Add a timestamp query to bust caches if needed,
+  // but the path itself should be stable.
   const filePath = "site-settings/logo";
   const logoRef = ref(storage, filePath);
 
@@ -47,17 +50,17 @@ export const uploadSiteLogo = async (file: File): Promise<string> => {
       contentType: file.type,
     };
     
+    console.log(`Uploading site logo to: ${filePath} with type: ${file.type}`);
     const uploadResult = await uploadBytes(logoRef, file, metadata);
     
-    // Guardamos la RUTA (no la URL) en Firestore
+    // Save the PATH, not the full URL, to Firestore for consistency.
     await updateLogoPath(uploadResult.ref.fullPath);
     
     const url = await getDownloadURL(uploadResult.ref);
 
     return url;
-  } catch (error) {
-     console.error(`Error uploading site logo to Storage. Code: ${(error as any).code}. Message: ${error}`, error);
+  } catch (error: any) {
+     console.error(`Error uploading site logo. Code: ${error.code}. Message: ${error.message}`, error);
     throw error;
   }
 };
-

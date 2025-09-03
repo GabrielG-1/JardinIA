@@ -1,3 +1,4 @@
+
 rules_version = '2';
 
 service cloud.firestore {
@@ -12,10 +13,10 @@ service cloud.firestore {
       return request.auth != null && request.auth.token.email.lower() in adminEmails;
     }
 
-    // Reglas para la colección de configuración del sitio
+    // Regla explícita para la configuración del sitio
     match /site-settings/{docId} {
-      allow read: if true; // Cualquiera puede leer la config (ej. logo)
-      allow write: if isAdmin(); // Solo los admins pueden modificar
+      allow read: if true;        // Cualquiera puede leer el logo/configuración pública
+      allow write: if isAdmin();   // Solo los administradores pueden modificarla
     }
 
     // Reglas para la colección 'catalog'
@@ -28,8 +29,7 @@ service cloud.firestore {
     match /community-tips/{tipId} {
       allow read: if resource.data.isApproved == true || isAdmin();
       allow create: if true; // Cualquiera puede enviar un consejo para moderación
-      allow update: if isAdmin(); // Solo admins pueden añadir respuestas o modificar
-      allow delete: if isAdmin(); // Solo los admins pueden borrar
+      allow update, delete: if isAdmin(); // Solo los administradores pueden modificar, responder o borrar
     }
   }
 }
