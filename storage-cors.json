@@ -6,7 +6,8 @@
       "https://jardnia.firebaseapp.com",
       "http://localhost:9003",
       "https://studio--jardnia.us-central1.hosted.app",
-      "https://6000-firebase-studio-1755739796532.cluster-lqzyk3r5hzdcaqv6zwm7wv6pwa.cloudworkstations.dev"
+      "https://6000-firebase-studio-1755739796532.cluster-lqzyk3r5hzdcaqv6zwm7wv6pwa.cloudworkstations.dev",
+      "https://9000-firebase-studio-1755739796532.cluster-lqzyk3r5hzdcaqv6zwm7wv6pwa.cloudworkstations.dev"
     ],
     "method": [
       "GET",
