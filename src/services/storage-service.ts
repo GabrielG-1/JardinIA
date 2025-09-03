@@ -60,3 +60,4 @@ export const uploadSiteLogo = async (file: File): Promise<string> => {
     throw error;
   }
 };
+

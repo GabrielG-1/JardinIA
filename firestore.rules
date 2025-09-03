@@ -4,11 +4,18 @@ service cloud.firestore {
   match /databases/{database}/documents {
     
     // Lista de correos de administradores.
+    // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
     let adminEmails = ['programaciongabriel2025@gmail.com'];
     
     // Función para verificar si el usuario es un administrador
     function isAdmin() {
       return request.auth != null && request.auth.token.email.lower() in adminEmails;
+    }
+
+    // Reglas para la colección de configuración del sitio
+    match /site-settings/{docId} {
+      allow read: if true; // Cualquiera puede leer la config (ej. logo)
+      allow write: if isAdmin(); // Solo los admins pueden modificar
     }
 
     // Reglas para la colección 'catalog'
@@ -21,14 +28,8 @@ service cloud.firestore {
     match /community-tips/{tipId} {
       allow read: if resource.data.isApproved == true || isAdmin();
       allow create: if true; // Cualquiera puede enviar un consejo para moderación
-      allow update: if request.auth != null || isAdmin(); // Usuarios logueados pueden añadir respuestas, admins pueden modificar
-      allow delete: if isAdmin(); // Solo los admins pueden borrar el consejo principal
-    }
-
-    // Reglas para la configuración del sitio
-    match /site-settings/{docId} {
-      allow read: if true; // Cualquiera puede leer la configuración del sitio (ej. logo)
-      allow write: if isAdmin(); // Solo los admins pueden modificarla
+      allow update: if isAdmin(); // Solo admins pueden añadir respuestas o modificar
+      allow delete: if isAdmin(); // Solo los admins pueden borrar
     }
   }
 }
