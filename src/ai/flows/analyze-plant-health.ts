@@ -25,6 +25,7 @@ const AnalyzePlantHealthInputSchema = z.object({
     ),
   description: z.string().describe('The description of the plant.'),
 });
+// This type is no longer exported to comply with "use server" constraints.
 export type AnalyzePlantHealthInput = z.infer<typeof AnalyzePlantHealthInputSchema>;
 
 
