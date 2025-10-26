@@ -36,6 +36,7 @@ export function ContactSection() {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsSubmitting(true);
     try {
+      // The type for the 'data' parameter of sendContactEmail is inferred here
       const result = await sendContactEmail(data);
       
       if (result.success) {

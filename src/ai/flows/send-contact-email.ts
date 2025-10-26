@@ -16,7 +16,8 @@ const SendContactEmailInputSchema = z.object({
   message: z.string().min(10, 'El mensaje es demasiado corto.'),
 });
 
-export type SendContactEmailInput = z.infer<typeof SendContactEmailInputSchema>;
+// The type is now inferred where the function is used, not exported.
+type SendContactEmailInput = z.infer<typeof SendContactEmailInputSchema>;
 
 
 /**
