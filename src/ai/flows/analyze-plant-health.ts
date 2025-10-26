@@ -3,16 +3,16 @@
 
 /**
  * @fileOverview Analyzes plant health based on a photo and description
- * and recommends products that EXIST in the Firestore catalog.
+ * and recommends product CATEGORIES that can be found in the store.
  *
- * Copy/paste into Firebase/Genkit project. Expects:
- *  - '@/ai/genkit' to export a configured `ai`
- *  - '@/services/catalog-service' to export `getAllProducts(): Promise<CatalogProduct[]>`
+ * This version is optimized for production:
+ * 1. It does NOT load the entire product catalog into the prompt.
+ * 2. The AI recommends generic product types (e.g., "fungicide", "tomato seeds").
+ * 3. The client is responsible for searching for these product types in the catalog.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { getAllProducts } from '@/services/catalog-service';
 
 /* ----------------------------- Input schema ----------------------------- */
 
@@ -27,16 +27,6 @@ const AnalyzePlantHealthInputSchema = z.object({
 });
 export type AnalyzePlantHealthInput = z.infer<typeof AnalyzePlantHealthInputSchema>;
 
-/* ---------------------------- Product schema ---------------------------- */
-/** Tolerant schema that normalizes price to string and image to optional. */
-const ProductSchema = z.object({
-  id: z.string().optional(),
-  name: z.string(),
-  price: z.string().describe('El precio del producto como una cadena de texto.'),
-  image: z.string().optional().default(''),
-  aiHint: z.string().optional(),
-});
-export type CatalogProduct = z.infer<typeof ProductSchema>;
 
 /* ----------------------------- Output schema ---------------------------- */
 
@@ -59,8 +49,10 @@ const AnalyzePlantHealthOutputSchema = z.object({
         'Recomendaciones detalladas. Usa <strong> subtítulos </strong> con <br> al final de cada uno.'
       ),
   }),
-  // Siempre presente (array vacío si no hay coincidencias).
-  recommendedProducts: z.array(ProductSchema).default([]),
+  // AI now returns an array of SEARCH TERMS, not full products.
+  recommendedProductKeywords: z.array(z.string()).default([]).describe(
+      'Una lista de 1 a 3 términos de búsqueda genéricos y breves para productos relevantes (ej: "fungicida", "semillas de tomate", "fertilizante NPK"). No incluyas nombres de marcas.'
+  ),
 });
 export type AnalyzePlantHealthOutput = z.infer<typeof AnalyzePlantHealthOutputSchema>;
 
@@ -68,16 +60,11 @@ export type AnalyzePlantHealthOutput = z.infer<typeof AnalyzePlantHealthOutputSc
 /* -------------------------------- Prompt -------------------------------- */
 
 const analyzePlantHealthPrompt = ai.definePrompt({
-  name: 'analyzePlantHealthPrompt',
+  name: 'analyzePlantHealthPrompt_v2',
   model: 'googleai/gemini-1.5-pro-latest',
   output: { schema: AnalyzePlantHealthOutputSchema, format: 'json' },
   config: { temperature: 0.1 },
-  prompt: `Eres un experto botánico y agrónomo. Tu objetivo es ayudar a los usuarios a diagnosticar problemas O a obtener consejos de cultivo, recomendando soluciones y productos REALES de nuestro catálogo. Tu única tarea es devolver un objeto JSON VÁLIDO que siga el esquema proporcionado.
-
-Este es el catálogo completo de productos disponibles en la tienda. Úsalo como tu única fuente de verdad para las recomendaciones:
---- INICIO DEL CATÁLOGO ---
-{{{catalog}}}
---- FIN DEL CATÁLOGO ---
+  prompt: `Eres un experto botánico y agrónomo. Tu objetivo es ayudar a los usuarios a diagnosticar problemas O a obtener consejos de cultivo, recomendando TIPOS de productos genéricos. Tu única tarea es devolver un objeto JSON VÁLIDO que siga el esquema proporcionado.
 
 Sigue estos pasos estrictamente:
 
@@ -99,11 +86,11 @@ Sigue estos pasos estrictamente:
      - 'recommendations' debe ser una guía clara y útil sobre cómo realizar la tarea solicitada (ej: cómo sembrar lechugas).
      - 'isHealthy' debe ser 'true'.
 
-4) Recomienda productos relevantes del catálogo:
-   - **Para Diagnóstico:** Si 'isHealthy' es 'false', selecciona 1-3 productos que solucionen el problema (ej: fungicidas, insecticidas, etc.).
-   - **Para Consejos de cultivo:** Incluso si 'isHealthy' es 'true', analiza la descripción del usuario. Si pide plantar algo, recomienda las semillas correspondientes, tierra, fertilizantes iniciales o herramientas.
-   - El campo 'recommendedProducts' de tu respuesta DEBE contener ÚNICA Y EXCLUSIVAMENTE los productos que has seleccionado de la lista. NO PUEDES inventar, añadir, modificar o alucinar ningún producto. Los datos deben ser idénticos a los del catálogo.
-   - Si NINGÚN producto del catálogo es adecuado, el campo 'recommendedProducts' DEBE ser un array vacío: [].
+4) Recomienda palabras clave de productos relevantes:
+   - Basado en tu análisis, identifica de 1 a 3 tipos de productos genéricos que serían útiles.
+   - **MUY IMPORTANTE**: El campo 'recommendedProductKeywords' debe contener ÚNICAMENTE términos de búsqueda simples y genéricos. NO inventes nombres de productos, NO uses marcas.
+   - Ejemplos de buenas palabras clave: ["fungicida"], ["semillas de lechuga", "tierra de hojas"], ["fertilizante", "herramientas de jardín"].
+   - Si NINGÚN producto es relevante, el campo 'recommendedProductKeywords' DEBE ser un array vacío: [].
 
 5) Revisa tu respuesta final. Debe ser únicamente un objeto JSON válido, sin ningún texto, explicación o nota adicional fuera del JSON.`,
 });
@@ -112,50 +99,20 @@ Sigue estos pasos estrictamente:
 
 const analyzePlantHealthFlow = ai.defineFlow(
   {
-    name: 'analyzePlantHealthFlow',
+    name: 'analyzePlantHealthFlow_v2',
     inputSchema: AnalyzePlantHealthInputSchema,
     outputSchema: AnalyzePlantHealthOutputSchema,
   },
   async (input) => {
-    // 1. Cargar el catálogo completo de productos.
-    const allProducts = await getAllProducts();
-    const catalogString = allProducts.map(p => `- ${p.name} (Precio: ${p.price})`).join('\n');
-    
-    // 2. Llamar a la IA con el input del usuario y el catálogo inyectado en el prompt.
-    const { output } = await analyzePlantHealthPrompt({
-      ...input,
-      catalog: catalogString,
-    });
+    // 1. Llamar a la IA con el input del usuario.
+    const { output } = await analyzePlantHealthPrompt(input);
 
     if (!output) {
         throw new Error('La IA no devolvió una respuesta.');
     }
     
-    // 3. Limpieza y validación final.
-    // Aunque el prompt es estricto, nos aseguramos que el output cumple el esquema.
-    const finalOutput: AnalyzePlantHealthOutput = {
-      identification: {
-        isPlant: output.identification?.isPlant ?? false,
-        commonName: output.identification?.commonName ?? 'No identificado',
-        latinName: output.identification?.latinName ?? '',
-      },
-      healthDiagnosis: {
-        isHealthy: output.healthDiagnosis?.isHealthy ?? true,
-        diagnosis: output.healthDiagnosis?.diagnosis ?? 'No se pudo determinar',
-        recommendations: output.healthDiagnosis?.recommendations ?? 'No hay recomendaciones.',
-      },
-      recommendedProducts: [], // Empezamos con un array vacío
-    };
-
-    // Si la IA recomendó productos, los buscamos en nuestro catálogo original 
-    // para asegurarnos de que son 100% reales y tienen todos los datos correctos (imagen, id, etc.).
-    if (output.recommendedProducts && output.recommendedProducts.length > 0) {
-        const productNamesFromAI = new Set(output.recommendedProducts.map(p => p.name));
-        const verifiedProducts = allProducts.filter(p => productNamesFromAI.has(p.name));
-        finalOutput.recommendedProducts = verifiedProducts.slice(0, 3);
-    }
-    
-    return AnalyzePlantHealthOutputSchema.parse(finalOutput);
+    // 2. La IA devuelve el objeto con las palabras clave, el cliente se encargará de buscar.
+    return output;
   }
 );
 

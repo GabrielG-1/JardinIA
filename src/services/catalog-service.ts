@@ -95,31 +95,6 @@ export const getCatalog = async (): Promise<Category[]> => {
 
 
 /**
- * Retrieves all products from all categories in the catalog, ensuring each product has a stable ID.
- * @returns A promise that resolves to a flat array of all products.
- */
-export const getAllProducts = async (): Promise<Product[]> => {
-  const q = query(collection(db, CATALOG_COLLECTION));
-  const querySnapshot = await getDocs(q);
-  const allProducts: Product[] = [];
-  
-  querySnapshot.forEach((doc) => {
-      const category = doc.data() as Omit<Category, 'id'>;
-      const catId = doc.id;
-      if (Array.isArray(category.products)) {
-          const productsWithIds = category.products.map((p: any, idx: number) => ({ 
-              ...p, 
-              id: p.id || `${catId}-p-${idx}`, // Fallback ID
-              inStock: p.inStock !== false,
-          }));
-          allProducts.push(...productsWithIds);
-      }
-  });
-
-  return allProducts;
-}
-
-/**
  * Searches for products across all categories whose name includes the query term.
  * @param query - The term to search for in product names.
  * @returns A promise that resolves to an array of matching products.
@@ -128,9 +103,10 @@ export const searchProducts = async (queryTerm: string): Promise<Product[]> => {
     if (!queryTerm) return [];
     
     const lowercasedQuery = queryTerm.toLowerCase().trim();
-    if (lowercasedQuery.length < 3) return [];
+    if (lowercasedQuery.length < 2) return []; // Lowered threshold for better results
     
-    const allProducts = await getAllProducts();
+    const allCategories = await getCatalog();
+    const allProducts = allCategories.flatMap(category => category.products);
 
     const matchingProducts = allProducts.filter(product => 
         product.name.toLowerCase().includes(lowercasedQuery)

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { UploadCloud, Bot, CheckCircle, XCircle, Leaf, Dna, Stethoscope, Camera, ShoppingCart, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { analyzePlantHealth, type AnalyzePlantHealthOutput } from "@/ai/flows/analyze-plant-health";
+import { searchProducts } from "@/services/catalog-service";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CameraCapture } from "@/components/camera-capture";
@@ -63,12 +64,18 @@ function ProductRecommendationCard({ product }: { product: Product }) {
     );
 }
 
+// Full analysis object state
+interface FullAnalysis {
+  aiResponse: AnalyzePlantHealthOutput;
+  foundProducts: Product[];
+}
+
 export function AiAdvisorSection() {
   const [photoDataUri, setPhotoDataUri] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<AnalyzePlantHealthOutput | null>(null);
+  const [result, setResult] = useState<FullAnalysis | null>(null); // New state for combined results
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const { toast } = useToast();
 
@@ -114,8 +121,24 @@ export function AiAdvisorSection() {
     setLoading(true);
     setResult(null);
     try {
-      const res = await analyzePlantHealth({ photoDataUri: photoDataUri ?? undefined, description });
-      setResult(res);
+      // Step 1: Get AI analysis and keywords
+      const aiResponse = await analyzePlantHealth({ photoDataUri: photoDataUri ?? undefined, description });
+      
+      let foundProducts: Product[] = [];
+      if (aiResponse.recommendedProductKeywords && aiResponse.recommendedProductKeywords.length > 0) {
+        // Step 2: Search for products based on keywords returned by the AI
+        const searchPromises = aiResponse.recommendedProductKeywords.map(term => searchProducts(term));
+        const searchResults = await Promise.all(searchPromises);
+        
+        // Flatten and deduplicate results
+        const allFoundProducts = searchResults.flat();
+        const uniqueProducts = Array.from(new Map(allFoundProducts.map(p => [p.id, p])).values());
+        foundProducts = uniqueProducts.slice(0, 4); // Limit to 4 products
+      }
+
+      // Step 3: Set the combined result
+      setResult({ aiResponse, foundProducts });
+
     } catch (err) {
       console.error(err);
       toast({
@@ -131,9 +154,7 @@ export function AiAdvisorSection() {
   const AnalysisResult = () => {
     if (!result) return null;
 
-    const validProducts = Array.isArray(result.recommendedProducts)
-      ? result.recommendedProducts.filter((p): p is Product => typeof p === 'object' && !!p.id)
-      : [];
+    const { aiResponse, foundProducts } = result;
 
     return (
       <Card className="mt-8 text-left">
@@ -141,7 +162,7 @@ export function AiAdvisorSection() {
           <CardTitle className="flex items-center gap-2"><Bot /> Diagnóstico de la IA</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {!result.identification.isPlant ? (
+          {!aiResponse.identification.isPlant ? (
             <div className="flex items-center gap-2 text-lg">
               <XCircle className="text-destructive" />
               <p>La imagen o descripción no parece ser de una planta.</p>
@@ -150,29 +171,29 @@ export function AiAdvisorSection() {
             <>
               <div>
                 <h3 className="font-semibold text-lg flex items-center gap-2"><Leaf /> Identificación</h3>
-                <p><strong>Nombre Común:</strong> {result.identification.commonName}</p>
-                <p><strong>Nombre Latino:</strong> {result.identification.latinName}</p>
+                <p><strong>Nombre Común:</strong> {aiResponse.identification.commonName}</p>
+                <p><strong>Nombre Latino:</strong> {aiResponse.identification.latinName}</p>
               </div>
               <div>
                 <h3 className="font-semibold text-lg flex items-center gap-2"><Stethoscope /> Diagnóstico de Salud</h3>
                 <div className="flex items-center gap-2 mb-2">
-                  {result.healthDiagnosis.isHealthy ? <CheckCircle className="text-primary" /> : <XCircle className="text-destructive" />}
-                  <p className="font-bold text-lg">{result.healthDiagnosis.isHealthy ? "Planta Saludable" : result.healthDiagnosis.diagnosis || "Se Detectaron Problemas"}</p>
+                  {aiResponse.healthDiagnosis.isHealthy ? <CheckCircle className="text-primary" /> : <XCircle className="text-destructive" />}
+                  <p className="font-bold text-lg">{aiResponse.healthDiagnosis.isHealthy ? "Planta Saludable" : aiResponse.healthDiagnosis.diagnosis || "Se Detectaron Problemas"}</p>
                 </div>
               </div>
               <div>
                 <h3 className="font-semibold text-lg flex items-center gap-2"><Dna /> Recomendaciones de Cuidado</h3>
                 <div 
                   className="text-muted-foreground text-left space-y-2"
-                  dangerouslySetInnerHTML={{ __html: result.healthDiagnosis.recommendations }}
+                  dangerouslySetInnerHTML={{ __html: aiResponse.healthDiagnosis.recommendations }}
                 />
               </div>
 
-              {validProducts.length > 0 && (
+              {foundProducts.length > 0 && (
                   <div>
                       <h3 className="font-semibold text-lg flex items-center gap-2 mt-6 mb-4"><ShoppingCart /> Productos Recomendados de la Tienda</h3>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                          {validProducts.map((product) => (
+                          {foundProducts.map((product) => (
                               <ProductRecommendationCard key={product.id} product={product} />
                           ))}
                       </div>
@@ -289,5 +310,3 @@ export function AiAdvisorSection() {
     </section>
   );
 }
-
-    
