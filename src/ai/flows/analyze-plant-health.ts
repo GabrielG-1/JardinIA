@@ -54,7 +54,9 @@ const AnalyzePlantHealthOutputSchema = z.object({
       'Una lista de 1 a 3 términos de búsqueda genéricos y breves para productos relevantes (ej: "fungicida", "semillas de tomate", "fertilizante NPK"). No incluyas nombres de marcas.'
   ),
 });
-export type AnalyzePlantHealthOutput = z.infer<typeof AnalyzePlantHealthOutputSchema>;
+// NOTE: This type is intentionally NOT exported to comply with "use server" constraints.
+// The return type of analyzePlantHealth will be inferred automatically.
+type AnalyzePlantHealthOutput = z.infer<typeof AnalyzePlantHealthOutputSchema>;
 
 
 /* -------------------------------- Prompt -------------------------------- */
@@ -120,6 +122,6 @@ const analyzePlantHealthFlow = ai.defineFlow(
 
 export async function analyzePlantHealth(
   input: AnalyzePlantHealthInput
-): Promise<AnalyzePlantHealthOutput> {
+) {
   return analyzePlantHealthFlow(input);
 }

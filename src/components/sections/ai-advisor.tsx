@@ -8,13 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { analyzePlantHealth, type AnalyzePlantHealthOutput } from "@/ai/flows/analyze-plant-health";
+import { analyzePlantHealth, type AnalyzePlantHealthInput } from "@/ai/flows/analyze-plant-health";
 import { searchProducts } from "@/services/catalog-service";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CameraCapture } from "@/components/camera-capture";
 import type { Product } from "@/services/catalog-service";
 import { useCart } from "@/hooks/use-cart";
+// Import the return type of the flow
+type AnalyzePlantHealthOutput = Awaited<ReturnType<typeof analyzePlantHealth>>;
+
 
 const formatPrice = (price: string) => {
     const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
