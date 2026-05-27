@@ -1,35 +1,66 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Lista de correos de administradores.
-    // REEMPLAZA ESTO CON TUS CORREOS REALES EN MINÚSCULAS
-    let adminEmails = ['programaciongabriel2025@gmail.com'];
-    
-    // Función para verificar si el usuario es un administrador
+
+    // Admin: autenticado + email verificado en la lista
+    // La lista se define dentro de la función para evitar
+    // problemas de scope en evaluaciones anidadas de reglas.
     function isAdmin() {
-      return request.auth != null && request.auth.token.email.lower() in adminEmails;
+      return request.auth != null
+          && request.auth.token.email != null
+          && request.auth.token.email.lower() in [
+               'programaciongabriel2025@gmail.com'
+             ];
     }
 
-    // Regla explícita para la configuración del sitio
-    match /site-settings/{docId} {
-      allow read: if true;        // Cualquiera puede leer el logo/configuración pública
-      allow write: if isAdmin();   // Solo los administradores pueden modificarla
-    }
-
-    // Reglas para la colección 'catalog'
+    // ------------------------------------------------------------------
+    // /catalog/{categoryId}
+    // Lectura pública. Solo admin puede crear, editar o eliminar.
+    // ------------------------------------------------------------------
     match /catalog/{categoryId} {
-      allow read: if true;
-      allow write: if isAdmin(); // Solo los admins pueden crear, actualizar o borrar productos.
+      allow read:                 if true;
+      allow create, update, delete: if isAdmin();
     }
-    
-    // Reglas para la colección de consejos de la comunidad
+
+    // ------------------------------------------------------------------
+    // /community-tips/{tipId}
+    // Lectura pública solo de tips aprobados (admin ve todos).
+    // Cualquiera puede crear (van a moderación).
+    // Solo admin puede editar o eliminar.
+    // ------------------------------------------------------------------
     match /community-tips/{tipId} {
-      allow read: if resource.data.isApproved == true || isAdmin();
-      allow create: if true; // Cualquiera puede enviar un consejo para moderación
-      allow update, delete: if isAdmin(); // Solo los administradores pueden modificar, responder o borrar
+      allow read:   if (resource != null && resource.data.isApproved == true)
+                    || isAdmin();
+      allow create: if true;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // /site-settings/{docId}
+    // Logo y configuración global del sitio. Lectura pública.
+    // ------------------------------------------------------------------
+    match /site-settings/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // /settings/{docId}   (incluye /settings/hero)
+    // Configuración de secciones del sitio. Lectura pública.
+    // ------------------------------------------------------------------
+    match /settings/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // Denegar cualquier otra colección no declarada explícitamente.
+    // Protege contra colecciones futuras que queden sin reglas.
+    // ------------------------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

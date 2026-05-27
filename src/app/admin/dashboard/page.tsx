@@ -342,7 +342,7 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-8 bg-muted/20 min-h-screen pt-28">
+    <div className="container mx-auto px-4 md:px-8 pb-8 bg-muted/20 min-h-screen pt-28">
       <header className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold font-headline">Panel de Administrador</h1>
