@@ -44,8 +44,8 @@ export function EditProductDialog({ product, categoryId, onProductUpdated }: Edi
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: product.name,
-      price: product.price,
+      name: product.name ?? '',
+      price: product.price ?? '',
     },
   });
 

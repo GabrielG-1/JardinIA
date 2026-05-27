@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { analyzePlantHealth, type AnalyzePlantHealthInput } from "@/ai/flows/analyze-plant-health";
+import { analyzePlantHealth } from "@/ai/flows/analyze-plant-health";
 import { searchProducts } from "@/services/catalog-service";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";

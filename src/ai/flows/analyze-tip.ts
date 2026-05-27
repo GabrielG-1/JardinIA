@@ -14,7 +14,7 @@ const AnalyzeTipInputSchema = z.object({
   name: z.string().describe('The name of the person submitting the tip.'),
   advice: z.string().describe('The content of the tip or comment.'),
 });
-export type AnalyzeTipInput = z.infer<typeof AnalyzeTipInputSchema>;
+type AnalyzeTipInput = z.infer<typeof AnalyzeTipInputSchema>;
 
 const AnalyzeTipOutputSchema = z.object({
   isRelevant: z
@@ -23,7 +23,7 @@ const AnalyzeTipOutputSchema = z.object({
       'Indica si el consejo está relacionado con jardinería, agricultura, plantas, o con una opinión sobre la tienda. Debe ser estrictamente sobre la temática.'
     ),
 });
-export type AnalyzeTipOutput = z.infer<typeof AnalyzeTipOutputSchema>;
+type AnalyzeTipOutput = z.infer<typeof AnalyzeTipOutputSchema>;
 
 export async function analyzeTip(input: AnalyzeTipInput): Promise<AnalyzeTipOutput> {
   return analyzeTipFlow(input);
@@ -31,7 +31,7 @@ export async function analyzeTip(input: AnalyzeTipInput): Promise<AnalyzeTipOutp
 
 const analyzeTipPrompt = ai.definePrompt({
   name: 'analyzeTipPrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-2.5-flash',
   input: {schema: AnalyzeTipInputSchema},
   output: {schema: AnalyzeTipOutputSchema},
   config: {

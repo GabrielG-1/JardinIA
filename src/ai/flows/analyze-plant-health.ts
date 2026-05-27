@@ -25,8 +25,7 @@ const AnalyzePlantHealthInputSchema = z.object({
     ),
   description: z.string().describe('The description of the plant.'),
 });
-// This type is no longer exported to comply with "use server" constraints.
-export type AnalyzePlantHealthInput = z.infer<typeof AnalyzePlantHealthInputSchema>;
+type AnalyzePlantHealthInput = z.infer<typeof AnalyzePlantHealthInputSchema>;
 
 
 /* ----------------------------- Output schema ---------------------------- */
@@ -64,7 +63,7 @@ type AnalyzePlantHealthOutput = z.infer<typeof AnalyzePlantHealthOutputSchema>;
 
 const analyzePlantHealthPrompt = ai.definePrompt({
   name: 'analyzePlantHealthPrompt_v2',
-  model: 'googleai/gemini-1.5-pro-latest',
+  model: 'googleai/gemini-2.5-flash',
   output: { schema: AnalyzePlantHealthOutputSchema, format: 'json' },
   config: { temperature: 0.1 },
   prompt: `Eres un experto botánico y agrónomo. Tu objetivo es ayudar a los usuarios a diagnosticar problemas O a obtener consejos de cultivo, recomendando TIPOS de productos genéricos. Tu única tarea es devolver un objeto JSON VÁLIDO que siga el esquema proporcionado.

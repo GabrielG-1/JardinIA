@@ -1,7 +1,14 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: [
+    'genkit',
+    '@genkit-ai/googleai',
+    '@genkit-ai/firebase',
+    '@genkit-ai/next',
+    'handlebars',
+    'dotprompt',
+  ],
   images: {
     remotePatterns: [
       {

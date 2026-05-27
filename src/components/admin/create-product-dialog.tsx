@@ -48,6 +48,11 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      price: '',
+      categoryId: '',
+    },
   });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
