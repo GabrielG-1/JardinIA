@@ -42,7 +42,16 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
     scanner
       .start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 150 } },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 150 },
+          aspectRatio: 1.5,
+          videoConstraints: {
+            facingMode: "environment",
+            focusMode: "continuous",
+            advanced: [{ focusMode: "continuous" }],
+          },
+        },
         (decodedText) => {
           isScanningRef.current = false;
           stopScanner().then(() => onScan(decodedText));

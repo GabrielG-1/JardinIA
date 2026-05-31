@@ -70,11 +70,10 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
         setBarcode("");
       } else {
         setNotFound(true);
-        toast({
-          title: "Producto no encontrado",
-          description: `No existe ningún producto con código "${code}".`,
-          variant: "destructive",
-        });
+        setTimeout(() => {
+          setBarcode("");
+          setNotFound(false);
+        }, 2000);
       }
     } catch {
       toast({
@@ -125,9 +124,14 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
           </Button>
         </form>
         {notFound && (
-          <p className="flex items-center gap-1 text-sm text-destructive">
-            <XCircle className="h-4 w-4" /> Código no encontrado en el catálogo.
-          </p>
+          <div className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive space-y-1">
+            <p className="flex items-center gap-1 font-medium">
+              <XCircle className="h-4 w-4 shrink-0" /> Producto no encontrado.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Regístralo primero en el Catálogo y luego asígnale el código de barras desde "Editar producto".
+            </p>
+          </div>
         )}
         <BarcodeCameraScanner onScan={handleCameraScan} />
       </CardContent>
