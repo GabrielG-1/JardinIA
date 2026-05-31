@@ -48,8 +48,7 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
           aspectRatio: 1.5,
           videoConstraints: {
             facingMode: "environment",
-            focusMode: "continuous",
-            advanced: [{ focusMode: "continuous" }],
+            advanced: [{ focusMode: "continuous" }] as any,
           },
         },
         (decodedText) => {
