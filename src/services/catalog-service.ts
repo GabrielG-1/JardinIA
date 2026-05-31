@@ -4,24 +4,24 @@ import {
   collection,
   doc,
   getDocs,
-  onSnapshot,
   query,
   updateDoc,
-  type Unsubscribe,
   getDoc,
   arrayUnion,
-  arrayRemove,
 } from "firebase/firestore";
 
 const CATALOG_COLLECTION = "catalog";
 
 export type Product = {
-  id: string; // ID is now mandatory
+  id: string;
   name: string;
   price: string;
   image: string;
   aiHint?: string;
   inStock?: boolean;
+  stock?: number;
+  barcode?: string;
+  stockMinimo?: number;
 };
 
 export type Category = {
@@ -122,9 +122,17 @@ export const searchProducts = async (queryTerm: string): Promise<Product[]> => {
  * @param updatedData An object with the new product data.
  */
 export const updateProduct = async (
-    categoryId: string, 
-    productId: string, 
-    updatedData: { name: string; price: string; image: string, inStock?: boolean }
+    categoryId: string,
+    productId: string,
+    updatedData: {
+        name: string;
+        price: string;
+        image: string;
+        inStock?: boolean;
+        barcode?: string;
+        stock?: number;
+        stockMinimo?: number;
+    }
 ) => {
     try {
         const categoryRef = doc(db, CATALOG_COLLECTION, categoryId);
@@ -136,19 +144,20 @@ export const updateProduct = async (
 
         const categoryData = categorySnap.data() as Omit<Category, 'id'>;
         const products = categoryData.products || [];
-        
+
         let productFound = false;
         const updatedProducts = products.map(p => {
             if (p.id === productId) {
                 productFound = true;
-                // Merge existing product data with the updated data
-                return { 
-                  ...p, 
+                return {
+                  ...p,
                   name: updatedData.name,
                   price: updatedData.price,
                   image: updatedData.image,
-                  // Use new inStock value if provided, otherwise keep the existing one
-                  inStock: typeof updatedData.inStock === 'boolean' ? updatedData.inStock : p.inStock
+                  inStock: typeof updatedData.inStock === 'boolean' ? updatedData.inStock : p.inStock,
+                  ...(updatedData.barcode !== undefined ? { barcode: updatedData.barcode } : {}),
+                  ...(updatedData.stock !== undefined ? { stock: updatedData.stock } : {}),
+                  ...(updatedData.stockMinimo !== undefined ? { stockMinimo: updatedData.stockMinimo } : {}),
                 };
             }
             return p;

@@ -56,6 +56,14 @@ service cloud.firestore {
     }
 
     // ------------------------------------------------------------------
+    // /stock_movements/{movementId}
+    // Solo admin puede leer y escribir.
+    // ------------------------------------------------------------------
+    match /stock_movements/{movementId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------
     // Denegar cualquier otra colección no declarada explícitamente.
     // Protege contra colecciones futuras que queden sin reglas.
     // ------------------------------------------------------------------

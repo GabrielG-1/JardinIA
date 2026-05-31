@@ -25,6 +25,12 @@ import { useAuth } from "@/hooks/use-auth";
 const formSchema = z.object({
   name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres." }),
   price: z.string().regex(/^\$?[\d,.]*$/, { message: "Introduce un precio válido (ej: $15.500 o 15500)." }),
+  barcode: z.string().optional(),
+  stockMinimo: z.coerce
+    .number({ invalid_type_error: "Debe ser un número." })
+    .int({ message: "Debe ser un número entero." })
+    .min(0, { message: "No puede ser negativo." })
+    .optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -44,8 +50,10 @@ export function EditProductDialog({ product, categoryId, onProductUpdated }: Edi
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: product.name ?? '',
-      price: product.price ?? '',
+      name: product.name ?? "",
+      price: product.price ?? "",
+      barcode: product.barcode ?? "",
+      stockMinimo: product.stockMinimo ?? 3,
     },
   });
 
@@ -56,16 +64,18 @@ export function EditProductDialog({ product, categoryId, onProductUpdated }: Edi
     }
     setIsSubmitting(true);
     try {
-      const cleanPrice = data.price.replace(/[^0-9]/g, '');
-      const priceToSave = data.price.startsWith('$') ? data.price : `$${parseInt(cleanPrice, 10).toLocaleString('es-CL')}`;
-      
-      // FIX: Pass all required product fields to the update function.
-      // We keep the existing image and inStock status while updating name and price.
-      await updateProduct(categoryId, product.id, { 
-        name: data.name, 
+      const cleanPrice = data.price.replace(/[^0-9]/g, "");
+      const priceToSave = data.price.startsWith("$")
+        ? data.price
+        : `$${parseInt(cleanPrice, 10).toLocaleString("es-CL")}`;
+
+      await updateProduct(categoryId, product.id, {
+        name: data.name,
         price: priceToSave,
-        image: product.image, // Keep the existing image
-        inStock: product.inStock, // Keep the existing stock status
+        image: product.image,
+        inStock: product.inStock,
+        barcode: data.barcode?.trim() || undefined,
+        stockMinimo: data.stockMinimo,
       });
 
       toast({
@@ -99,44 +109,70 @@ export function EditProductDialog({ product, categoryId, onProductUpdated }: Edi
           <DialogTitle>Editar Producto</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
             <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
+              control={form.control}
+              name="name"
+              render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Nombre del Producto</FormLabel>
-                    <FormControl>
+                  <FormLabel>Nombre del Producto</FormLabel>
+                  <FormControl>
                     <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
-                )}
+              )}
             />
             <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
+              control={form.control}
+              name="price"
+              render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Precio</FormLabel>
-                    <FormControl>
+                  <FormLabel>Precio</FormLabel>
+                  <FormControl>
                     <Input placeholder="$1.234" {...field} />
-                    </FormControl>
-                    <FormMessage />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
-                )}
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="barcode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Código de Barras (EAN/SKU)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ej: 7802300012458" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="stockMinimo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Stock mínimo (alerta)</FormLabel>
+                  <FormControl>
+                    <Input type="number" min={0} placeholder="Ej: 5" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
             <DialogFooter>
-                <DialogClose asChild>
-                    <Button type="button" variant="secondary">
-                        Cancelar
-                    </Button>
-                </DialogClose>
-                <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+              <DialogClose asChild>
+                <Button type="button" variant="secondary">
+                  Cancelar
                 </Button>
+              </DialogClose>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+              </Button>
             </DialogFooter>
-            </form>
+          </form>
         </Form>
       </DialogContent>
     </Dialog>

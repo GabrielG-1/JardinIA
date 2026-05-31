@@ -2,14 +2,15 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, Warehouse } from "lucide-react";
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, isAdmin, isAuthLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-
   useEffect(() => {
     if (isAuthLoading) {
       return; // Wait for the AuthProvider to finish loading.
@@ -57,9 +58,53 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Once loaded, the useEffect handles redirection.
-  // We render children so the login or dashboard pages can be displayed.
-  return <>{children}</>;
+  const isAuthPage = pathname === "/admin";
+  const showNav = !isAuthLoading && !!user && isAdmin && !isAuthPage;
+
+  return (
+    <>
+      {showNav && (
+        <nav className="fixed top-20 left-0 right-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container mx-auto px-4 md:px-8 flex items-center gap-1 h-11">
+            <NavLink href="/admin/dashboard" current={pathname} icon={<LayoutDashboard className="h-4 w-4" />}>
+              Catálogo
+            </NavLink>
+            <NavLink href="/admin/inventario" current={pathname} icon={<Warehouse className="h-4 w-4" />}>
+              Inventario
+            </NavLink>
+          </div>
+        </nav>
+      )}
+      {children}
+    </>
+  );
+}
+
+function NavLink({
+  href,
+  current,
+  icon,
+  children,
+}: {
+  href: string;
+  current: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const active = current === href || current.startsWith(href + "/");
+  return (
+    <Link
+      href={href}
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+        active
+          ? "bg-primary text-primary-foreground"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+      }`}
+    >
+      {icon}
+      {children}
+    </Link>
+  );
 }
 
 

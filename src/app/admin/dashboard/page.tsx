@@ -2,22 +2,112 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { getCatalog, updateProduct, type Category, type Product } from "@/services/catalog-service";
+import { getLowStockProducts, getTodayMovements } from "@/services/inventory-service";
 import { uploadSiteLogo, uploadProductImage as uploadImageService } from "@/services/storage-service";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { AlertTriangle, Upload, Image as ImageIcon } from "lucide-react";
+import { AlertTriangle, Upload, Image as ImageIcon, Package, PackageX, TrendingDown, ClipboardList, Warehouse } from "lucide-react";
 import { EditProductDialog } from "@/components/admin/edit-product-dialog";
 import { CreateProductDialog } from "@/components/admin/create-product-dialog";
 import { DeleteProductDialog } from "@/components/admin/delete-product-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { getLogoUrl } from "@/services/settings-service";
+
+// ---------------------------------------------------------------------------
+// InventoryMetrics
+// ---------------------------------------------------------------------------
+
+function InventoryMetrics() {
+  const { isAdmin, isAuthLoading } = useAuth();
+  const [totalProducts, setTotalProducts] = useState<number | null>(null);
+  const [lowStockCount, setLowStockCount] = useState<number | null>(null);
+  const [outOfStockCount, setOutOfStockCount] = useState<number | null>(null);
+  const [todayMovements, setTodayMovements] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isAuthLoading || !isAdmin) return;
+
+    const fetchMetrics = async () => {
+      setLoading(true);
+      try {
+        const [catalog, lowStock, movements] = await Promise.all([
+          getCatalog(),
+          getLowStockProducts(),
+          getTodayMovements(),
+        ]);
+
+        const allProducts = catalog.flatMap((c) => c.products);
+        setTotalProducts(allProducts.length);
+        setLowStockCount(lowStock.length);
+        setOutOfStockCount(allProducts.filter((p) => p.inStock === false).length);
+        setTodayMovements(movements.length);
+      } catch {
+        // silently fail — metrics are non-critical
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMetrics();
+  }, [isAdmin, isAuthLoading]);
+
+  const metrics = [
+    {
+      title: "Total de productos",
+      value: totalProducts,
+      icon: <Package className="h-5 w-5 text-primary" />,
+      description: "en el catálogo",
+    },
+    {
+      title: "Stock bajo",
+      value: lowStockCount,
+      icon: <TrendingDown className="h-5 w-5 text-yellow-600" />,
+      description: "productos con stock mínimo",
+    },
+    {
+      title: "Sin stock",
+      value: outOfStockCount,
+      icon: <PackageX className="h-5 w-5 text-destructive" />,
+      description: "productos no disponibles",
+    },
+    {
+      title: "Movimientos hoy",
+      value: todayMovements,
+      icon: <ClipboardList className="h-5 w-5 text-green-600" />,
+      description: "registros del día",
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {metrics.map((m) => (
+        <Card key={m.title}>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-medium text-muted-foreground">{m.title}</p>
+              {m.icon}
+            </div>
+            {loading ? (
+              <Skeleton className="h-8 w-16 rounded" />
+            ) : (
+              <p className="text-3xl font-bold">{m.value ?? "—"}</p>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">{m.description}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
 
 const formatPrice = (price: string) => {
     const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
@@ -30,9 +120,11 @@ function SiteSettings() {
   const [isUploading, setIsUploading] = useState(false);
   const [isLoadingLogo, setIsLoadingLogo] = useState(true);
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isAuthLoading } = useAuth();
 
   useEffect(() => {
+    if (isAuthLoading || !isAdmin) return;
+
     const fetchLogo = async () => {
       try {
         setIsLoadingLogo(true);
@@ -45,7 +137,7 @@ function SiteSettings() {
       }
     };
     fetchLogo();
-  }, []);
+  }, [isAdmin, isAuthLoading]);
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -129,8 +221,8 @@ function AdminProductList() {
   const [uploadingProductId, setUploadingProductId] = useState<string | null>(null);
   const [stockChangeProductId, setStockChangeProductId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
-  
+  const { isAdmin, isAuthLoading } = useAuth();
+
   const fetchCatalogData = async () => {
     setLoading(true);
     try {
@@ -143,15 +235,11 @@ function AdminProductList() {
       setLoading(false);
     }
   }
-  
+
   useEffect(() => {
-    // Only fetch data once the user's admin status is confirmed to be true.
-    // This prevents race conditions on login where the component renders before
-    // the auth state is fully propagated.
-    if (isAdmin) {
-      fetchCatalogData();
-    }
-  }, [isAdmin]);
+    if (isAuthLoading || !isAdmin) return;
+    fetchCatalogData();
+  }, [isAdmin, isAuthLoading]);
 
 
   const handleProductUpdate = async () => {
@@ -282,6 +370,9 @@ function AdminProductList() {
                         <div>
                           <p className="font-medium">{product.name}</p>
                           <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p>
+                          {typeof product.stock === 'number' && (
+                            <p className="text-xs text-muted-foreground">Stock: {product.stock} u.</p>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-2 justify-start md:justify-center col-span-1">
@@ -336,23 +427,32 @@ function AdminProductList() {
 
 export default function AdminDashboardPage() {
   const { user, signOut } = useAuth();
-  
+
   const handleSignOut = async () => {
     await signOut();
   };
 
   return (
-    <div className="container mx-auto px-4 md:px-8 pb-8 bg-muted/20 min-h-screen pt-28">
+    <div className="container mx-auto px-4 md:px-8 pb-8 bg-muted/20 min-h-screen pt-36">
       <header className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold font-headline">Panel de Administrador</h1>
           {user && <p className="text-muted-foreground truncate">Sesión iniciada como {user.email}</p>}
         </div>
-        <Button onClick={handleSignOut} variant="destructive">
-          Cerrar Sesión
-        </Button>
+        <div className="flex items-center gap-3">
+          <Link href="/admin/inventario">
+            <Button variant="outline">
+              <Warehouse className="mr-2 h-4 w-4" />
+              Gestionar Inventario
+            </Button>
+          </Link>
+          <Button onClick={handleSignOut} variant="destructive">
+            Cerrar Sesión
+          </Button>
+        </div>
       </header>
       <main>
+        <InventoryMetrics />
         <SiteSettings />
         <AdminProductList />
       </main>
