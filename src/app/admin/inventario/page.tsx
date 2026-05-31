@@ -51,12 +51,10 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
   const [searching, setSearching] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
   const clearAll = () => {
-    if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
     setBarcode("");
     setNotFound(false);
     inputRef.current?.focus();
@@ -64,9 +62,6 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
 
   useEffect(() => {
     inputRef.current?.focus();
-    return () => {
-      if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
-    };
   }, []);
 
   const search = async (value: string) => {
@@ -82,10 +77,6 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
         setBarcode("");
       } else {
         setNotFound(true);
-        clearTimerRef.current = setTimeout(() => {
-          setBarcode("");
-          setNotFound(false);
-        }, 2000);
       }
     } catch {
       toast({
