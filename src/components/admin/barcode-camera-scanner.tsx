@@ -46,10 +46,6 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
           fps: 10,
           qrbox: { width: 250, height: 150 },
           aspectRatio: 1.5,
-          videoConstraints: {
-            facingMode: "environment",
-            advanced: [{ focusMode: "continuous" }] as any,
-          },
         },
         (decodedText) => {
           isScanningRef.current = false;
