@@ -51,10 +51,21 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
   const [searching, setSearching] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
+
+  const clearAll = () => {
+    if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+    setBarcode("");
+    setNotFound(false);
+    inputRef.current?.focus();
+  };
 
   useEffect(() => {
     inputRef.current?.focus();
+    return () => {
+      if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+    };
   }, []);
 
   const search = async (value: string) => {
@@ -70,7 +81,7 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
         setBarcode("");
       } else {
         setNotFound(true);
-        setTimeout(() => {
+        clearTimerRef.current = setTimeout(() => {
           setBarcode("");
           setNotFound(false);
         }, 2000);
@@ -109,16 +120,28 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        <form onSubmit={handleSubmit} className="flex gap-3">
-          <Input
-            ref={inputRef}
-            value={barcode}
-            onChange={(e) => { setBarcode(e.target.value); setNotFound(false); }}
-            placeholder="Escanea o escribe el código..."
-            disabled={searching}
-            className={notFound ? "border-destructive" : ""}
-            autoComplete="off"
-          />
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <div className="relative flex-1">
+            <Input
+              ref={inputRef}
+              value={barcode}
+              onChange={(e) => { setBarcode(e.target.value); setNotFound(false); }}
+              placeholder="Escanea o escribe el código..."
+              disabled={searching}
+              className={notFound ? "border-destructive pr-8" : "pr-8"}
+              autoComplete="off"
+            />
+            {barcode && (
+              <button
+                type="button"
+                onClick={clearAll}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label="Limpiar"
+              >
+                <XCircle className="h-4 w-4" />
+              </button>
+            )}
+          </div>
           <Button type="submit" disabled={searching || !barcode.trim()}>
             {searching ? "Buscando..." : "Buscar"}
           </Button>
