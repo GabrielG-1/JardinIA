@@ -53,6 +53,7 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   const clearAll = () => {
     if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
@@ -154,6 +155,17 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
             <p className="text-xs text-muted-foreground">
               Regístralo primero en el Catálogo y luego asígnale el código de barras desde "Editar producto".
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-1 text-foreground"
+              onClick={() => {
+                localStorage.setItem("pendingBarcode", barcode);
+                router.push("/admin/dashboard");
+              }}
+            >
+              Agregar al catálogo
+            </Button>
           </div>
         )}
         <BarcodeCameraScanner onScan={handleCameraScan} />

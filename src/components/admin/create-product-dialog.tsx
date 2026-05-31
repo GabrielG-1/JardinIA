@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -29,6 +29,7 @@ const formSchema = z.object({
   name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres." }),
   price: z.string().regex(/^\$?[\d,.]*$/, { message: "Introduce un precio válido (ej: $15.500 o 15500)." }),
   categoryId: z.string({ required_error: "Debes seleccionar una categoría." }),
+  barcode: z.string().optional(),
   image: z.instanceof(File, { message: "Se requiere una imagen para el producto." }).optional(),
 });
 
@@ -52,8 +53,18 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
       name: '',
       price: '',
       categoryId: '',
+      barcode: '',
     },
   });
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const pendingBarcode = localStorage.getItem("pendingBarcode");
+    if (pendingBarcode) {
+      form.setValue("barcode", pendingBarcode);
+      localStorage.removeItem("pendingBarcode");
+    }
+  }, [isOpen]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -91,7 +102,8 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
         name: data.name,
         price: priceToSave,
         image: imageUrl,
-        aiHint: "", // Default AI hint
+        aiHint: "",
+        ...(data.barcode?.trim() ? { barcode: data.barcode.trim() } : {}),
       });
 
       toast({
@@ -176,6 +188,17 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
                                 ))}
                             </SelectContent>
                         </Select>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="barcode"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Código de Barras (EAN/SKU)</FormLabel>
+                        <FormControl><Input placeholder="Ej: 7802300012458" {...field} /></FormControl>
                         <FormMessage />
                     </FormItem>
                     )}
