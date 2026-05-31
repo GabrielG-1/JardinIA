@@ -93,7 +93,11 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
       ) : (
         <Card className="w-full">
           <CardContent className="pt-4 space-y-3">
-            <div id={CONTAINER_ID} className="w-full overflow-hidden rounded-md" />
+            <div
+              id={CONTAINER_ID}
+              className="w-full overflow-hidden rounded-md"
+              style={{ minHeight: "300px", background: "#000" }}
+            />
             <Button
               type="button"
               variant="outline"
