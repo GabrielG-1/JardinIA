@@ -57,7 +57,7 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
   const clearAll = () => {
     setBarcode("");
     setNotFound(false);
-    inputRef.current?.focus();
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   useEffect(() => {
@@ -96,6 +96,7 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
   };
 
   const handleCameraScan = (code: string) => {
+    if (notFound || searching) return;
     setBarcode(code);
     search(code);
   };
@@ -151,7 +152,9 @@ function BarcodeScanner({ onProductFound }: BarcodeScannerProps) {
               size="sm"
               className="mt-1 text-foreground"
               onClick={() => {
-                localStorage.setItem("pendingBarcode", barcode);
+                const code = barcode;
+                clearAll();
+                localStorage.setItem("pendingBarcode", code);
                 router.push("/admin/dashboard");
               }}
             >
