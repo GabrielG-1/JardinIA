@@ -68,7 +68,7 @@ export function RootsOverlay() {
       {/* Lateral izquierdo */}
       <svg
         ref={leftRef}
-        className="fixed top-0 left-0 w-[160px] h-full pointer-events-none z-10"
+        className="fixed top-0 left-0 w-[160px] h-screen pointer-events-none z-10"
         viewBox="0 0 160 520"
         preserveAspectRatio="xMinYMin slice"
         xmlns="http://www.w3.org/2000/svg"
@@ -96,7 +96,7 @@ export function RootsOverlay() {
       {/* Lateral derecho */}
       <svg
         ref={rightRef}
-        className="fixed top-0 right-0 w-[160px] h-full pointer-events-none z-10"
+        className="fixed top-0 right-0 w-[160px] h-screen pointer-events-none z-10"
         viewBox="0 0 160 520"
         preserveAspectRatio="xMaxYMin slice"
         xmlns="http://www.w3.org/2000/svg"
