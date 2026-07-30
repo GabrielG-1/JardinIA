@@ -10,7 +10,8 @@ import {
   registerStockMovement,
   getTodayMovements,
 } from "@/services/inventory-service";
-import { type Product } from "@/services/catalog-service";
+import { getCatalog, type Category, type Product } from "@/services/catalog-service";
+import { InventoryExcel } from "@/components/admin/inventory-excel";
 import { type StockMovement, type MovementType } from "@/types/inventory";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -422,6 +423,7 @@ export default function InventarioPage() {
   const [scannedCategoryId, setScannedCategoryId] = useState<string>("");
   const [movements, setMovements] = useState<StockMovement[]>([]);
   const [movementsLoading, setMovementsLoading] = useState(true);
+  const [catalogData, setCatalogData] = useState<Category[]>([]);
 
   const fetchMovements = useCallback(async () => {
     setMovementsLoading(true);
@@ -442,6 +444,10 @@ export default function InventarioPage() {
   useEffect(() => {
     if (isAdmin) fetchMovements();
   }, [isAdmin, fetchMovements]);
+
+  useEffect(() => {
+    if (isAdmin) getCatalog().then(setCatalogData);
+  }, [isAdmin]);
 
   const handleProductFound = (product: Product, categoryId: string) => {
     setScannedProduct(product);
@@ -511,6 +517,7 @@ export default function InventarioPage() {
               onClear={handleClear}
             />
           )}
+          <InventoryExcel categories={catalogData} />
         </div>
 
         {/* Columna derecha: movimientos del día */}
