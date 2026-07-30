@@ -20,6 +20,7 @@ import { DeleteProductDialog } from "@/components/admin/delete-product-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { getLogoUrl } from "@/services/settings-service";
+import { CategoryManager } from "@/components/admin/category-manager";
 
 // ---------------------------------------------------------------------------
 // InventoryMetrics
@@ -340,9 +341,17 @@ function AdminProductList() {
 
   return (
     <>
-      <div className="mb-6 flex justify-end">
-        <CreateProductDialog categories={catalogData} onProductCreated={handleProductUpdate} />
-      </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Gestión de Categorías</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CategoryManager categories={catalogData} onCategoryChanged={handleProductUpdate} />
+          <div className="flex justify-end">
+            <CreateProductDialog categories={catalogData} onProductCreated={handleProductUpdate} />
+          </div>
+        </CardContent>
+      </Card>
       <Accordion type="multiple" className="w-full space-y-4">
         {catalogData.map((category) => (
           <AccordionItem key={category.id} value={category.id} className="border rounded-lg bg-card">
@@ -424,6 +433,7 @@ function AdminProductList() {
     </>
   );
 }
+
 
 export default function AdminDashboardPage() {
   const { user, signOut } = useAuth();
