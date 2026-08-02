@@ -20,51 +20,51 @@ type AnalyzePlantHealthOutput = Awaited<ReturnType<typeof analyzePlantHealth>>;
 
 
 const formatPrice = (price: string) => {
-    const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
-    if (isNaN(number)) {
-        return price;
-    }
-    return `$${number.toLocaleString('es-CL')}`;
+  const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
+  if (isNaN(number)) {
+    return price;
+  }
+  return `$${number.toLocaleString('es-CL')}`;
 };
 
 function ProductRecommendationCard({ product }: { product: Product }) {
-    const imageUrl = product.image && product.image.startsWith('http') 
-        ? product.image 
-        : 'https://placehold.co/200x200.png';
-    
-    const { addItem, getItem } = useCart();
-    const { toast } = useToast();
-    const [isAdded, setIsAdded] = useState(false);
-    
-    const productId = product.id;
-    const itemInCart = getItem(productId);
+  const imageUrl = product.image && product.image.startsWith('http')
+    ? product.image
+    : 'https://placehold.co/200x200.png';
 
-    const handleAddToCart = () => {
-        addItem(product);
-        toast({
-          title: "Producto Añadido",
-          description: `${product.name} fue añadido a tu carrito.`,
-        });
-        setIsAdded(true);
-        setTimeout(() => setIsAdded(false), 2000);
-    };
+  const { addItem, getItem } = useCart();
+  const { toast } = useToast();
+  const [isAdded, setIsAdded] = useState(false);
 
-    return (
-        <Card className="flex flex-col">
-            <CardHeader className="p-0">
-                <Image src={imageUrl} alt={product.name} width={150} height={150} className="rounded-t-lg object-cover w-full aspect-square" />
-            </CardHeader>
-            <CardContent className="flex-grow p-3">
-                <h4 className="font-semibold text-sm h-10">{product.name}</h4>
-            </CardContent>
-            <CardFooter className="p-3 pt-0 flex justify-between items-center">
-                <p className="text-base font-bold text-primary">{formatPrice(product.price)}</p>
-                <Button size="sm" onClick={handleAddToCart} disabled={!!itemInCart || isAdded} className={itemInCart || isAdded ? 'bg-green-500 hover:bg-green-600' : ''}>
-                    {itemInCart || isAdded ? <Check /> : <ShoppingCart />}
-                </Button>
-            </CardFooter>
-        </Card>
-    );
+  const productId = product.id;
+  const itemInCart = getItem(productId);
+
+  const handleAddToCart = () => {
+    addItem(product);
+    toast({
+      title: "Producto Añadido",
+      description: `${product.name} fue añadido a tu carrito.`,
+    });
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  return (
+    <Card className="flex flex-col">
+      <CardHeader className="p-0">
+        <Image src={imageUrl} alt={product.name} width={150} height={150} className="rounded-t-lg object-cover w-full aspect-square" />
+      </CardHeader>
+      <CardContent className="flex-grow p-3">
+        <h4 className="font-semibold text-sm h-10">{product.name}</h4>
+      </CardContent>
+      <CardFooter className="p-3 pt-0 flex justify-between items-center">
+        <p className="text-base font-bold text-primary">{formatPrice(product.price)}</p>
+        <Button size="sm" onClick={handleAddToCart} disabled={!!itemInCart || isAdded} className={itemInCart || isAdded ? 'bg-green-500 hover:bg-green-600' : ''}>
+          {itemInCart || isAdded ? <Check /> : <ShoppingCart />}
+        </Button>
+      </CardFooter>
+    </Card>
+  );
 }
 
 // Full analysis object state
@@ -126,13 +126,13 @@ export function AiAdvisorSection() {
     try {
       // Step 1: Get AI analysis and keywords
       const aiResponse = await analyzePlantHealth({ photoDataUri: photoDataUri ?? undefined, description });
-      
+
       let foundProducts: Product[] = [];
       if (aiResponse.recommendedProductKeywords && aiResponse.recommendedProductKeywords.length > 0) {
         // Step 2: Search for products based on keywords returned by the AI
         const searchPromises = aiResponse.recommendedProductKeywords.map(term => searchProducts(term));
         const searchResults = await Promise.all(searchPromises);
-        
+
         // Flatten and deduplicate results
         const allFoundProducts = searchResults.flat();
         const uniqueProducts = Array.from(new Map(allFoundProducts.map(p => [p.id, p])).values());
@@ -186,21 +186,21 @@ export function AiAdvisorSection() {
               </div>
               <div>
                 <h3 className="font-semibold text-lg flex items-center gap-2"><Dna /> Recomendaciones de Cuidado</h3>
-                <div 
+                <div
                   className="text-muted-foreground text-left space-y-2"
                   dangerouslySetInnerHTML={{ __html: aiResponse.healthDiagnosis.recommendations }}
                 />
               </div>
 
               {foundProducts.length > 0 && (
-                  <div>
-                      <h3 className="font-semibold text-lg flex items-center gap-2 mt-6 mb-4"><ShoppingCart /> Productos Recomendados de la Tienda</h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                          {foundProducts.map((product) => (
-                              <ProductRecommendationCard key={product.id} product={product} />
-                          ))}
-                      </div>
+                <div>
+                  <h3 className="font-semibold text-lg flex items-center gap-2 mt-6 mb-4"><ShoppingCart /> Productos Recomendados de la Tienda</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {foundProducts.map((product) => (
+                      <ProductRecommendationCard key={product.id} product={product} />
+                    ))}
                   </div>
+                </div>
               )}
             </>
           )}
@@ -250,10 +250,10 @@ export function AiAdvisorSection() {
             <h2 className="text-4xl font-bold font-headline">Asesor de Cultivos IA</h2>
           </div>
           <Image
-            src="https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FAsesor_IA.png?alt=media&token=0c084b89-2bef-4676-bd34-bb674aad9c1f"
+            src="https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FAsesor_IA.png?alt=media&token=0f66c890-4163-400c-9690-6461441e13ff"
             alt="Robot asesor de plantas"
-            width={120}
-            height={120}
+            width={250}
+            height={250}
             className="object-contain drop-shadow-md"
           />
         </div>
@@ -278,15 +278,15 @@ export function AiAdvisorSection() {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-[150px] space-y-4">
-                     <Dialog open={isCameraOpen} onOpenChange={setIsCameraOpen}>
+                    <Dialog open={isCameraOpen} onOpenChange={setIsCameraOpen}>
                       <DialogTrigger asChild>
-                         <Button variant="outline"><Camera className="mr-2"/> Tomar Foto</Button>
+                        <Button variant="outline"><Camera className="mr-2" /> Tomar Foto</Button>
                       </DialogTrigger>
                       <DialogContent className="max-w-md">
-                          <DialogHeader>
-                              <DialogTitle>Capturar Foto</DialogTitle>
-                          </DialogHeader>
-                          <CameraCapture onPhotoTaken={handlePhotoTaken} />
+                        <DialogHeader>
+                          <DialogTitle>Capturar Foto</DialogTitle>
+                        </DialogHeader>
+                        <CameraCapture onPhotoTaken={handlePhotoTaken} />
                       </DialogContent>
                     </Dialog>
 
@@ -295,7 +295,7 @@ export function AiAdvisorSection() {
                       <span className="flex-shrink mx-4 text-muted-foreground">o</span>
                       <div className="flex-grow border-t border-muted-foreground"></div>
                     </div>
-                    
+
                     <label htmlFor="plant-photo" className="cursor-pointer text-primary font-semibold flex items-center gap-2">
                       <UploadCloud className="w-5 h-5" />
                       <span>Subir un archivo</span>
@@ -306,7 +306,7 @@ export function AiAdvisorSection() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>2. Describe el estado</CardTitle>
@@ -322,11 +322,11 @@ export function AiAdvisorSection() {
             </CardContent>
           </Card>
         </div>
-        
+
         <Button size="lg" onClick={handleAnalysis} disabled={loading || (!photoDataUri && !description.trim())} className="mt-8">
           {loading ? "Analizando..." : "Obtener Diagnóstico"}
         </Button>
-        
+
         {loading && <LoadingSkeleton />}
         {result && <AnalysisResult />}
       </div>

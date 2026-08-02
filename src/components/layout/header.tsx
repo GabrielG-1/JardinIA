@@ -14,7 +14,7 @@ export function Header() {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm shadow-md" style={{ backgroundColor: 'hsl(40, 15%, 97%)' }}>
+    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm shadow-md" style={{ backgroundColor: '#e8ede4' }}>
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center space-x-3">
           <div className="h-10 w-10 flex items-center justify-center">
