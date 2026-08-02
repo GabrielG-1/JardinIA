@@ -243,21 +243,21 @@ export function AiAdvisorSection() {
   );
 
   return (
-    <section id="asesor-ia" className="py-20 px-4 bg-background">
+    <section id="asesor-ia" className="py-10 px-4 bg-background">
       <div className="container mx-auto max-w-4xl text-center">
-        <div className="relative flex items-center justify-center gap-6 mb-4">
+        <div className="relative flex items-center justify-center gap-6 mb-2">
           <div className="text-center">
             <h2 className="text-4xl font-bold font-headline">Asesor de Cultivos IA</h2>
           </div>
           <Image
-            src="https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FAsesor_IA.png?alt=media&token=0a81a995-2eff-4ee1-8223-e1378efb50e9"
+            src="https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FAsesor_IA.png?alt=media&token=0f66c890-4163-400c-9690-6461441e13ff"
             alt="Robot asesor de plantas"
-            width={200}
-            height={200}
-            className="object-contain drop-shadow-md w-[200px] h-[200px]"
+            width={120}
+            height={120}
+            className="object-contain drop-shadow-md"
           />
         </div>
-        <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
+        <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
           ¿No estás seguro de qué le pasa a tu planta? Sube una foto, descríbenos el problema y nuestra IA te dará un diagnóstico y recomendaciones.
         </p>
 
