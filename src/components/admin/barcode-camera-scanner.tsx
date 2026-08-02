@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Html5Qrcode } from "html5-qrcode";
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Camera, X } from "lucide-react";
@@ -44,30 +44,20 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
     scanner
       .start(
         { facingMode: "environment" },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ({
+        {
           fps: 15,
           qrbox: { width: 300, height: 120 },
-          formatsToSupport: [
-            0,  // QR_CODE
-            1,  // AZTEC
-            2,  // CODABAR
-            3,  // CODE_39
-            4,  // CODE_93
-            5,  // CODE_128
-            6,  // DATA_MATRIX
-            7,  // MAXICODE
-            8,  // ITF
-            9,  // EAN_13
-            10, // EAN_8
-            11, // PDF_417
-            12, // RSS_14
-            13, // RSS_EXPANDED
-            14, // UPC_A
-            15, // UPC_E
-            16, // UPC_EAN_EXTENSION
-          ],
-        } as any),
+          // formatsToSupport no está en los tipos pero sí funciona en runtime
+          ...({ formatsToSupport: [
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+            Html5QrcodeSupportedFormats.QR_CODE,
+          ] } as any),
+        },
         (decodedText) => {
           if (done) return;
           done = true;
