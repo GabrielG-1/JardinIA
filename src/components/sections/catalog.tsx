@@ -134,46 +134,46 @@ export function CatalogSection() {
         <div className="text-center mb-12">
           {/* Guirnalda decorativa */}
         <div className="relative w-full overflow-hidden" style={{ height: '140px' }}>
-            <svg width="100%" height="140" viewBox="0 0 680 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="100%" height="140" viewBox="0 0 1920 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
               {/* Cuerda */}
-              <path d="M0 28 C80 38, 160 30, 240 38 C320 46, 400 32, 480 40 C560 48, 630 34, 680 30" stroke="#b5956a" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.9"/>
-              <path d="M0 30 C80 40, 160 32, 240 40 C320 48, 400 34, 480 42 C560 50, 630 36, 680 32" stroke="#d4b896" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.4"/>
+              <path d="M0 28 C240 42, 480 30, 720 40 C960 50, 1200 32, 1440 42 C1680 52, 1800 36, 1920 30" stroke="#b5956a" strokeWidth="6" fill="none" strokeLinecap="round" opacity="0.9"/>
+              <path d="M0 31 C240 45, 480 33, 720 43 C960 53, 1200 35, 1440 45 C1680 55, 1800 39, 1920 33" stroke="#d4b896" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.4"/>
 
               {/* HOJA */}
-              <line x1="160" y1="34" x2="160" y2="50" stroke="#9a7a50" strokeWidth="1" opacity="0.8"/>
-              <g transform="translate(160, 50)">
-                <line x1="0" y1="0" x2="0" y2="6" stroke="#4a7028" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M0 6 C-20 6, -24 22, 0 42 C24 22, 20 6, 0 6Z" fill="#4a8a38" stroke="#3a6028" strokeWidth="0.9"/>
-                <line x1="0" y1="8" x2="0" y2="40" stroke="#3a6028" strokeWidth="0.8" opacity="0.6"/>
-                <path d="M0 16 C-8 19, -14 23, -16 27" fill="none" stroke="#3a6028" strokeWidth="0.5" opacity="0.5"/>
-                <path d="M0 16 C8 19, 14 23, 16 27" fill="none" stroke="#3a6028" strokeWidth="0.5" opacity="0.5"/>
-                <path d="M0 28 C-6 31, -10 34, -11 37" fill="none" stroke="#3a6028" strokeWidth="0.4" opacity="0.4"/>
-                <path d="M0 28 C6 31, 10 34, 11 37" fill="none" stroke="#3a6028" strokeWidth="0.4" opacity="0.4"/>
+              <line x1="441" y1="36" x2="441" y2="56" stroke="#9a7a50" strokeWidth="2.5" opacity="0.8"/>
+              <g transform="translate(441, 56)">
+                <line x1="0" y1="0" x2="0" y2="10" stroke="#4a7028" strokeWidth="3.5" strokeLinecap="round"/>
+                <path d="M0 10 C-24 12, -28 32, 0 52 C28 32, 24 12, 0 10Z" fill="#4a8a38" stroke="#3a6028" strokeWidth="2"/>
+                <line x1="0" y1="13" x2="0" y2="50" stroke="#3a6028" strokeWidth="1.5" opacity="0.6"/>
+                <path d="M0 25 C-12 29, -19 35, -22 40" fill="none" stroke="#3a6028" strokeWidth="1.2" opacity="0.5"/>
+                <path d="M0 25 C12 29, 19 35, 22 40" fill="none" stroke="#3a6028" strokeWidth="1.2" opacity="0.5"/>
+                <path d="M0 38 C-8 42, -13 46, -15 50" fill="none" stroke="#3a6028" strokeWidth="1" opacity="0.4"/>
+                <path d="M0 38 C8 42, 13 46, 15 50" fill="none" stroke="#3a6028" strokeWidth="1" opacity="0.4"/>
               </g>
 
               {/* MACETA CON PLANTA */}
-              <line x1="340" y1="40" x2="340" y2="56" stroke="#9a7a50" strokeWidth="1" opacity="0.8"/>
-              <g transform="translate(340, 56)">
-                <path d="M-3 0 C-4 -9, -7 -17, -5 -24" fill="none" stroke="#2d6a1a" strokeWidth="1.4" strokeLinecap="round"/>
-                <path d="M3 0 C4 -9, 7 -17, 5 -24" fill="none" stroke="#2d6a1a" strokeWidth="1.4" strokeLinecap="round"/>
-                <path d="M-5 -24 C-12 -30, -16 -24, -10 -19" fill="#5aaa38" stroke="#3a8028" strokeWidth="0.7"/>
-                <path d="M5 -24 C12 -30, 16 -24, 10 -19" fill="#5aaa38" stroke="#3a8028" strokeWidth="0.7"/>
-                <ellipse cx="0" cy="0" rx="11" ry="3.5" fill="#5a8a3a" opacity="0.85"/>
-                <path d="M-12 0 L-9 20 L9 20 L12 0Z" fill="#c8703a" stroke="#a85828" strokeWidth="0.9"/>
-                <rect x="-13" y="-3" width="26" height="5" rx="1.5" fill="#d4844a" stroke="#a85828" strokeWidth="0.7"/>
-                <rect x="-9" y="18" width="18" height="3" rx="1" fill="#b86828" stroke="#a85828" strokeWidth="0.5"/>
+              <line x1="960" y1="43" x2="960" y2="62" stroke="#9a7a50" strokeWidth="2.5" opacity="0.8"/>
+              <g transform="translate(960, 62)">
+                <path d="M-8 0 C-10 -18, -16 -34, -12 -48" fill="none" stroke="#2d6a1a" strokeWidth="3" strokeLinecap="round"/>
+                <path d="M8 0 C10 -18, 16 -34, 12 -48" fill="none" stroke="#2d6a1a" strokeWidth="3" strokeLinecap="round"/>
+                <path d="M-12 -48 C-26 -60, -36 -48, -24 -38" fill="#5aaa38" stroke="#3a8028" strokeWidth="1.5"/>
+                <path d="M12 -48 C26 -60, 36 -48, 24 -38" fill="#5aaa38" stroke="#3a8028" strokeWidth="1.5"/>
+                <ellipse cx="0" cy="0" rx="26" ry="8" fill="#5a8a3a" opacity="0.85"/>
+                <path d="M-28 0 L-22 40 L22 40 L28 0Z" fill="#c8703a" stroke="#a85828" strokeWidth="2"/>
+                <rect x="-30" y="-7" width="60" height="11" rx="3" fill="#d4844a" stroke="#a85828" strokeWidth="1.5"/>
+                <rect x="-22" y="37" width="44" height="6" rx="2" fill="#b86828" stroke="#a85828" strokeWidth="1"/>
               </g>
 
               {/* PALITA DE JARDÍN */}
-              <line x1="520" y1="36" x2="520" y2="50" stroke="#9a7a50" strokeWidth="1" opacity="0.8"/>
-              <g transform="translate(520, 50)">
-                <rect x="-5" y="0" width="10" height="22" rx="5" fill="#c8a060" stroke="#a07840" strokeWidth="0.9"/>
-                <line x1="-4" y1="8" x2="4" y2="8" stroke="#a07840" strokeWidth="0.6" opacity="0.5"/>
-                <line x1="-4" y1="14" x2="4" y2="14" stroke="#a07840" strokeWidth="0.6" opacity="0.5"/>
-                <rect x="-7" y="19" width="14" height="5" rx="1.5" fill="#888878" stroke="#666658" strokeWidth="0.8"/>
-                <path d="M-13 24 L13 24 L10 44 Q0 52 -10 44 Z" fill="#b8b8a8" stroke="#808070" strokeWidth="1"/>
-                <line x1="0" y1="26" x2="0" y2="50" stroke="#d0d0c0" strokeWidth="0.9" opacity="0.5"/>
-                <path d="M-8 28 C-10 36, -9 43, -6 48" fill="none" stroke="#d8d8c8" strokeWidth="1" opacity="0.4"/>
+              <line x1="1478" y1="38" x2="1478" y2="56" stroke="#9a7a50" strokeWidth="2.5" opacity="0.8"/>
+              <g transform="translate(1478, 56)">
+                <rect x="-11" y="0" width="22" height="28" rx="11" fill="#c8a060" stroke="#a07840" strokeWidth="2"/>
+                <line x1="-9" y1="10" x2="9" y2="10" stroke="#a07840" strokeWidth="1.5" opacity="0.5"/>
+                <line x1="-9" y1="19" x2="9" y2="19" stroke="#a07840" strokeWidth="1.5" opacity="0.5"/>
+                <rect x="-14" y="25" width="28" height="9" rx="3" fill="#888878" stroke="#666658" strokeWidth="1.5"/>
+                <path d="M-24 34 L24 34 L20 66 Q0 76 -20 66 Z" fill="#b8b8a8" stroke="#808070" strokeWidth="2"/>
+                <line x1="0" y1="36" x2="0" y2="74" stroke="#d0d0c0" strokeWidth="2" opacity="0.5"/>
+                <path d="M-14 38 C-17 50, -15 62, -10 72" fill="none" stroke="#d8d8c8" strokeWidth="1.5" opacity="0.4"/>
               </g>
             </svg>
           </div>
