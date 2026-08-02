@@ -12,6 +12,7 @@ import {
 } from "@/services/inventory-service";
 import { getCatalog, type Category, type Product } from "@/services/catalog-service";
 import { InventoryExcel } from "@/components/admin/inventory-excel";
+import { StockTable } from "@/components/admin/stock-table";
 import { type StockMovement, type MovementType } from "@/types/inventory";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -525,6 +526,7 @@ export default function InventarioPage() {
           <MovementsList movements={movements} loading={movementsLoading} />
         </div>
       </main>
+      <StockTable categories={catalogData} />
     </div>
   );
 }
