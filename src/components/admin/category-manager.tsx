@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { type Category } from "@/services/catalog-service";
 import { useToast } from "@/hooks/use-toast";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FolderPlus, Pencil } from "lucide-react";
+import { FolderPlus, Pencil, Trash2 } from "lucide-react";
 
 interface CategoryManagerProps {
   categories: Category[];
@@ -63,6 +63,9 @@ export function CategoryManager({ categories, onCategoryChanged }: CategoryManag
   const [renameName, setRenameName] = useState("");
   const [renaming, setRenaming] = useState(false);
 
+  const [deleteId, setDeleteId] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
   const handleRename = async () => {
     if (!selectedId || !renameName.trim()) return;
     setRenaming(true);
@@ -79,8 +82,32 @@ export function CategoryManager({ categories, onCategoryChanged }: CategoryManag
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    const cat = categories.find((c) => c.id === deleteId);
+    if (cat && cat.products && cat.products.length > 0) {
+      toast({
+        title: "No se puede eliminar",
+        description: `La categoría "${cat.name}" tiene ${cat.products.length} producto(s). Elimina los productos primero.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    setDeleting(true);
+    try {
+      await deleteDoc(doc(db, "catalog", deleteId));
+      toast({ title: "Categoría eliminada", description: `La categoría fue eliminada correctamente.` });
+      setDeleteId("");
+      onCategoryChanged();
+    } catch (error: any) {
+      toast({ title: "Error al eliminar", description: error.message ?? "No se pudo eliminar la categoría.", variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       {/* Crear categoría */}
       <Card>
         <CardHeader>
@@ -156,6 +183,43 @@ export function CategoryManager({ categories, onCategoryChanged }: CategoryManag
             className="w-full"
           >
             {renaming ? "Renombrando..." : "Renombrar"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="border-destructive/40">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base text-destructive">
+            <Trash2 className="h-4 w-4" />
+            Eliminar categoría
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label>Categoría a eliminar</Label>
+            <Select value={deleteId} onValueChange={setDeleteId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona una categoría..." />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name} {cat.products?.length ? `(${cat.products.length} productos)` : "(vacía)"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Solo se pueden eliminar categorías vacías (sin productos).
+          </p>
+          <Button
+            onClick={handleDelete}
+            disabled={deleting || !deleteId}
+            variant="destructive"
+            className="w-full"
+          >
+            {deleting ? "Eliminando..." : "Eliminar categoría"}
           </Button>
         </CardContent>
       </Card>
