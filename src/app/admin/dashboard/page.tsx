@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { AlertTriangle, Upload, Image as ImageIcon, Package, PackageX, TrendingDown, ClipboardList, Warehouse } from "lucide-react";
+import { AlertTriangle, Upload, Image as ImageIcon, Package, PackageX, TrendingDown, ClipboardList, Warehouse, LogOut } from "lucide-react";
 import { EditProductDialog } from "@/components/admin/edit-product-dialog";
 import { CreateProductDialog } from "@/components/admin/create-product-dialog";
 import { DeleteProductDialog } from "@/components/admin/delete-product-dialog";
@@ -447,17 +447,17 @@ export default function AdminDashboardPage() {
       <header className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold font-headline">Panel de Administrador</h1>
-          {user && <p className="text-muted-foreground truncate">Sesión iniciada como {user.email}</p>}
+          {user && <p className="text-muted-foreground truncate text-sm">{user.email}</p>}
         </div>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+        <div className="flex items-center gap-2">
           <Link href="/admin/inventario">
-            <Button variant="outline">
+            <Button variant="outline" size="sm">
               <Warehouse className="mr-2 h-4 w-4" />
-              Gestionar Inventario
+              Inventario
             </Button>
           </Link>
-          <Button onClick={handleSignOut} variant="destructive">
-            Cerrar Sesión
+          <Button onClick={handleSignOut} variant="ghost" size="icon" title="Cerrar sesión">
+            <LogOut className="h-5 w-5 text-destructive" />
           </Button>
         </div>
       </header>

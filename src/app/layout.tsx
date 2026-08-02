@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 import { Header } from '@/components/layout/header';
@@ -12,6 +12,12 @@ const alegreya = Alegreya({
   display: 'swap',
   variable: '--font-alegreya',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  minimumScale: 1,
+};
 
 export const metadata: Metadata = {
   title: 'JardínIA',
