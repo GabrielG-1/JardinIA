@@ -134,7 +134,7 @@ export function CatalogSection() {
         <div className="text-center mb-12">
           {/* Guirnalda decorativa */}
         <div className="relative w-full overflow-hidden" style={{ height: '140px' }}>
-            <svg width="100%" viewBox="0 0 680 140" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+            <svg width="100%" height="140" viewBox="0 0 680 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
               {/* Cuerda */}
               <path d="M0 28 C80 38, 160 30, 240 38 C320 46, 400 32, 480 40 C560 48, 630 34, 680 30" stroke="#b5956a" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.9"/>
               <path d="M0 30 C80 40, 160 32, 240 40 C320 48, 400 34, 480 42 C560 50, 630 36, 680 32" stroke="#d4b896" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.4"/>
