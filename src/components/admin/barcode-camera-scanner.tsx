@@ -16,18 +16,15 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
   const [active, setActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
-  const isRunningRef = useRef(false);
   const onScanRef = useRef(onScan);
-  const handledRef = useRef(false);
 
   useEffect(() => {
     onScanRef.current = onScan;
   }, [onScan]);
 
-  const safeStop = async () => {
+  const stopScanner = async () => {
     const scanner = scannerRef.current;
     if (!scanner) return;
-    isRunningRef.current = false;
     scannerRef.current = null;
     try {
       await scanner.stop();
@@ -35,13 +32,12 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
     } catch {
       // ignore
     }
-    setActive(false);
   };
 
   useEffect(() => {
     if (!active) return;
 
-    handledRef.current = false;
+    let done = false;
     const scanner = new Html5Qrcode(CONTAINER_ID);
     scannerRef.current = scanner;
 
@@ -50,24 +46,17 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 250, height: 150 } },
         (decodedText) => {
-          if (handledRef.current) return;
-          handledRef.current = true;
-          const currentScanner = scannerRef.current;
+          if (done) return;
+          done = true;
           scannerRef.current = null;
-          isRunningRef.current = false;
-          if (currentScanner) {
-            currentScanner.stop().catch(() => {}).finally(() => {
-              currentScanner.clear();
-              setActive(false);
-              onScanRef.current(decodedText);
-            });
-          }
+          scanner.stop().catch(() => {}).finally(() => {
+            scanner.clear();
+            setActive(false);
+            onScanRef.current(decodedText);
+          });
         },
         undefined
       )
-      .then(() => {
-        isRunningRef.current = true;
-      })
       .catch((err) => {
         setError("No se pudo acceder a la cámara. Verifica los permisos.");
         console.error("[BarcodeCameraScanner]", err);
@@ -76,25 +65,20 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
       });
 
     return () => {
-      const currentScanner = scannerRef.current;
-      const wasRunning = isRunningRef.current;
+      done = true;
+      const s = scannerRef.current;
       scannerRef.current = null;
-      isRunningRef.current = false;
-      if (currentScanner) {
-        if (wasRunning) {
-          currentScanner.stop().catch(() => {}).finally(() => currentScanner.clear());
-        } else {
-          setTimeout(() => {
-            currentScanner.stop().catch(() => {}).finally(() => currentScanner.clear());
-          }, 300);
-        }
+      if (s) {
+        setTimeout(() => {
+          s.stop().catch(() => {}).finally(() => s.clear());
+        }, 200);
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
   const handleCancel = async () => {
-    await safeStop();
+    await stopScanner();
     setActive(false);
   };
 
