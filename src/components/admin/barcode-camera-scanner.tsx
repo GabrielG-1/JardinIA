@@ -15,34 +15,27 @@ const CONTAINER_ID = "barcode-scanner-container";
 export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
   const [active, setActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
-  const isRunningRef = useRef(false);
   const onScanRef = useRef(onScan);
-  const handledRef = useRef(false);
+  // Points to the current effect run's cancel function, used by handleCancel
+  const stopFnRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     onScanRef.current = onScan;
   }, [onScan]);
 
-  const safeStop = async () => {
-    const scanner = scannerRef.current;
-    if (!scanner || !isRunningRef.current) return;
-    isRunningRef.current = false;
-    scannerRef.current = null;
-    try {
-      await scanner.stop();
-      scanner.clear();
-    } catch {
-      // ignore
-    }
+  const handleCancel = () => {
+    stopFnRef.current?.();
+    setActive(false);
   };
 
   useEffect(() => {
     if (!active) return;
 
-    handledRef.current = false;
-
-    const scanner = new Html5Qrcode(CONTAINER_ID, {
+    // Local closure vars — each effect run gets its own, so Strict Mode
+    // double-invocation cannot cause the cleanup of run 1 to kill run 2.
+    let cancelled = false;
+    let isRunning = false;
+    const scannerInstance = new Html5Qrcode(CONTAINER_ID, {
       verbose: false,
       formatsToSupport: [
         Html5QrcodeSupportedFormats.EAN_13,
@@ -54,19 +47,31 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
         Html5QrcodeSupportedFormats.QR_CODE,
       ],
     });
-    scannerRef.current = scanner;
 
-    scanner
+    const stop = () => {
+      if (cancelled) return;
+      cancelled = true;
+      stopFnRef.current = null;
+      if (isRunning) {
+        isRunning = false;
+        scannerInstance.stop().catch(() => {}).finally(() => scannerInstance.clear());
+      }
+      // If not yet running, the .then() handler will clean up on seeing cancelled
+    };
+
+    stopFnRef.current = stop;
+
+    scannerInstance
       .start(
         { facingMode: "environment" },
         { fps: 15, qrbox: { width: 300, height: 120 } },
         (decodedText) => {
-          if (handledRef.current) return;
-          handledRef.current = true;
-          isRunningRef.current = false;
-          scanner.stop().catch(() => {}).finally(() => {
-            scanner.clear();
-            scannerRef.current = null;
+          if (cancelled) return;
+          cancelled = true;
+          stopFnRef.current = null;
+          isRunning = false;
+          scannerInstance.stop().catch(() => {}).finally(() => {
+            scannerInstance.clear();
             setActive(false);
             onScanRef.current(decodedText);
           });
@@ -74,29 +79,26 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
         undefined
       )
       .then(() => {
-        isRunningRef.current = true;
+        if (cancelled) {
+          // Cleanup ran before start() resolved — stop the scanner now
+          scannerInstance.stop().catch(() => {}).finally(() => scannerInstance.clear());
+          return;
+        }
+        isRunning = true;
       })
       .catch((err) => {
-        setError("No se pudo acceder a la cámara. Verifica los permisos.");
-        console.error("[BarcodeCameraScanner]", err);
-        scannerRef.current = null;
-        setActive(false);
+        if (!cancelled) {
+          setError("No se pudo acceder a la cámara. Verifica los permisos.");
+          console.error("[BarcodeCameraScanner]", err);
+          setActive(false);
+        }
       });
 
     return () => {
-      if (isRunningRef.current) {
-        safeStop();
-      } else {
-        setTimeout(() => safeStop(), 300);
-      }
+      stop();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
-
-  const handleCancel = async () => {
-    await safeStop();
-    setActive(false);
-  };
 
   return (
     <div>
