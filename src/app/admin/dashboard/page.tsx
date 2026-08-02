@@ -89,7 +89,7 @@ function InventoryMetrics() {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
       {metrics.map((m) => (
         <Card key={m.title}>
           <CardContent className="pt-6">
@@ -449,7 +449,7 @@ export default function AdminDashboardPage() {
           <h1 className="text-3xl font-bold font-headline">Panel de Administrador</h1>
           {user && <p className="text-muted-foreground truncate">Sesión iniciada como {user.email}</p>}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
           <Link href="/admin/inventario">
             <Button variant="outline">
               <Warehouse className="mr-2 h-4 w-4" />
