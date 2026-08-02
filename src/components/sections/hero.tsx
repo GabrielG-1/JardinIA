@@ -97,7 +97,7 @@ export function HeroSection() {
         <section
             id="hero"
             className="relative min-h-[600px] flex items-center justify-center text-white mt-20 bg-cover bg-center py-20"
-            style={{ backgroundImage: "url('https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FHero1.gif?alt=media&token=652b7479-7500-4ab4-82cd-16c1478e36a4')" }}
+            style={{ backgroundImage: "url('https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FHeroImage.jpg?alt=media&token=693c548b-a8cc-4f94-8eeb-f54806b5b858')" }}
         >
             <div className="absolute inset-0 bg-black/50" />
 
