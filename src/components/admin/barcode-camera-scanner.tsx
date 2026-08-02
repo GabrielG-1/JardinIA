@@ -38,26 +38,24 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
     if (!active) return;
 
     let done = false;
-    const scanner = new Html5Qrcode(CONTAINER_ID);
+    const scanner = new Html5Qrcode(CONTAINER_ID, {
+      verbose: false,
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+        Html5QrcodeSupportedFormats.QR_CODE,
+      ],
+    });
     scannerRef.current = scanner;
 
     scanner
       .start(
         { facingMode: "environment" },
-        {
-          fps: 15,
-          qrbox: { width: 300, height: 120 },
-          // formatsToSupport no está en los tipos pero sí funciona en runtime
-          ...({ formatsToSupport: [
-            Html5QrcodeSupportedFormats.EAN_13,
-            Html5QrcodeSupportedFormats.EAN_8,
-            Html5QrcodeSupportedFormats.CODE_128,
-            Html5QrcodeSupportedFormats.CODE_39,
-            Html5QrcodeSupportedFormats.UPC_A,
-            Html5QrcodeSupportedFormats.UPC_E,
-            Html5QrcodeSupportedFormats.QR_CODE,
-          ] } as any),
-        },
+        { fps: 15, qrbox: { width: 300, height: 120 } },
         (decodedText) => {
           if (done) return;
           done = true;
