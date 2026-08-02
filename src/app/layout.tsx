@@ -31,6 +31,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className={`${alegreya.variable} antialiased`} suppressHydrationWarning>
+      <head>
+        <link
+          rel="preload"
+          as="image"
+          href="https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FHeroImage.jpg?alt=media&token=693c548b-a8cc-4f94-8eeb-f54806b5b858"
+        />
+      </head>
       <body className="font-body">
         <AuthProvider>
           <CartProvider>
