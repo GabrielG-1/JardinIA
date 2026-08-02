@@ -108,40 +108,6 @@ export function CategoryManager({ categories, onCategoryChanged }: CategoryManag
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      {/* Crear categoría */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <FolderPlus className="h-4 w-4 text-primary" />
-            Crear categoría
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="new-category-name">Nombre visible</Label>
-            <Input
-              id="new-category-name"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Ej: Fertilizantes Foliares"
-              onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-            />
-            {newName.trim() && (
-              <p className="text-xs text-muted-foreground">
-                ID generado: <span className="font-mono font-medium">{generatedId || "—"}</span>
-              </p>
-            )}
-          </div>
-          <Button
-            onClick={handleCreate}
-            disabled={creating || !newName.trim() || !generatedId}
-            className="w-full"
-          >
-            {creating ? "Creando..." : "Crear categoría"}
-          </Button>
-        </CardContent>
-      </Card>
-
       {/* Renombrar categoría */}
       <Card>
         <CardHeader>
@@ -183,6 +149,40 @@ export function CategoryManager({ categories, onCategoryChanged }: CategoryManag
             className="w-full"
           >
             {renaming ? "Renombrando..." : "Renombrar"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Crear categoría */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FolderPlus className="h-4 w-4 text-primary" />
+            Crear categoría
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="new-category-name">Nombre visible</Label>
+            <Input
+              id="new-category-name"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Ej: Fertilizantes Foliares"
+              onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+            />
+            {newName.trim() && (
+              <p className="text-xs text-muted-foreground">
+                ID generado: <span className="font-mono font-medium">{generatedId || "—"}</span>
+              </p>
+            )}
+          </div>
+          <Button
+            onClick={handleCreate}
+            disabled={creating || !newName.trim() || !generatedId}
+            className="w-full"
+          >
+            {creating ? "Creando..." : "Crear categoría"}
           </Button>
         </CardContent>
       </Card>
