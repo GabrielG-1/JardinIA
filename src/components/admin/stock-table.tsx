@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, AlertTriangle, Package } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface StockTableProps {
   categories: Category[];
@@ -14,6 +15,7 @@ interface StockTableProps {
 export function StockTable({ categories }: StockTableProps) {
   const [search, setSearch] = useState("");
   const [filterLow, setFilterLow] = useState(false);
+  const [filterCategory, setFilterCategory] = useState("todas");
 
   const allProducts = useMemo(() => {
     return categories.flatMap((cat) =>
@@ -23,6 +25,11 @@ export function StockTable({ categories }: StockTableProps) {
       }))
     );
   }, [categories]);
+
+  const categoryNames = useMemo(
+    () => Array.from(new Set(allProducts.map((p) => p.categoryName))).sort(),
+    [allProducts]
+  );
 
   const filtered = useMemo(() => {
     let result = allProducts;
@@ -34,13 +41,16 @@ export function StockTable({ categories }: StockTableProps) {
           p.categoryName.toLowerCase().includes(q)
       );
     }
+    if (filterCategory !== "todas") {
+      result = result.filter((p) => p.categoryName === filterCategory);
+    }
     if (filterLow) {
       result = result.filter(
         (p) => p.stockMinimo !== undefined && (p.stock ?? 0) <= p.stockMinimo
       );
     }
     return result.sort((a, b) => (a.stock ?? 0) - (b.stock ?? 0));
-  }, [allProducts, search, filterLow]);
+  }, [allProducts, search, filterCategory, filterLow]);
 
   const lowStockCount = allProducts.filter(
     (p) => p.stockMinimo !== undefined && (p.stock ?? 0) <= p.stockMinimo
@@ -74,6 +84,17 @@ export function StockTable({ categories }: StockTableProps) {
                 className="pl-9 w-52"
               />
             </div>
+            <Select value={filterCategory} onValueChange={setFilterCategory}>
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder="Todas las categorías" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todas">Todas las categorías</SelectItem>
+                {categoryNames.map((name) => (
+                  <SelectItem key={name} value={name}>{name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <button
               onClick={() => setFilterLow(!filterLow)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium border transition-colors ${

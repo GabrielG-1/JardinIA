@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { format, isToday, isYesterday, subDays } from "date-fns";
 import {
   findProductByBarcode,
   registerStockMovement,
-  getTodayMovements,
+  getAllMovements,
 } from "@/services/inventory-service";
 import { getCatalog, type Category, type Product } from "@/services/catalog-service";
 import { InventoryExcel } from "@/components/admin/inventory-excel";
@@ -359,14 +360,43 @@ interface MovementsListProps {
 }
 
 function MovementsList({ movements, loading }: MovementsListProps) {
+  const [dateFilter, setDateFilter] = useState<"hoy" | "ayer" | "semana" | "todos">("hoy");
+
+  const filtered = useMemo(() => {
+    if (dateFilter === "todos") return movements;
+    const now = new Date();
+    return movements.filter((m) => {
+      const date = new Date(m.createdAt);
+      if (dateFilter === "hoy") return isToday(date);
+      if (dateFilter === "ayer") return isYesterday(date);
+      if (dateFilter === "semana") return date >= subDays(now, 7);
+      return true;
+    });
+  }, [movements, dateFilter]);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-primary" />
-          Movimientos de hoy
+          Movimientos
         </CardTitle>
-        <CardDescription>Últimos 10 registros del día actual.</CardDescription>
+        <CardDescription>Historial de entradas, salidas y ajustes.</CardDescription>
+        <div className="flex gap-1 mt-2 flex-wrap">
+          {(["hoy", "ayer", "semana", "todos"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setDateFilter(f)}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors capitalize ${
+                dateFilter === f
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card border-border text-muted-foreground hover:border-primary"
+              }`}
+            >
+              {f === "semana" ? "Últimos 7 días" : f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </div>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -375,18 +405,21 @@ function MovementsList({ movements, loading }: MovementsListProps) {
               <Skeleton key={i} className="h-12 w-full rounded-md" />
             ))}
           </div>
-        ) : movements.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <p className="text-center text-muted-foreground py-8 text-sm">
-            Sin movimientos registrados hoy.
+            Sin movimientos en este período.
           </p>
         ) : (
           <div className="divide-y divide-border">
-            {movements.slice(0, 10).map((m) => {
+            {filtered.slice(0, 20).map((m) => {
               const style = MOVEMENT_STYLES[m.type];
               return (
                 <div key={m.id} className="flex items-center justify-between py-3 gap-3">
                   <div className="flex-grow min-w-0">
                     <p className="font-medium text-sm truncate">{m.productName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(m.createdAt), "dd/MM/yyyy HH:mm")}
+                    </p>
                     {m.note && (
                       <p className="text-xs text-muted-foreground truncate">{m.note}</p>
                     )}
@@ -397,9 +430,6 @@ function MovementsList({ movements, loading }: MovementsListProps) {
                     </Badge>
                     <span className="text-sm font-bold w-10 text-right">
                       {m.type === "salida" ? "-" : "+"}{m.quantity}
-                    </span>
-                    <span className="text-xs text-muted-foreground w-12 text-right">
-                      {formatTime(m.createdAt)}
                     </span>
                   </div>
                 </div>
@@ -429,7 +459,7 @@ export default function InventarioPage() {
   const fetchMovements = useCallback(async () => {
     setMovementsLoading(true);
     try {
-      const data = await getTodayMovements();
+      const data = await getAllMovements();
       setMovements(data);
     } finally {
       setMovementsLoading(false);

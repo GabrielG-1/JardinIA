@@ -138,6 +138,20 @@ export const getTodayMovements = async (): Promise<StockMovement[]> => {
 };
 
 // ---------------------------------------------------------------------------
+// getAllMovements
+// ---------------------------------------------------------------------------
+
+export async function getAllMovements(): Promise<StockMovement[]> {
+  const q = query(
+    collection(db, MOVEMENTS_COLLECTION),
+    orderBy("createdAt", "desc"),
+    limit(200)
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as StockMovement));
+}
+
+// ---------------------------------------------------------------------------
 // getLowStockProducts
 // ---------------------------------------------------------------------------
 
