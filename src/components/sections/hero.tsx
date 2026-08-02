@@ -99,10 +99,10 @@ export function HeroSection() {
             className="relative min-h-[600px] flex items-center justify-center text-white mt-20 bg-cover bg-center py-20"
             style={{ backgroundImage: "url('https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=1600&h=900&auto=format&fit=crop')" }}
         >
-            <div className="absolute inset-0 bg-black/30" />
+            <div className="absolute inset-0 bg-black/50" />
 
             <div className="relative z-10 text-center p-4 max-w-4xl w-full">
-                <div className="bg-black/20 p-8 md:p-12 rounded-lg backdrop-blur-sm">
+                <div className="bg-black/40 p-8 md:p-12 rounded-lg backdrop-blur-sm">
                     <h1 className="text-5xl md:text-7xl font-bold mb-4 font-headline text-shadow-lg">
                         Tu Aliado en el Campo y Jardín
                     </h1>
