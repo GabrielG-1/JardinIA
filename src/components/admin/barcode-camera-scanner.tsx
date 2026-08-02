@@ -26,15 +26,16 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
 
   const safeStop = async () => {
     const scanner = scannerRef.current;
-    if (!scanner || !isRunningRef.current) return;
+    if (!scanner) return;
     isRunningRef.current = false;
+    scannerRef.current = null;
     try {
       await scanner.stop();
       scanner.clear();
     } catch {
       // ignore
     }
-    scannerRef.current = null;
+    setActive(false);
   };
 
   useEffect(() => {
@@ -51,13 +52,16 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
         (decodedText) => {
           if (handledRef.current) return;
           handledRef.current = true;
+          const currentScanner = scannerRef.current;
+          scannerRef.current = null;
           isRunningRef.current = false;
-          scanner.stop().catch(() => {}).finally(() => {
-            scanner.clear();
-            scannerRef.current = null;
-            setActive(false);
-            onScanRef.current(decodedText);
-          });
+          if (currentScanner) {
+            currentScanner.stop().catch(() => {}).finally(() => {
+              currentScanner.clear();
+              setActive(false);
+              onScanRef.current(decodedText);
+            });
+          }
         },
         undefined
       )
@@ -72,11 +76,18 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
       });
 
     return () => {
-      if (isRunningRef.current) {
-        safeStop();
-      } else {
-        // El scanner aún está iniciando, espera un tick antes de parar
-        setTimeout(() => safeStop(), 300);
+      const currentScanner = scannerRef.current;
+      const wasRunning = isRunningRef.current;
+      scannerRef.current = null;
+      isRunningRef.current = false;
+      if (currentScanner) {
+        if (wasRunning) {
+          currentScanner.stop().catch(() => {}).finally(() => currentScanner.clear());
+        } else {
+          setTimeout(() => {
+            currentScanner.stop().catch(() => {}).finally(() => currentScanner.clear());
+          }, 300);
+        }
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
