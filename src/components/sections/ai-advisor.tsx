@@ -244,7 +244,8 @@ export function AiAdvisorSection() {
 
   return (
     <section id="asesor-ia" className="py-10 px-4 bg-background">
-      <div className="container mx-auto max-w-4xl text-center">
+      <div className="container mx-auto max-w-4xl">
+        <div className="bg-card rounded-2xl shadow-sm px-10 py-8 text-center">
         <div className="relative flex items-center justify-center gap-2 mb-2">
           <div className="text-center">
             <h2 className="text-4xl font-bold font-headline">Asesor de Cultivos IA</h2>
@@ -329,6 +330,7 @@ export function AiAdvisorSection() {
 
         {loading && <LoadingSkeleton />}
         {result && <AnalysisResult />}
+        </div>
       </div>
     </section>
   );
