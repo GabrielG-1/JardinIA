@@ -252,9 +252,9 @@ export function AiAdvisorSection() {
           <Image
             src="https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FAsesor_IA.png?alt=media&token=0f66c890-4163-400c-9690-6461441e13ff"
             alt="Robot asesor de plantas"
-            width={120}
-            height={120}
-            className="object-contain drop-shadow-md"
+            width={240}
+            height={240}
+            className="object-contain drop-shadow-md w-[240px] h-[240px]"
           />
         </div>
         <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
