@@ -251,7 +251,7 @@ export function AiAdvisorSection() {
             <h2 className="text-4xl font-bold font-headline">Asesor de Cultivos IA</h2>
           </div>
           <Image
-            src="https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FAsesor_IA.png?alt=media&token=0f66c890-4163-400c-9690-6461441e13ff"
+            src="https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FAsesor_IA.png?alt=media&token=0a81a995-2eff-4ee1-8223-e1378efb50e9"
             alt="Robot asesor de plantas"
             width={360}
             height={360}
