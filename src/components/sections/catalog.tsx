@@ -133,36 +133,33 @@ export function CatalogSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           {/* Guirnalda decorativa */}
-          <div className="relative w-full overflow-hidden" style={{ height: '110px' }}>
-            <svg width="100%" viewBox="0 0 680 130" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 32 C80 42, 160 36, 240 44 C320 52, 400 38, 480 46 C560 54, 630 40, 680 36" stroke="#b5956a" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.9"/>
-              <path d="M0 34 C80 44, 160 38, 240 46 C320 54, 400 40, 480 48 C560 56, 630 42, 680 38" stroke="#d4b896" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.4"/>
-              <line x1="160" y1="40" x2="160" y2="58" stroke="#9a7a50" strokeWidth="0.9" opacity="0.8"/>
-              <g transform="translate(160, 58)">
-                <path d="M0 0 C-9 8, -11 22, 0 30 C11 22, 9 8, 0 0Z" fill="#4a7a38" stroke="#3a6028" strokeWidth="0.8"/>
-                <line x1="0" y1="2" x2="0" y2="28" stroke="#3a6028" strokeWidth="0.6" opacity="0.6"/>
-                <path d="M0 10 C-5 12, -8 14, -9 16" fill="none" stroke="#3a6028" strokeWidth="0.5" opacity="0.5"/>
-                <path d="M0 10 C5 12, 8 14, 9 16" fill="none" stroke="#3a6028" strokeWidth="0.5" opacity="0.5"/>
-                <path d="M0 18 C-5 20, -7 22, -8 24" fill="none" stroke="#3a6028" strokeWidth="0.4" opacity="0.4"/>
-                <path d="M0 18 C5 20, 7 22, 8 24" fill="none" stroke="#3a6028" strokeWidth="0.4" opacity="0.4"/>
+        <div className="relative w-full overflow-hidden" style={{ height: '90px' }}>
+            <svg width="100%" viewBox="0 0 680 90" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 20 C80 28, 160 22, 240 28 C320 34, 400 22, 480 28 C560 34, 630 22, 680 20" stroke="#b5956a" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.9"/>
+              <path d="M0 22 C80 30, 160 24, 240 30 C320 36, 400 24, 480 30 C560 36, 630 24, 680 22" stroke="#d4b896" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.4"/>
+              <line x1="160" y1="26" x2="160" y2="38" stroke="#9a7a50" strokeWidth="0.9" opacity="0.8"/>
+              <g transform="translate(160, 38)">
+                <path d="M0 0 C-8 7, -10 19, 0 26 C10 19, 8 7, 0 0Z" fill="#4a7a38" stroke="#3a6028" strokeWidth="0.8"/>
+                <line x1="0" y1="2" x2="0" y2="24" stroke="#3a6028" strokeWidth="0.6" opacity="0.6"/>
+                <path d="M0 9 C-4 11, -7 13, -8 14" fill="none" stroke="#3a6028" strokeWidth="0.5" opacity="0.5"/>
+                <path d="M0 9 C4 11, 7 13, 8 14" fill="none" stroke="#3a6028" strokeWidth="0.5" opacity="0.5"/>
               </g>
-              <line x1="340" y1="44" x2="340" y2="60" stroke="#9a7a50" strokeWidth="0.9" opacity="0.8"/>
-              <g transform="translate(340, 60)">
-                <ellipse cx="0" cy="0" rx="11" ry="3.5" fill="#5a8a3a" opacity="0.85"/>
-                <path d="M-3 0 C-5 -8, -8 -14, -5 -20" fill="none" stroke="#2d6a1a" strokeWidth="1.4" strokeLinecap="round"/>
-                <path d="M3 0 C5 -8, 8 -14, 5 -20" fill="none" stroke="#2d6a1a" strokeWidth="1.4" strokeLinecap="round"/>
-                <path d="M-5 -20 C-12 -26, -16 -20, -10 -16" fill="#5aaa38" stroke="#3a8028" strokeWidth="0.7"/>
-                <path d="M5 -20 C12 -26, 16 -20, 10 -16" fill="#5aaa38" stroke="#3a8028" strokeWidth="0.7"/>
-                <path d="M-12 0 L-9 18 L9 18 L12 0Z" fill="#c8703a" stroke="#a85828" strokeWidth="0.9"/>
-                <rect x="-13" y="-2" width="26" height="5" rx="1" fill="#d4844a" stroke="#a85828" strokeWidth="0.7"/>
-                <line x1="-9" y1="6" x2="9" y2="6" stroke="#a85828" strokeWidth="0.5" opacity="0.5"/>
+              <line x1="340" y1="28" x2="340" y2="40" stroke="#9a7a50" strokeWidth="0.9" opacity="0.8"/>
+              <g transform="translate(340, 40)">
+                <path d="M-12 0 L-9 16 L9 16 L12 0Z" fill="#c8703a" stroke="#a85828" strokeWidth="0.9"/>
+                <rect x="-13" y="-3" width="26" height="5" rx="1" fill="#d4844a" stroke="#a85828" strokeWidth="0.7"/>
+                <ellipse cx="0" cy="-3" rx="10" ry="3" fill="#5a8a3a" opacity="0.85"/>
+                <path d="M-3 -3 C-4 -10, -6 -16, -4 -22" fill="none" stroke="#2d6a1a" strokeWidth="1.3" strokeLinecap="round"/>
+                <path d="M3 -3 C4 -10, 6 -16, 4 -22" fill="none" stroke="#2d6a1a" strokeWidth="1.3" strokeLinecap="round"/>
+                <path d="M-4 -22 C-10 -28, -14 -22, -9 -18" fill="#5aaa38" stroke="#3a8028" strokeWidth="0.7"/>
+                <path d="M4 -22 C10 -28, 14 -22, 9 -18" fill="#5aaa38" stroke="#3a8028" strokeWidth="0.7"/>
               </g>
-              <line x1="520" y1="41" x2="520" y2="58" stroke="#9a7a50" strokeWidth="0.9" opacity="0.8"/>
-              <g transform="translate(520, 58)">
-                <rect x="-2.5" y="0" width="5" height="22" rx="2" fill="#c8a060" stroke="#a07840" strokeWidth="0.7"/>
-                <rect x="-3.5" y="18" width="7" height="4" rx="1" fill="#888878" stroke="#666658" strokeWidth="0.6"/>
-                <path d="M-8 22 L8 22 L4 42 Q0 48 -4 42 Z" fill="#b0b0a0" stroke="#808070" strokeWidth="0.9"/>
-                <path d="M-2 24 L0 24 L-2 40" fill="none" stroke="#d0d0c0" strokeWidth="0.8" opacity="0.6"/>
+              <line x1="520" y1="26" x2="520" y2="38" stroke="#9a7a50" strokeWidth="0.9" opacity="0.8"/>
+              <g transform="translate(520, 38)">
+                <rect x="-2" y="0" width="4" height="18" rx="2" fill="#c8a060" stroke="#a07840" strokeWidth="0.7"/>
+                <rect x="-3" y="15" width="6" height="3" rx="1" fill="#888878" stroke="#666658" strokeWidth="0.6"/>
+                <path d="M-7 18 L7 18 L4 34 Q0 39 -4 34 Z" fill="#b0b0a0" stroke="#808070" strokeWidth="0.9"/>
+                <line x1="-1" y1="20" x2="1" y2="36" stroke="#d0d0c0" strokeWidth="0.7" opacity="0.5"/>
               </g>
             </svg>
           </div>

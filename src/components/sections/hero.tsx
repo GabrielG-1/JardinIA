@@ -97,16 +97,8 @@ export function HeroSection() {
         <section
             id="hero"
             className="relative min-h-[600px] flex items-center justify-center text-white mt-20 bg-cover bg-center py-20"
-            style={{}}
+            style={{ backgroundImage: "url('https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FHero1.gif?alt=media&token=652b7479-7500-4ab4-82cd-16c1478e36a4')" }}
         >
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-            src="https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FHero1.gif?alt=media&token=28a0c047-12c1-41ce-8697-a50c3d5ccc45"
-          />
             <div className="absolute inset-0 bg-black/50" />
 
             <div className="relative z-10 text-center p-4 max-w-4xl w-full">
