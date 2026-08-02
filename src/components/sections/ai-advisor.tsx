@@ -245,16 +245,16 @@ export function AiAdvisorSection() {
   return (
     <section id="asesor-ia" className="py-10 px-4 bg-background">
       <div className="container mx-auto max-w-4xl text-center">
-        <div className="relative flex items-center justify-center gap-6 mb-2">
+        <div className="relative flex items-center justify-center gap-2 mb-2">
           <div className="text-center">
             <h2 className="text-4xl font-bold font-headline">Asesor de Cultivos IA</h2>
           </div>
           <Image
             src="https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FAsesor_IA.png?alt=media&token=0f66c890-4163-400c-9690-6461441e13ff"
             alt="Robot asesor de plantas"
-            width={240}
-            height={240}
-            className="object-contain drop-shadow-md w-[240px] h-[240px]"
+            width={360}
+            height={360}
+            className="object-contain drop-shadow-md w-[360px] h-[360px]"
           />
         </div>
         <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
