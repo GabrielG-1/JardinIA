@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { Icons } from "@/components/icons";
+import Image from "next/image";
 import { CartSheet } from "@/components/cart/cart-sheet";
 
 export function Header() {
@@ -17,9 +17,13 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm shadow-md" style={{ backgroundColor: '#e8ede4' }}>
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center space-x-3">
-          <div className="h-10 w-10 flex items-center justify-center">
-            <Icons />
-          </div>
+          <Image
+            src="https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FLOGOPAGINA.jpg?alt=media&token=55eda32d-45eb-4257-add6-017cf11f267f"
+            alt="Jardín y Huerta Labranza"
+            width={48}
+            height={48}
+            className="rounded-full object-cover"
+          />
           <span className="font-bold text-xl font-headline hidden sm:inline-block" style={{ color: '#1a3d15' }}>
             Jardín y Huerta Labranza
           </span>
