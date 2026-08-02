@@ -35,18 +35,7 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
     // double-invocation cannot cause the cleanup of run 1 to kill run 2.
     let cancelled = false;
     let isRunning = false;
-    const scannerInstance = new Html5Qrcode(CONTAINER_ID, {
-      verbose: false,
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.EAN_13,
-        Html5QrcodeSupportedFormats.EAN_8,
-        Html5QrcodeSupportedFormats.CODE_128,
-        Html5QrcodeSupportedFormats.CODE_39,
-        Html5QrcodeSupportedFormats.UPC_A,
-        Html5QrcodeSupportedFormats.UPC_E,
-        Html5QrcodeSupportedFormats.QR_CODE,
-      ],
-    });
+    const scannerInstance = new Html5Qrcode(CONTAINER_ID, { verbose: false });
 
     const stop = () => {
       if (cancelled) return;
@@ -64,7 +53,20 @@ export function BarcodeCameraScanner({ onScan }: BarcodeCameraScannerProps) {
     scannerInstance
       .start(
         { facingMode: "environment" },
-        { fps: 15, qrbox: { width: 300, height: 120 } },
+        {
+          fps: 15,
+          qrbox: { width: 300, height: 120 },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          formatsToSupport: [
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+            Html5QrcodeSupportedFormats.QR_CODE,
+          ],
+        } as any,
         (decodedText) => {
           if (cancelled) return;
           cancelled = true;
