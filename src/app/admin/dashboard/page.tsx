@@ -221,6 +221,7 @@ function AdminProductList() {
   const [error, setError] = useState<string | null>(null);
   const [uploadingProductId, setUploadingProductId] = useState<string | null>(null);
   const [stockChangeProductId, setStockChangeProductId] = useState<string | null>(null);
+  const [openCategories, setOpenCategories] = useState<string[]>([]);
   const { toast } = useToast();
   const { isAdmin, isAuthLoading } = useAuth();
 
@@ -244,9 +245,10 @@ function AdminProductList() {
 
 
   const handleProductUpdate = async () => {
-    // Refetch the entire catalog to show changes
+    const current = openCategories;
     setLoading(true);
     await fetchCatalogData();
+    setOpenCategories(current);
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, product: Product, categoryId: string) => {
@@ -352,7 +354,12 @@ function AdminProductList() {
           </div>
         </CardContent>
       </Card>
-      <Accordion type="multiple" className="w-full space-y-4">
+      <Accordion
+        type="multiple"
+        className="w-full space-y-4"
+        value={openCategories}
+        onValueChange={setOpenCategories}
+      >
         {catalogData.map((category) => (
           <AccordionItem key={category.id} value={category.id} className="border rounded-lg bg-card">
             <AccordionTrigger className="text-lg font-semibold hover:no-underline px-6">
