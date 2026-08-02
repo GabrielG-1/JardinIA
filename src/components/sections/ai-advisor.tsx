@@ -212,31 +212,51 @@ export function AiAdvisorSection() {
   const LoadingSkeleton = () => (
     <Card className="mt-8">
       <CardHeader>
-        <Skeleton className="h-8 w-1/2" />
+        <CardTitle className="flex items-center gap-2">
+          <Bot className="animate-pulse text-primary" />
+          Analizando tu planta...
+        </CardTitle>
+        <CardDescription>
+          Nuestra IA está procesando la información. Esto puede tomar unos segundos.
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-2">
-            <Skeleton className="h-6 w-1/4" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-2/3" />
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span className="inline-block h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+          Identificando la planta...
         </div>
-        <div className="space-y-2">
-            <Skeleton className="h-6 w-1/4" />
-            <Skeleton className="h-4 w-1/3" />
-            <Skeleton className="h-4 w-full" />
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span className="inline-block h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+          Evaluando estado de salud...
         </div>
-         <div className="space-y-2">
-            <Skeleton className="h-6 w-1/4" />
-            <Skeleton className="h-12 w-full" />
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span className="inline-block h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+          Buscando productos recomendados...
+        </div>
+        <div className="space-y-2 mt-4">
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-4 w-1/2" />
         </div>
       </CardContent>
     </Card>
-  )
+  );
 
   return (
     <section id="asesor-ia" className="py-20 px-4 bg-background">
       <div className="container mx-auto max-w-4xl text-center">
-        <h2 className="text-4xl font-bold mb-4 font-headline">Asesor de Cultivos IA</h2>
+        <div className="relative flex items-center justify-center gap-6 mb-4">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold font-headline">Asesor de Cultivos IA</h2>
+          </div>
+          <Image
+            src="https://firebasestorage.googleapis.com/v0/b/jardnia.firebasestorage.app/o/assets%2FAsesor_IA.png?alt=media&token=0c084b89-2bef-4676-bd34-bb674aad9c1f"
+            alt="Robot asesor de plantas"
+            width={120}
+            height={120}
+            className="object-contain drop-shadow-md"
+          />
+        </div>
         <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
           ¿No estás seguro de qué le pasa a tu planta? Sube una foto, descríbenos el problema y nuestra IA te dará un diagnóstico y recomendaciones.
         </p>
