@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Barcode, PackagePlus, PackageMinus, SlidersHorizontal, CheckCircle, XCircle, Clock, ArrowLeft } from "lucide-react";
+import { Barcode, PackagePlus, PackageMinus, SlidersHorizontal, CheckCircle, XCircle, Clock, ArrowLeft, LogOut } from "lucide-react";
 import Link from "next/link";
 import { BarcodeCameraScanner } from "@/components/admin/barcode-camera-scanner";
 
@@ -515,23 +515,21 @@ export default function InventarioPage() {
   return (
     <div className="container mx-auto px-4 md:px-8 pb-8 bg-muted/20 min-h-screen pt-36">
       <header className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Link href="/admin/dashboard">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold font-headline">Control de Inventario</h1>
+            <h1 className="text-2xl font-bold font-headline">Control de Inventario</h1>
             {user && (
-              <p className="text-muted-foreground truncate">
-                Sesión iniciada como {user.email}
-              </p>
+              <p className="text-muted-foreground truncate text-sm">{user.email}</p>
             )}
           </div>
         </div>
-        <Button onClick={signOut} variant="destructive">
-          Cerrar Sesión
+        <Button onClick={signOut} variant="ghost" size="icon" title="Cerrar sesión">
+          <LogOut className="h-5 w-5 text-destructive" />
         </Button>
       </header>
 
