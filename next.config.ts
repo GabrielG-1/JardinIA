@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
     'handlebars',
     'dotprompt',
   ],
+  experimental: {
+    serverActions: {
+      // Las fotos del asesor IA se envían como data URI a la server action.
+      bodySizeLimit: '5mb',
+    },
+  },
   images: {
     remotePatterns: [
       {

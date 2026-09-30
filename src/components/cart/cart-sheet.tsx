@@ -5,6 +5,7 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
+  SheetDescription,
   SheetTitle,
   SheetTrigger,
   SheetFooter,
@@ -69,6 +70,7 @@ export function CartSheet() {
       <SheetContent className="flex flex-col">
         <SheetHeader>
           <SheetTitle>Carrito de Compras ({isClient ? totalItems : 0})</SheetTitle>
+          <SheetDescription className="sr-only">Revisa los productos de tu carrito antes de enviar el pedido.</SheetDescription>
         </SheetHeader>
         {isClient && items.length > 0 ? (
           <>

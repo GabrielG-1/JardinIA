@@ -10,6 +10,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
   DialogFooter,
@@ -145,6 +146,7 @@ export function CreateProductDialog({ categories, onProductCreated }: CreateProd
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Añadir Nuevo Producto</DialogTitle>
+          <DialogDescription className="sr-only">Completa los datos del producto para agregarlo al inventario.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">

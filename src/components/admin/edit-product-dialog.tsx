@@ -10,6 +10,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
   DialogFooter,
@@ -107,6 +108,7 @@ export function EditProductDialog({ product, categoryId, onProductUpdated }: Edi
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Editar Producto</DialogTitle>
+          <DialogDescription className="sr-only">Modifica los datos del producto y guarda los cambios.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">

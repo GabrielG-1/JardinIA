@@ -11,13 +11,32 @@ import { useToast } from "@/hooks/use-toast";
 import { analyzePlantHealth } from "@/ai/flows/analyze-plant-health";
 import { searchProducts } from "@/services/catalog-service";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CameraCapture } from "@/components/camera-capture";
 import type { Product } from "@/services/catalog-service";
 import { useCart } from "@/hooks/use-cart";
 // Import the return type of the flow
 type AnalyzePlantHealthOutput = Awaited<ReturnType<typeof analyzePlantHealth>>;
 
+
+// Reduce la imagen antes de enviarla a la server action (límite de cuerpo de Next.js).
+const MAX_IMAGE_DIMENSION = 1280;
+const resizeImage = (dataUri: string): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const img = new window.Image();
+    img.onload = () => {
+      const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("No se pudo procesar la imagen."));
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", 0.8));
+    };
+    img.onerror = () => reject(new Error("No se pudo cargar la imagen."));
+    img.src = dataUri;
+  });
 
 const formatPrice = (price: string) => {
   const number = parseInt(price.replace(/[^0-9]/g, ''), 10);
@@ -90,24 +109,32 @@ export function AiAdvisorSection() {
   };
 
   const processFile = (file: File) => {
-    if (file.size > 4 * 1024 * 1024) { // 4MB limit for Gemini
+    if (file.size > 15 * 1024 * 1024) {
       toast({
         title: "Archivo demasiado grande",
-        description: "Por favor, sube una imagen de menos de 4MB.",
+        description: "Por favor, sube una imagen de menos de 15MB.",
         variant: "destructive",
       });
       return;
     }
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setPhotoDataUri(reader.result as string);
-      setPreviewUrl(URL.createObjectURL(file));
+    reader.onloadend = async () => {
+      try {
+        setPhotoDataUri(await resizeImage(reader.result as string));
+        setPreviewUrl(URL.createObjectURL(file));
+      } catch {
+        toast({
+          title: "Imagen no válida",
+          description: "No se pudo leer la imagen. Intenta con otro archivo.",
+          variant: "destructive",
+        });
+      }
     };
     reader.readAsDataURL(file);
   }
 
-  const handlePhotoTaken = (imageDataUri: string) => {
-    setPhotoDataUri(imageDataUri);
+  const handlePhotoTaken = async (imageDataUri: string) => {
+    setPhotoDataUri(await resizeImage(imageDataUri));
     setPreviewUrl(imageDataUri);
     setIsCameraOpen(false);
   }
@@ -286,6 +313,7 @@ export function AiAdvisorSection() {
                       <DialogContent className="max-w-md">
                         <DialogHeader>
                           <DialogTitle>Capturar Foto</DialogTitle>
+                          <DialogDescription>Enfoca la planta y toma la foto para analizarla.</DialogDescription>
                         </DialogHeader>
                         <CameraCapture onPhotoTaken={handlePhotoTaken} />
                       </DialogContent>
